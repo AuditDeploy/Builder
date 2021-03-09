@@ -30,9 +30,9 @@ func GetURL(cArgs []string) {
 func cloneRepo(repo string) {
 	fmt.Println(repo)
 
-	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
+	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 
-	// enter parent name/workspace dir
-	cmd := exec.Command("git", "clone", repo, workspaceDir)
+	// enter parent name/hidden dir
+	cmd := exec.Command("git", "clone", repo, hiddenDir)
 	cmd.Run()
 }

@@ -33,6 +33,14 @@ func hiddenDir(path string) (bool, error) {
 		fmt.Println("BUILDER_HIDDEN_DIR", val)
 	}
 
+	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+
+	//change permissions to read only
+	err = os.Chmod(hiddenDir, 0444)
+	if err != nil {
+		log.Println(err)
+	}
+
 	//make directory hidden
 	pathW, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
@@ -43,6 +51,13 @@ func hiddenDir(path string) (bool, error) {
 		fmt.Print(err)
 	}
 
+	fileInfo, err := os.Stat(hiddenDir)
+  if err != nil {       
+    log.Fatalln(err)
+  }
+	log.Println(fileInfo.Mode())
+
+
 	return true, err
 }
 
@@ -51,7 +66,6 @@ func MakeHiddenDir(path string) {
 
 	hiddenPath := path + "/.hidden"
 
-	fmt.Printf(hiddenPath)
 	hiddenDir(hiddenPath)
 
 }
