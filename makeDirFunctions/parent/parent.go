@@ -69,7 +69,7 @@ func MakeParentDir(args string) {
 
 	//slice original url
 	name := args[strings.LastIndex(args, "/")+1:]
-	path := "C:/var/lib/builder/" + name
+	path := "./" + name
 
 	fmt.Printf(path)
 	parentDir(path)
