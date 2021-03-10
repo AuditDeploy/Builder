@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"syscall"
 )
 
 func logDir(path string) (bool, error) {
@@ -18,7 +17,7 @@ func logDir(path string) (bool, error) {
 	// should return true if file doesn't exist
 	if os.IsNotExist(err) {
 
-		errDir := os.MkdirAll(path, 0755)
+		errDir := os.Mkdir(path, 0755)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
 			log.Fatal(err)
@@ -36,23 +35,13 @@ func logDir(path string) (bool, error) {
 		fmt.Println("BUILDER_LOGS_DIR", val)
 	}
 
-	//make directory hidden
-	pathW, err := syscall.UTF16PtrFromString(path)
-	if err != nil {
-		fmt.Print(err)
-	}
-	err = syscall.SetFileAttributes(pathW, syscall.FILE_ATTRIBUTE_HIDDEN)
-	if err != nil {
-		fmt.Print(err)
-	}
-
 	return true, err
 }
 
 //MakeLogDir does...
 func MakeLogDir(path string) {
 
-	logPath := path + "/.logs"
+	logPath := path + "/logs"
 
 	fmt.Printf(logPath)
 	logDir(logPath)

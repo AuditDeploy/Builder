@@ -35,4 +35,8 @@ func cloneRepo(repo string) {
 	// enter parent name/hidden dir
 	cmd := exec.Command("git", "clone", repo, hiddenDir)
 	cmd.Run()
+
+	//make contents read-only
+	cmd2 := exec.Command("chmod", "-R", "0444", hiddenDir)
+	cmd2.Run()  
 }

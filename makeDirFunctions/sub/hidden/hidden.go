@@ -17,7 +17,7 @@ func hiddenDir(path string) (bool, error) {
 
 	// should return true if file doesn't exist
 	if os.IsNotExist(err) {
-		errDir := os.MkdirAll(path, 0755)
+		errDir := os.Mkdir(path, 0444)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
 			log.Fatal(err)
@@ -33,14 +33,6 @@ func hiddenDir(path string) (bool, error) {
 		fmt.Println("BUILDER_HIDDEN_DIR", val)
 	}
 
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
-
-	//change permissions to read only
-	err = os.Chmod(hiddenDir, 0444)
-	if err != nil {
-		log.Println(err)
-	}
-
 	//make directory hidden
 	pathW, err := syscall.UTF16PtrFromString(path)
 	if err != nil {
@@ -50,13 +42,6 @@ func hiddenDir(path string) (bool, error) {
 	if err != nil {
 		fmt.Print(err)
 	}
-
-	fileInfo, err := os.Stat(hiddenDir)
-  if err != nil {       
-    log.Fatalln(err)
-  }
-	log.Println(fileInfo.Mode())
-
 
 	return true, err
 }

@@ -17,7 +17,7 @@ func workSpaceDir(path string) (bool, error) {
 	// should return true if file doesn't exist
 	if os.IsNotExist(err) {
 
-		errDir := os.MkdirAll(path, 0755)
+		errDir := os.Mkdir(path, 0755)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
 			log.Fatal(err)
