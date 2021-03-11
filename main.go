@@ -9,8 +9,14 @@ import (
 )
 
 func main() {
+	//check argument syntax, exit if incorrect
+	utils.CheckArgs()
+
 	args := os.Args[1:]
 	repoURL := os.Args[2]
+
+	//check args/flags
+	// clone repo
 
 	// make dirs
 	directory.MakeParentDir(repoURL)
@@ -18,17 +24,9 @@ func main() {
 	// clone repo into hidden
 	utils.CloneRepo(args)
 
-	//install dependecies ('npm install', etc)
-	// dependency.Go()
+	// compile logic to derive project type 
 
-	//QUESTIONS install dependencies in compile package?
-	//make hidden after compile? 
-
-	// compile logic to derive project type
-
-	// compile source code from repo
+	// copy hidden into work dir, install dependencies, compile source code from repo
 	compile.Npm()
-
-	// pass source code into hidden dir AND workspace
-
 }
+

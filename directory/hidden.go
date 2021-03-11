@@ -50,7 +50,6 @@ func hiddenDir(path string) (bool, error) {
 func MakeHiddenDir(path string) {
 
 	hiddenPath := path + "/.hidden"
-
 	hiddenDir(hiddenPath)
 
 }
