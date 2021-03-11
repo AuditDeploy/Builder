@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	compile "github.com/ilarocca/Builder/compile"
 	parent "github.com/ilarocca/Builder/makeDirFunctions/parent"
+	derive "github.com/ilarocca/Builder/utils/derive"
 	cloneRepo "github.com/ilarocca/Builder/utils/repo"
 )
 
@@ -19,12 +19,15 @@ func main() {
 	// clone repo into workspace
 	cloneRepo.GetURL(args)
 
+	//derive project type and compiles repo
+	derive.ProjectType()
+
 	//install dependecies ('npm install', etc)
 	// dependency.Go()
 
 	// compile logic to derive project type
 	// compile source code from repo
-	compile.Go()
+	// compile.Go()
 
 	// pass source code into hidden dir AND workspace
 

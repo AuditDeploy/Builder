@@ -7,10 +7,11 @@ import (
 )
 
 //Java does ...
-func Java() {
+func Java(filePath string) {
 
 	fmt.Println("compiler start")
-	cmd := exec.Command("javac", "javaHelloWorld/HelloWorld.java")
+
+	cmd := exec.Command("javac", filePath)
 	err := cmd.Run()
 
 	if err != nil {
