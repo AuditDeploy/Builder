@@ -4,27 +4,30 @@ import (
 	"os"
 
 	compile "github.com/ilarocca/Builder/compile"
-	parent "github.com/ilarocca/Builder/makeDirFunctions/parent"
-	cloneRepo "github.com/ilarocca/Builder/utils/repo"
+	directory "github.com/ilarocca/Builder/directory"
+	utils "github.com/ilarocca/Builder/utils"
 )
 
 func main() {
 	args := os.Args[1:]
 	repoURL := os.Args[2]
 
-	// make parent
-	// make sub dirs
-	parent.MakeParentDir(repoURL)
+	// make dirs
+	directory.MakeParentDir(repoURL)
 
-	// clone repo into workspace
-	cloneRepo.GetURL(args) 
+	// clone repo into hidden
+	utils.CloneRepo(args)
 
 	//install dependecies ('npm install', etc)
 	// dependency.Go()
 
+	//QUESTIONS install dependencies in compile package?
+	//make hidden after compile? 
+
 	// compile logic to derive project type
+
 	// compile source code from repo
-	compile.Go()
+	compile.Npm()
 
 	// pass source code into hidden dir AND workspace
 

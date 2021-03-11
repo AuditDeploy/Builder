@@ -1,4 +1,4 @@
-package logs
+package directory
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func logDir(path string) (bool, error) {
+func workSpaceDir(path string) (bool, error) {
 	//check if file path exists, returns err = nil if file exists
 	_, err := os.Stat(path)
 
@@ -23,26 +23,25 @@ func logDir(path string) (bool, error) {
 			log.Fatal(err)
 		}
 		fmt.Println("Path created")
-
 	}
 
 	//check workspace env exists, if not, create it
-	val, present := os.LookupEnv("BUILDER_LOGS_DIR")
+	val, present := os.LookupEnv("BUILDER_WORKSPACE_DIR")
 	if !present {
-		os.Setenv("BUILDER_LOGS_DIR", path)
-		fmt.Println("BUILDER_LOGS_DIR", os.Getenv("BUILDER_LOGS_DIR"))
+		os.Setenv("BUILDER_WORKSPACE_DIR", path)
+		fmt.Println("BUILDER_WORKSPACE_DIR", os.Getenv("BUILDER_WORKSPACE_DIR"))
 	} else {
-		fmt.Println("BUILDER_LOGS_DIR", val)
+		fmt.Println("BUILDER_WORKSPACE_DIR", val)
 	}
-
 	return true, err
 }
 
-//MakeLogDir does...
-func MakeLogDir(path string) {
+//MakeWorkspaceDir does...
+func MakeWorkspaceDir(path string) {
 
-	logPath := path + "/logs"
+	workPath := path + "/workspace"
 
-	fmt.Printf(logPath)
-	logDir(logPath)
+	fmt.Printf(workPath)
+	workSpaceDir(workPath)
+
 }

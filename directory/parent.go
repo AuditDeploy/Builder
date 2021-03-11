@@ -1,14 +1,10 @@
-package parent
+package directory
 
 import (
 	"fmt"
 	"log"
 	"os"
 	"strings"
-
-	"github.com/ilarocca/Builder/makeDirFunctions/sub/hidden"
-	"github.com/ilarocca/Builder/makeDirFunctions/sub/logs"
-	"github.com/ilarocca/Builder/makeDirFunctions/sub/workspace"
 
 	"github.com/manifoldco/promptui"
 )
@@ -77,7 +73,7 @@ func MakeParentDir(args string) {
 	fmt.Printf(path)
 	parentDir(path)
 
-	hidden.MakeHiddenDir(path)
-	logs.MakeLogDir(path)
-	workspace.MakeWorkspaceDir(path)
+	MakeHiddenDir(path)
+	MakeLogDir(path)
+	MakeWorkspaceDir(path)
 }

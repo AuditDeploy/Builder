@@ -4,7 +4,6 @@
 package compile
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -18,16 +17,18 @@ func Go() {
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 	exec.Command("cp", "-a", hiddenDir+"/.", workspaceDir).Run()
 
-	//compile source code in workspace
-	cmd := exec.Command("go", "build", "-o", workspaceDir, "main.go")
+	cmd := exec.Command("go", "mod", "init")
+	cmd.Run()
 
-	//search for a 'main.go' filename and add that path to workspaceDir
-	stdout, err := cmd.Output()
+	//compile source code in workspace
+	cmd2 := exec.Command("go", "build", "-o", workspaceDir, "main.go")
+	err := cmd2.Run()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Print(string(stdout))
+	//make contents read-only
+	exec.Command("chmod", "-R", "0444", hiddenDir).Run()
 }
 

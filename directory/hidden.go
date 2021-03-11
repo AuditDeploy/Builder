@@ -1,4 +1,4 @@
-package hidden
+package directory
 
 import (
 	"fmt"
