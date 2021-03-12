@@ -7,17 +7,20 @@ import (
 )
 
 //CloneRepo grabs url
-func CloneRepo(cArgs []string) {
+func CloneRepo() {
+
+	args := os.Args[1:]
+
 	//grab URL first
 	var repo string
-	for i, v := range cArgs {
+	for i, v := range args {
 		if v == "--repo" || v == "-r" {
-			if len(cArgs) <= i+1 {
+			if len(args) <= i+1 {
 				fmt.Println("No Repo Url Provided")
 				os.Exit(1)
 
 			} else {
-				repo = cArgs[i+1]
+				repo = args[i+1]
 			}
 		}
 	}

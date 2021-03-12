@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
+	"github.com/ilarocca/Builder/utils"
 	"github.com/manifoldco/promptui"
 )
 
@@ -28,10 +28,10 @@ func parentDir(path string) (bool, error) {
 			if errDir != nil {
 				log.Fatal(err)
 			}
-			fmt.Println("Path created")
 
 		} else {
 			fmt.Println("Please create a directory for the Builder")
+			os.Exit(1)
 			return true, err
 		}
 	}
@@ -40,7 +40,6 @@ func parentDir(path string) (bool, error) {
 	val, present := os.LookupEnv("BUILDER_PARENT_DIR")
 	if !present {
 		os.Setenv("BUILDER_PARENT_DIR", path)
-		fmt.Println("BUILDER_PARENT_DIR", os.Getenv("BUILDER_PARENT_DIR"))
 	} else {
 		fmt.Println("BUILDER_PARENT_DIR", val)
 	}
@@ -49,7 +48,7 @@ func parentDir(path string) (bool, error) {
 
 func yesNo() bool {
 	prompt := promptui.Select{
-		Label: "Select[Yes/No]",
+		Label: "Create A Directory? [Yes/No]",
 		Items: []string{"Yes", "No"},
 	}
 	_, result, err := prompt.Run()
@@ -60,17 +59,15 @@ func yesNo() bool {
 }
 
 //MakeParentDir does...
-func MakeParentDir(args string) {
-	// 'github.com/name/project' slice that into '/name/project' as a var
+func MakeParentDir() {
+	args := os.Args[1:]
 
-	//slice original url
-	name := args[strings.LastIndex(args, "/")+1:]
+	//handles -n flag
+	name := utils.GetName(args)
 
 	// local path for now
 	path := "./" + name
 
-
-	fmt.Printf(path)
 	parentDir(path)
 
 	MakeHiddenDir(path)
