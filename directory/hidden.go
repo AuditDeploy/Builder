@@ -1,4 +1,4 @@
-package hidden
+package directory
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func hiddenDir(path string) (bool, error) {
 
 	// should return true if file doesn't exist
 	if os.IsNotExist(err) {
-		errDir := os.MkdirAll(path, 0755)
+		errDir := os.Mkdir(path, 0444)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
 			log.Fatal(err)
@@ -27,7 +27,6 @@ func hiddenDir(path string) (bool, error) {
 	val, present := os.LookupEnv("BUILDER_HIDDEN_DIR")
 	if !present {
 		os.Setenv("BUILDER_HIDDEN_DIR", path)
-		fmt.Println("BUILDER_HIDDEN_DIR", os.Getenv("BUILDER_HIDDEN_DIR"))
 	} else {
 		fmt.Println("BUILDER_HIDDEN_DIR", val)
 	}
@@ -49,8 +48,6 @@ func hiddenDir(path string) (bool, error) {
 func MakeHiddenDir(path string) {
 
 	hiddenPath := path + "/.hidden"
-
-	fmt.Printf(hiddenPath)
 	hiddenDir(hiddenPath)
 
 }

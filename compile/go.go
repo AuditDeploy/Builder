@@ -4,34 +4,30 @@
 package compile
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
 )
 
 //Go creates exe from file passed in as arg
-func Go() {
+func Go(filepath string) {
 
+	//copies contents of .hidden to workspace
+	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 
-	cmd := exec.Command("go", "build", "-o", workspaceDir, "main")
+	cmd := exec.Command("go", "mod", "init")
+	cmd.Run()
 
-	//search for a 'main.go' filename and add that path to workspaceDir
-	stdout, err := cmd.Output()
+	//compile source code in workspace
+	cmd2 := exec.Command("go", "build", "-o", workspaceDir, filepath)
+	err := cmd2.Run()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Print(string(stdout))
-
-	Artifact2()
+	//make contents read-only
+	exec.Command("chmod", "-R", "0444", hiddenDir).Run()
 }
 
-//Artifact2 does ...
-func Artifact2() {
-	hidden := os.Getenv("BUILDER_HIDDEN_DIR")
-	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
-	exec.Command("cp", workspaceDir+"/main", hidden).Run()
-}
