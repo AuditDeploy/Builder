@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 
 	"github.com/ilarocca/Builder/makeDirFunctions/sub/hidden"
 	"github.com/ilarocca/Builder/makeDirFunctions/sub/logs"
 	"github.com/ilarocca/Builder/makeDirFunctions/sub/workspace"
-
+	"github.com/ilarocca/Builder/utils/getname"
 	"github.com/manifoldco/promptui"
 )
 
@@ -64,14 +63,15 @@ func yesNo() bool {
 }
 
 //MakeParentDir does...
-func MakeParentDir(args string) {
-	// 'github.com/name/project' slice that into '/name/project' as a var
+func MakeParentDir() {
+	//get all the arguments execept the 1st
+	args := os.Args[1:]
 
-	//slice original url
-	name := args[strings.LastIndex(args, "/")+1:]
+	//handles -n flag
+	name := getname.GetName(args)
+
 	path := "./" + name
 
-	fmt.Printf(path)
 	parentDir(path)
 
 	hidden.MakeHiddenDir(path)

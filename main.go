@@ -10,11 +10,11 @@ import (
 
 func main() {
 	args := os.Args[1:]
-	repoURL := os.Args[2]
+	// repoURL := os.Args[2]
 
 	// make parent
 	// make sub dirs
-	parent.MakeParentDir(repoURL)
+	parent.MakeParentDir()
 
 	// clone repo into workspace
 	cloneRepo.GetURL(args)
