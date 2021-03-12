@@ -24,5 +24,5 @@ all build logs will be added to (in addition to their own logs file)
 
 ~~~~ Project Type Examples:
 Go: https://github.com/go-training/helloworld
-Java: https://github.com/LuisJoseSanchez/hello-world-java
+Java: https://github.com/Coveros/helloworld
 Node: https://github.com/johnpapa/node-hello

@@ -27,7 +27,6 @@ func hiddenDir(path string) (bool, error) {
 	val, present := os.LookupEnv("BUILDER_HIDDEN_DIR")
 	if !present {
 		os.Setenv("BUILDER_HIDDEN_DIR", path)
-		fmt.Println("BUILDER_HIDDEN_DIR", os.Getenv("BUILDER_HIDDEN_DIR"))
 	} else {
 		fmt.Println("BUILDER_HIDDEN_DIR", val)
 	}

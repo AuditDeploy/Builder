@@ -31,6 +31,7 @@ func CheckArgs() {
 	}
 
 	//check to see if repo exists
+	//git ls-remote lists refs/heads & tags of a repo, if none exists, exit status thrown
 	//returns the exit status in err
 	_, err := 	exec.Command("git", "ls-remote", repo, "-q").Output()
 	if (err != nil) { 

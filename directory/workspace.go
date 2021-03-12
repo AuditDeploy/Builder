@@ -22,14 +22,12 @@ func workSpaceDir(path string) (bool, error) {
 		if errDir != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("Path created")
 	}
 
 	//check workspace env exists, if not, create it
 	val, present := os.LookupEnv("BUILDER_WORKSPACE_DIR")
 	if !present {
 		os.Setenv("BUILDER_WORKSPACE_DIR", path)
-		fmt.Println("BUILDER_WORKSPACE_DIR", os.Getenv("BUILDER_WORKSPACE_DIR"))
 	} else {
 		fmt.Println("BUILDER_WORKSPACE_DIR", val)
 	}
@@ -41,7 +39,6 @@ func MakeWorkspaceDir(path string) {
 
 	workPath := path + "/workspace"
 
-	fmt.Printf(workPath)
 	workSpaceDir(workPath)
 
 }

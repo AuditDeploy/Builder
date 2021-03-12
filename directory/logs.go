@@ -22,7 +22,6 @@ func logDir(path string) (bool, error) {
 		if errDir != nil {
 			log.Fatal(err)
 		}
-		fmt.Println("Path created")
 
 	}
 
@@ -30,7 +29,6 @@ func logDir(path string) (bool, error) {
 	val, present := os.LookupEnv("BUILDER_LOGS_DIR")
 	if !present {
 		os.Setenv("BUILDER_LOGS_DIR", path)
-		fmt.Println("BUILDER_LOGS_DIR", os.Getenv("BUILDER_LOGS_DIR"))
 	} else {
 		fmt.Println("BUILDER_LOGS_DIR", val)
 	}
@@ -43,6 +41,5 @@ func MakeLogDir(path string) {
 
 	logPath := path + "/logs"
 
-	fmt.Printf(logPath)
 	logDir(logPath)
 }
