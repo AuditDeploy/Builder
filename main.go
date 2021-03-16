@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	
 	//check argument syntax, exit if incorrect
 	utils.CheckArgs()
 
