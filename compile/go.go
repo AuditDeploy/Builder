@@ -27,7 +27,10 @@ func Go(filepath string) {
 		log.Fatal(err)
 	}
 
+	//make hiddenDir hidden
+	exec.Command("attrib", hiddenDir, "-h").Run()
 	//make contents read-only
 	exec.Command("chmod", "-R", "0444", hiddenDir).Run()
+
 }
 
