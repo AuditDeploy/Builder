@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/ilarocca/Builder/utils"
 	"github.com/manifoldco/promptui"
@@ -65,8 +66,10 @@ func MakeParentDir() {
 	//handles -n flag
 	name := utils.GetName(args)
 
+	t := time.Now()
+
 	// local path for now
-	path := "./" + name
+	path := "./" + name +"_"+t.Format("20060102150405")
 
 	parentDir(path)
 
