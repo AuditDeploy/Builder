@@ -42,10 +42,13 @@ func Npm() {
 		 log.Fatal(err)
 	}
 
+	//make hiddenDir hidden
+	exec.Command("attrib", hiddenDir, "-h").Run()
 	// Make contents read-only.
 	exec.Command("chmod", "-R", "0444", hiddenDir).Run()
 }
 
+//recursively add files
 func addFiles(w *zip.Writer, basePath, baseInZip string) {
 	// Open the Directory
 	files, err := ioutil.ReadDir(basePath)
