@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
+	"strconv"
 
 	"github.com/ilarocca/Builder/utils"
 	"github.com/manifoldco/promptui"
@@ -77,10 +78,11 @@ func MakeParentDir() {
 	//handles -n flag
 	name := utils.GetName(args)
 
-	t := time.Now()
+	//add Unix timestamp to dir name
+	currentTime := time.Now().Unix()
 
 	// local path for now
-	path := "./" + name +"_"+t.Format("20060102150405")
+	path := "./" + name +"_"+strconv.FormatInt(currentTime, 10)
 
 	parentDir(path)
 
