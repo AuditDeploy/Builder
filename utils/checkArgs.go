@@ -11,6 +11,14 @@ func CheckArgs() {
 	var repo string
 	cArgs := os.Args[1:]
 
+	//check for help flag
+	for _, v := range cArgs {
+		if v == "--help" || v == "-h" {
+			fmt.Println("**Info about Builder**")
+			os.Exit(1)
+		}
+	}
+
 	//check repo flag syntax
 	for i, v := range cArgs {
 		if v == "--repo" || v == "-r" {
