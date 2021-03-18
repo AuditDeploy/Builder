@@ -5,8 +5,11 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"os/user"
 	"time"
+
+	"gopkg.in/yaml.v2"
 )
 
 func Metadata() {
@@ -61,10 +64,19 @@ func GetIPAdress() net.IP {
 
 //OutputJSONall  outputs allMetaData struct in JSON format
 func OutputJSONall(allData *AllMetaData) {
-	data, _ := json.Marshal(allData)
-	err := ioutil.WriteFile("./all.json", data, 0644)
+	parentDir := os.Getenv("BUILDER_PARENT_DIR")
+
+	yamlData, _ := yaml.Marshal(allData)
+	jsonData, _ := json.Marshal(allData)
+
+	err := ioutil.WriteFile(parentDir+"/metedata.json", jsonData, 0644)
+	err2 := ioutil.WriteFile(parentDir+"/metedata.yml", yamlData, 0644)
 
 	if err != nil {
 		panic(err)
+	}
+
+	if err2 != nil {
+		panic(err2)
 	}
 }
