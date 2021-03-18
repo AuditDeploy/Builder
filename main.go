@@ -15,8 +15,10 @@ func main() {
 	// clone repo into hidden
 	utils.CloneRepo()
 
-	// compile logic to derive project type 
+	// compile logic to derive project type
 	utils.ProjectType()
 	// copy hidden into work dir, install dependencies, compile source code from repo
-}
 
+	//outputs user's metadata
+	utils.Metadata()
+}
