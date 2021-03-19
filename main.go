@@ -1,24 +1,20 @@
 package main
 
 import (
-	directory "github.com/ilarocca/Builder/directory"
-	utils "github.com/ilarocca/Builder/utils"
+	"fmt"
+	"os"
+	cmd "github.com/ilarocca/Builder/cmd"
+	
 )
 
 func main() {
-	//check argument syntax, exit if incorrect
-	utils.CheckArgs()
+	
+		builderCommand := os.Args[1]
 
-	// make dirs
-	directory.MakeParentDir()
+		if builderCommand == "init" {
+			cmd.Init()
+		}else if builderCommand == "config" {
+			cmd.Config()
+		}else {fmt.Println("expected command: 'init' or 'config'")}
 
-	// clone repo into hidden
-	utils.CloneRepo()
-
-	// compile logic to derive project type
-	utils.ProjectType()
-	// copy hidden into work dir, install dependencies, compile source code from repo
-
-	//outputs user's metadata
-	utils.Metadata()
 }
