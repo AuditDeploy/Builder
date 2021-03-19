@@ -8,7 +8,7 @@ import (
 
 //GetName does ...
 func GetName(cArgs []string) string {
-	repoURL := os.Args[2]
+	repoURL := os.Args[3]
 
 	name := repoURL[strings.LastIndex(repoURL, "/")+1:]
 
