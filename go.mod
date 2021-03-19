@@ -1,4 +1,4 @@
-module github.com/ilarocca/Builder
+module Builder
 
 go 1.15
 

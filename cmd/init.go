@@ -2,8 +2,8 @@ package cmd
 
 import (
 	
-	directory "github.com/ilarocca/Builder/directory"
-	utils "github.com/ilarocca/Builder/utils"
+	directory "Builder/directory"
+	utils "Builder/utils"
 )
 
 func Init() {

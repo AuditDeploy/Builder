@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"strings"
 
-	compile "github.com/ilarocca/Builder/compile"
+	compile "Builder/compile"
 )
 
 //ProjectType will derive the poject type(go, node, java repo) and execute its compiler

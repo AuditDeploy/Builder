@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	cmd "github.com/ilarocca/Builder/cmd"
+	cmd "Builder/cmd"
 	
 )
 

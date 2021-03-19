@@ -7,7 +7,7 @@ import (
 	"time"
 	"strconv"
 
-	"github.com/ilarocca/Builder/utils"
+	"Builder/utils"
 	"github.com/manifoldco/promptui"
 )
 
