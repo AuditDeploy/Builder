@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	
 	directory "Builder/directory"
 	utils "Builder/utils"
 )
@@ -20,4 +19,6 @@ func Init() {
 	utils.ProjectType()
 	// copy hidden into work dir, install dependencies, compile source code from repo
 
+	//Get build metadata
+	utils.Metadata()
 }
