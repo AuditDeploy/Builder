@@ -8,7 +8,9 @@ import (
 
 //CheckArgs is...
 func CheckArgs() {
-	var repo string
+	//Repo
+	repo := GetRepoURL()
+
 	cArgs := os.Args[1:]
 
 	//check for help flag
@@ -16,19 +18,6 @@ func CheckArgs() {
 		if v == "--help" || v == "-h" {
 			fmt.Println("**Info about Builder**")
 			os.Exit(1)
-		}
-	}
-
-	//check repo flag syntax
-	for i, v := range cArgs {
-		if v == "--repo" || v == "-r" {
-			if len(cArgs) <= i+1 {
-				fmt.Println("No Repo Url Provided")
-				os.Exit(1)
-
-			} else {
-				 repo = cArgs[i+1]
-			}
 		}
 	}
 
@@ -41,9 +30,9 @@ func CheckArgs() {
 	//check to see if repo exists
 	//git ls-remote lists refs/heads & tags of a repo, if none exists, exit status thrown
 	//returns the exit status in err
-	_, err := 	exec.Command("git", "ls-remote", repo, "-q").Output()
-	if (err != nil) { 
+	_, err := exec.Command("git", "ls-remote", repo, "-q").Output()
+	if err != nil {
 		fmt.Println("Repo Provided Does Not Exists")
 		os.Exit(1)
-	} 
+	}
 }

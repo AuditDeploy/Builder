@@ -2,7 +2,6 @@ package utils
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -90,26 +89,8 @@ func OutputMetadata(allData *AllMetaData) {
 
 //GitHas gets the latest git commit id in a repo
 func GitHash() string {
-	//Get repo
-	args := os.Args[1:]
-
-	//grab URL first
-	var repo string
-	for i, v := range args {
-		if v == "--repo" || v == "-r" {
-			if len(args) <= i+1 {
-				fmt.Println("No Repo Url Provided")
-				os.Exit(1)
-
-			} else {
-				repo = args[i+1]
-			}
-		}
-	}
-	if repo == "" {
-		fmt.Println("No Repo Url Provided")
-		os.Exit(1)
-	}
+	//Get repoURL
+	repo := GetRepoURL()
 
 	//outputs all the commits of the clone repo
 	output, _ := exec.Command("git", "ls-remote", repo, "refs/heads/master").Output()
