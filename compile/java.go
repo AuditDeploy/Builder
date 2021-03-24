@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	
 )
 
 //Java does ...
@@ -11,9 +12,9 @@ func Java(filePath string) {
 
 	//copies contents of .hidden to workspace
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
-
-	cmd := exec.Command("javac", filePath)
+	cmd := exec.Command("mvn", "clean", "install", "-f", filePath)
 	err := cmd.Run()
+	
 
 	if err != nil {
 		log.Fatal(err)
