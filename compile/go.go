@@ -13,7 +13,6 @@ import (
 func Go(filepath string) {
 
 	//copies contents of .hidden to workspace
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 
 	cmd := exec.Command("go", "mod", "init")
@@ -26,11 +25,6 @@ func Go(filepath string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//make hiddenDir hidden
-	exec.Command("attrib", hiddenDir, "-h").Run()
-	//make contents read-only
-	exec.Command("chmod", "-R", "0444", hiddenDir).Run()
 
 }
 

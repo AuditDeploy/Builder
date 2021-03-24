@@ -21,4 +21,7 @@ func Init() {
 
 	//Get build metadata
 	utils.Metadata()
+
+	//makes hidden dir read-only
+	utils.MakeHidden()
 }
