@@ -1,11 +1,11 @@
 package utils
 
 import (
-	"fmt"
+	// "fmt"
 	"log"
 	"os"
-	"os/exec"
-	"strings"
+	// "os/exec"
+	// "strings"
 
 	compile "Builder/compile"
 )
@@ -43,16 +43,16 @@ func ProjectType() {
 			case "pom.xml":
 				//executes java compiler
 				CopyDir() 
-				filePath2, _ := exec.Command("find", parentDir+"/workspace", "-name", "*.java").CombinedOutput()
+				// // filePath2, _ := exec.Command("find", parentDir+"/workspace", "-name", "*.xml").CombinedOutput()
 
-				//returning multiple possible paths which are separated by a newline "\n"
-				stringPath := string(filePath2)
+				// //returning multiple possible paths which are separated by a newline "\n"
+				// stringPath := string(filePath2)
 
-				//split paths are returns an array of paths
-				paths := strings.Split(stringPath, "\n")
-				fmt.Println(paths[0])
-
-				compile.Java(paths[0])
+				// //split paths are returns an array of paths
+				// paths := strings.Split(stringPath, "\n")
+				// // fmt.Println(paths[0])
+				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
+				compile.Java(workspace)
 			}
 		}
 	}
