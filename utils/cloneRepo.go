@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Builder/logger"
 	"os"
 	"os/exec"
 )
@@ -15,5 +16,6 @@ func CloneRepo() {
 
 	// enter parent name/hidden dir
 	cmd := exec.Command("git", "clone", repo, hiddenDir)
+	logger.InfoLogger.Println(cmd)
 	cmd.Run()
 }

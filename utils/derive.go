@@ -1,13 +1,10 @@
 package utils
 
 import (
-	// "fmt"
+	"Builder/compile"
+	"Builder/logger"
 	"log"
 	"os"
-	// "os/exec"
-	// "strings"
-
-	compile "Builder/compile"
 )
 
 //ProjectType will derive the poject type(go, node, java repo) and execute its compiler
@@ -27,6 +24,7 @@ func ProjectType() {
 		fileExists, err := exists(filePath)
 
 		if err != nil {
+			logger.ErrorLogger.Println("No Go, Npm, or Java File Exists")
 			log.Fatal(err)
 		}
 
@@ -36,21 +34,17 @@ func ProjectType() {
 			case "main.go":
 				//executes go compiler
 				CopyDir()
+				logger.InfoLogger.Println("Go project detected")
 				compile.Go(filePath)
 			case "package.json":
 				//executes node compiler
+				logger.InfoLogger.Println("Npm project detected")
 				compile.Npm()
 			case "pom.xml":
 				//executes java compiler
 				CopyDir() 
-				// // filePath2, _ := exec.Command("find", parentDir+"/workspace", "-name", "*.xml").CombinedOutput()
+				logger.InfoLogger.Println("Java project detected")
 
-				// //returning multiple possible paths which are separated by a newline "\n"
-				// stringPath := string(filePath2)
-
-				// //split paths are returns an array of paths
-				// paths := strings.Split(stringPath, "\n")
-				// // fmt.Println(paths[0])
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
 			}

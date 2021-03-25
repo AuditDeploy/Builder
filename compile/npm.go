@@ -1,6 +1,7 @@
 package compile
 
 import (
+	"Builder/logger"
 	"archive/zip"
 	"fmt"
 	"io/ioutil"
@@ -21,8 +22,9 @@ func Npm() {
 
 	//add hidden dir contents to temp dir, install dependencies
 	exec.Command("cp", "-a", hiddenDir+"/.", tempWorkspace).Run()
-	exec.Command("npm", "install", tempWorkspace).Run()
-	
+ 	cmd :=	exec.Command("npm", "install", tempWorkspace).Run()
+	logger.InfoLogger.Println(cmd)
+
 	// Zip temp dir.
 	outFile, err := os.Create(workspaceDir+"/temp.zip")
 	if err != nil {
@@ -39,8 +41,11 @@ func Npm() {
 
 	err = w.Close()
 	if err != nil {
+		logger.ErrorLogger.Println("Npm project failed to compile.")
 		 log.Fatal(err)
 	}
+
+	logger.InfoLogger.Println("Npm project compiled successfully.")
 }
 
 //recursively add files

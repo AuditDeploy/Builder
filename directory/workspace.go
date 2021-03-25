@@ -1,6 +1,7 @@
 package directory
 
 import (
+	"Builder/logger"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +13,7 @@ func workSpaceDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
+		logger.WarningLogger.Println("Path already exists")
 	}
 
 	// should return true if file doesn't exist
