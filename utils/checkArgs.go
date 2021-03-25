@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"Builder/logger"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 )
@@ -23,8 +25,8 @@ func CheckArgs() {
 
 	//if flag present, but no url
 	if repo == "" {
-		fmt.Println("No Repo Url Provided")
-		os.Exit(1)
+		logger.ErrorLogger.Println("No Repo Url Provided")
+		log.Fatal("No Repo Url Provided")
 	}
 
 	//check to see if repo exists
@@ -32,7 +34,7 @@ func CheckArgs() {
 	//returns the exit status in err
 	_, err := exec.Command("git", "ls-remote", repo, "-q").Output()
 	if err != nil {
-		fmt.Println("Repo Provided Does Not Exists")
-		os.Exit(1)
+		logger.ErrorLogger.Println("Repo Provided Does Not Exists")
+		log.Fatal("Repo Provided Does Not Exists")
 	}
 }

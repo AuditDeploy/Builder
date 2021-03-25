@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Builder/logger"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -79,10 +80,12 @@ func OutputMetadata(allData *AllMetaData) {
 	err2 := ioutil.WriteFile(parentDir+"/metedata.yml", yamlData, 0644)
 
 	if err != nil {
+		logger.ErrorLogger.Println("JSON Metadata creation unsuccessful.")
 		panic(err)
 	}
 
 	if err2 != nil {
+		logger.ErrorLogger.Println("YAML Metadata creation unsuccessful.")
 		panic(err2)
 	}
 }

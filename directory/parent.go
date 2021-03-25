@@ -4,10 +4,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 	"strconv"
+	"time"
 
+	"Builder/logger"
 	"Builder/utils"
+
 	"github.com/manifoldco/promptui"
 )
 
@@ -17,6 +19,7 @@ func parentDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
+		logger.WarningLogger.Println("Path already exists")
 	}
 
 	// should return true if file doesn't exist
@@ -40,8 +43,8 @@ func parentDir(path string) (bool, error) {
 				}
 
 			} else {
-				fmt.Println("Please create a directory for the Builder")
-				os.Exit(1)
+				logger.ErrorLogger.Println("Please create a directory for the Builder")
+				log.Fatal("Please create a directory for the Builder")
 				return true, err
 			}
 
@@ -85,10 +88,17 @@ func MakeParentDir() {
 	path := "./" + name +"_"+strconv.FormatInt(currentTime, 10)
 
 	parentDir(path)
+	logger.InfoLogger.Println("Parent directory created.")
+
 
 	MakeHiddenDir(path)
+	logger.InfoLogger.Println("Hidden directory created.")
+
 	MakeLogDir(path)
+	logger.InfoLogger.Println("Logs directory created.")
+
 	MakeWorkspaceDir(path)
+	logger.InfoLogger.Println("Workspace directory created.")
 }
 
 func bypassPrompt() bool {

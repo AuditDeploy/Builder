@@ -1,6 +1,7 @@
 package directory
 
 import (
+	"Builder/logger"
 	"fmt"
 	"log"
 	"os"
@@ -12,6 +13,8 @@ func hiddenDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
+		logger.WarningLogger.Println("Path already exists")
+
 	}
 
 	// should return true if file doesn't exist
@@ -30,16 +33,6 @@ func hiddenDir(path string) (bool, error) {
 	} else {
 		fmt.Println("BUILDER_HIDDEN_DIR", val)
 	}
-
-	//make directory hidden
-	// pathW, err := syscall.UTF16PtrFromString(path)
-	// if err != nil {
-	// 	fmt.Print(err)
-	// }
-	// err = syscall.SetFileAttributes(pathW, syscall.FILE_ATTRIBUTE_HIDDEN)
-	// if err != nil {
-	// 	fmt.Print(err)
-	// }
 
 	return true, err
 }

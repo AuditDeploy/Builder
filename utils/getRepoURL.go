@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"fmt"
+	"Builder/logger"
+	"log"
 	"os"
 )
 
@@ -13,8 +14,8 @@ func GetRepoURL() string {
 	for i, v := range args {
 		if v == "--repo" || v == "-r" {
 			if len(args) <= i+1 {
-				fmt.Println("No Repo Url Provided")
-				os.Exit(1)
+				logger.ErrorLogger.Println("No Repo Url Provided")
+				log.Fatal("No Repo Url Provided")
 
 			} else {
 				repo = args[i+1]
@@ -22,8 +23,8 @@ func GetRepoURL() string {
 		}
 	}
 	if repo == "" {
-		fmt.Println("No Repo Url Provided")
-		os.Exit(1)
+		logger.ErrorLogger.Println("No Repo Url Provided")
+		log.Fatal("No Repo Url Provided")
 	}
 	return repo
 }
