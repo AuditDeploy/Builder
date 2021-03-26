@@ -11,8 +11,10 @@ var (
 	ErrorLogger   *log.Logger
 )
 
-func init() {
-	file, err := os.OpenFile("logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+func CreateLogs() {
+  logsDir := os.Getenv("BUILDER_LOGS_DIR")
+
+	file, err := os.OpenFile(logsDir+"/logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}

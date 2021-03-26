@@ -36,9 +36,7 @@ func logDir(path string) (bool, error) {
 		fmt.Println("BUILDER_LOGS_DIR", val)
 	}
 
-	// logsDir := os.Getenv("BUILDER_LOGS_DIR")
-	// exec.Command("cp", "-a", "./logs.txt", logsDir).Run()
-
+	logger.CreateLogs()
 	return true, err
 }
 

@@ -9,7 +9,6 @@ import (
 func Init() {
 	//check argument syntax, exit if incorrect
 	utils.CheckArgs()
-	logger.InfoLogger.Println("Args accepted.")
 
 	// make dirs
 	directory.MakeParentDir()
