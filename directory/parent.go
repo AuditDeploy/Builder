@@ -88,17 +88,10 @@ func MakeParentDir() {
 	path := "./" + name +"_"+strconv.FormatInt(currentTime, 10)
 
 	parentDir(path)
-	logger.InfoLogger.Println("Parent directory created.")
-
 
 	MakeHiddenDir(path)
-	logger.InfoLogger.Println("Hidden directory created.")
-
 	MakeLogDir(path)
-	logger.InfoLogger.Println("Logs directory created.")
-
 	MakeWorkspaceDir(path)
-	logger.InfoLogger.Println("Workspace directory created.")
 }
 
 func bypassPrompt() bool {

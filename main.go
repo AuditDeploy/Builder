@@ -2,14 +2,11 @@ package main
 
 import (
 	"Builder/cmd"
-	"Builder/logger"
 	"fmt"
 	"os"
 )
 
-func main() {
-		logger.InfoLogger.Println("Builder is starting...")
-	
+func main() {	
 		builderCommand := os.Args[1]
 
 		if builderCommand == "init" {
