@@ -3,6 +3,7 @@ package compile
 import (
 	"Builder/logger"
 	"log"
+	"os"
 	"os/exec"
 )
 
@@ -20,6 +21,11 @@ func Java(filePath string) {
 		log.Fatal(err)
 	}
 
+	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
+	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	if (artifactPath != "") {
+		exec.Command("cp", "-a", workspaceDir+"/target", artifactPath).Run()
+	}
 	logger.InfoLogger.Println("Java project compiled successfully.")
 
 }

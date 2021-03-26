@@ -45,6 +45,10 @@ func Npm() {
 		 log.Fatal(err)
 	}
 
+	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	if (artifactPath != "") {
+		exec.Command("cp", "-a", workspaceDir+"/temp.zip", artifactPath).Run()
+	}
 	logger.InfoLogger.Println("Npm project compiled successfully.")
 }
 

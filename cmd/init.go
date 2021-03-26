@@ -15,7 +15,6 @@ func Init() {
 	directory.MakeParentDir()
 	logger.InfoLogger.Println("Directories successfully created.")
 
-
 	// clone repo into hidden
 	utils.CloneRepo()
 	logger.InfoLogger.Println("Repo cloned successfully.")

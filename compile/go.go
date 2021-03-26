@@ -30,6 +30,11 @@ func Go(filepath string) {
 		log.Fatal(err)
 	}
 
+	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	if (artifactPath != "") {
+		exec.Command("cp", "-a", workspaceDir+"/main.exe", artifactPath).Run()
+	}
+
 	logger.InfoLogger.Println("Go project compiled successfully.")
 }
 
