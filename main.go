@@ -17,5 +17,4 @@ func main() {
 		} else if builderCommand == "config" {
 			cmd.Config()
 		} else {fmt.Println("expected command: 'init' or 'config'")}
-
 }
