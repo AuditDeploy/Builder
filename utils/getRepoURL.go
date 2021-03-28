@@ -12,7 +12,7 @@ func GetRepoURL() string {
 	//grab URL first
 	var repo string
 	for i, v := range args {
-		if v == "--repo" || v == "-r" {
+		if v == "init" {
 			if len(args) <= i+1 {
 				logger.ErrorLogger.Println("No Repo Url Provided")
 				log.Fatal("No Repo Url Provided")
