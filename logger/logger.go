@@ -11,10 +11,13 @@ var (
 	ErrorLogger   *log.Logger
 )
 
-func CreateLogs() {
-  logsDir := os.Getenv("BUILDER_LOGS_DIR")
+func CreateLogs(filePath string) {
+	logsDir := os.Getenv("BUILDER_LOGS_DIR")
 
-	file, err := os.OpenFile(logsDir+"/logs.txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	newFileName := ConvertParentPathToFileName(filePath)
+
+	//log file name = parentDir
+	file, err := os.OpenFile(logsDir+"/"+newFileName+".txt", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -22,4 +25,5 @@ func CreateLogs() {
 	InfoLogger = log.New(file, "INFO: ", log.Ldate|log.Ltime|log.Lshortfile)
 	WarningLogger = log.New(file, "WARNING: ", log.Ldate|log.Ltime|log.Lshortfile)
 	ErrorLogger = log.New(file, "ERROR: ", log.Ldate|log.Ltime|log.Lshortfile)
+
 }

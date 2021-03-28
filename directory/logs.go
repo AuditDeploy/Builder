@@ -36,7 +36,6 @@ func logDir(path string) (bool, error) {
 		fmt.Println("BUILDER_LOGS_DIR", val)
 	}
 
-	logger.CreateLogs()
 	return true, err
 }
 
@@ -46,4 +45,5 @@ func MakeLogDir(path string) {
 	logPath := path + "/logs"
 
 	logDir(logPath)
+	logger.CreateLogs(path)
 }
