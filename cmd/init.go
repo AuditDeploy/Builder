@@ -20,7 +20,6 @@ func Init() {
 
 	// compile logic to derive project type
 	utils.ProjectType()
-	// copy hidden into work dir, install dependencies, compile source code from repo
 
 	//Get build metadata
 	utils.Metadata()
@@ -29,4 +28,7 @@ func Init() {
 	//makes hidden dir read-only
 	utils.MakeHidden()
 	logger.InfoLogger.Println("Hidden Dir is now read-only.")
+
+	//creates global logs dir
+	logger.GlobalLogs()
 }
