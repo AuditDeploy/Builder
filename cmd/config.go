@@ -1,9 +1,11 @@
 package cmd
 
 import (
-"fmt"
+	"Builder/utils"
+	"fmt"
 )
 
 func Config() {
 	fmt.Println("this is the 'config' command")
+	utils.YamlParser()
 }
