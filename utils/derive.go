@@ -3,8 +3,10 @@ package utils
 import (
 	"Builder/compile"
 	"Builder/logger"
+	"fmt"
 	"log"
 	"os"
+	"os/exec"
 )
 
 //ProjectType will derive the poject type(go, node, java repo) and execute its compiler
@@ -42,7 +44,7 @@ func ProjectType() {
 				compile.Npm()
 			case "pom.xml":
 				//executes java compiler
-				CopyDir() 
+				CopyDir()
 				logger.InfoLogger.Println("Java project detected")
 
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -50,8 +52,37 @@ func ProjectType() {
 			}
 		}
 	}
+
+	//derive projects by Extensions
+	deriveProjectByExtension()
 }
 
+func deriveProjectByExtension() {
+	//parentDir = the name of the project
+	parentDir := os.Getenv("BUILDER_PARENT_DIR")
+
+	extensions := []string{".csproj"}
+
+	for _, ext := range extensions {
+		err := exec.Command("find", parentDir+"/"+".hidden", "-name", fmt.Sprintf("*%s", ext)).Run()
+
+		if err != nil {
+			log.Fatal(err)
+		} else {
+			switch ext {
+			case ".csproj":
+				CopyDir()
+				logger.InfoLogger.Println("C# project detected")
+
+				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
+				compile.CSharp(workspace)
+			}
+		}
+
+	}
+}
+
+//checks if file exists
 func exists(path string) (bool, error) {
 	//file exists
 	_, err := os.Stat(path)
