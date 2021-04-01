@@ -14,7 +14,6 @@ func logDir(path string) (bool, error) {
 	if err == nil {
 		fmt.Println("Path already exists")
 		logger.WarningLogger.Println("Path already exists")
-
 	}
 
 	// should return true if file doesn't exist
@@ -35,7 +34,6 @@ func logDir(path string) (bool, error) {
 	} else {
 		fmt.Println("BUILDER_LOGS_DIR", val)
 	}
-
 	return true, err
 }
 
