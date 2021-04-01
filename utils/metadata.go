@@ -96,7 +96,7 @@ func GitHash() string {
 	repo := GetRepoURL()
 
 	//outputs all the commits of the clone repo
-	output, _ := exec.Command("git", "ls-remote", repo, "refs/heads/master").Output()
+	output, _ := exec.Command("git", "ls-remote", repo).Output()
 
 	//stringify output - []byte to string
 	stringGitHash := string(output)
