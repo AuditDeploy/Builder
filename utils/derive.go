@@ -56,11 +56,7 @@ func ProjectType() {
 		} else {
 			deriveProjectByExtension() 
 		}
-<<<<<<< HEAD
 	} 
-=======
-	}
->>>>>>> 15f7c862182f0f12b458f29f2f7acba96abd8e8d
 }
 
 //derive projects by Extensions
