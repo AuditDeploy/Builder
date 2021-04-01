@@ -50,13 +50,13 @@ func ProjectType() {
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
 			}
+		} else {
+			deriveProjectByExtension() 
 		}
-	}
-
-	//derive projects by Extensions
-	deriveProjectByExtension()
+	} 
 }
 
+//derive projects by Extensions
 func deriveProjectByExtension() {
 	//parentDir = the name of the project
 	parentDir := os.Getenv("BUILDER_PARENT_DIR")
