@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 
 	"gopkg.in/yaml.v3"
 )
@@ -26,20 +26,26 @@ func YamlParser() {
 //  yamlString := string(yamlPath)
 
 //takes yaml path and read file
-	source, err := ioutil.ReadFile("builder.yaml")
+	source, err := ioutil.ReadFile("./tempRepo/builder.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	//print raw yaml
-	fmt.Printf("File contents: %s", source)
+	// fmt.Printf("File contents: %s", source)
 
-	//unpacks yaml file in a map 
+	//unpacks yaml file in a map int{}
 	err = yaml.Unmarshal([]byte(source), &f) 
 	if err != nil {
 		log.Printf("error: %v", err)
 	}
 
-	//print map of yaml
-	fmt.Printf("%+v\n", f)
+	//pass map int{} to callback that sets env vars
+	ConfigEnvs(f)
+
+	//delete tempRepo dir
+	err2 := os.RemoveAll("./tempRepo")
+	if err2 != nil {
+			log.Fatal(err2)
+	}
 }

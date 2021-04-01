@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 )
 
 //creates global logs
@@ -33,10 +34,10 @@ func GlobalLogs() {
 	logsDir := os.Getenv("BUILDER_LOGS_DIR")
 	parentDir := os.Getenv("BUILDER_PARENT_DIR")
 
-	fileName := ConvertParentPathToFileName(parentDir)
+	fileName := parentDir[strings.LastIndex(parentDir, "/")+1:]
 
 	//append log to global logs
-	from, err := os.Open(logsDir + "/" + fileName + ".txt")
+	from, err := os.Open(logsDir + "/" + fileName + "_logs.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
