@@ -33,7 +33,6 @@ func hiddenDir(path string) (bool, error) {
 	} else {
 		fmt.Println("BUILDER_HIDDEN_DIR", val)
 	}
-
 	return true, err
 }
 

@@ -38,10 +38,12 @@ func ProjectType() {
 				CopyDir()
 				logger.InfoLogger.Println("Go project detected")
 				compile.Go(filePath)
+				break
 			case "package.json":
 				//executes node compiler
 				logger.InfoLogger.Println("Npm project detected")
 				compile.Npm()
+				break
 			case "pom.xml":
 				//executes java compiler
 				CopyDir()
@@ -49,11 +51,16 @@ func ProjectType() {
 
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
+				break
 			}
 		} else {
 			deriveProjectByExtension() 
 		}
+<<<<<<< HEAD
 	} 
+=======
+	}
+>>>>>>> 15f7c862182f0f12b458f29f2f7acba96abd8e8d
 }
 
 //derive projects by Extensions
@@ -65,7 +72,8 @@ func deriveProjectByExtension() {
 
 	for _, ext := range extensions {
 		err := exec.Command("find", parentDir+"/"+".hidden", "-name", fmt.Sprintf("*%s", ext)).Run()
-
+		fmt.Println("THIS IS THE ERROR MSG ")
+		fmt.Println(err)
 		if err != nil {
 			log.Fatal(err)
 		} else {
@@ -76,6 +84,7 @@ func deriveProjectByExtension() {
 
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.CSharp(workspace)
+				break
 			}
 		}
 

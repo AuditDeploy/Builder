@@ -47,9 +47,7 @@ func parentDir(path string) (bool, error) {
 				log.Fatal("Please create a directory for the Builder")
 				return true, err
 			}
-
 		}
-
 	}
 
 	//check workspace env exists, if not, create it
@@ -59,6 +57,7 @@ func parentDir(path string) (bool, error) {
 	} else {
 		fmt.Println("BUILDER_PARENT_DIR", val)
 	}
+
 	return true, err
 }
 
@@ -84,8 +83,17 @@ func MakeParentDir() {
 	//add Unix timestamp to dir name
 	currentTime := time.Now().Unix()
 
-	// local path for now
-	path := "./" + name +"_"+strconv.FormatInt(currentTime, 10)
+	//check for path env from builder.yaml
+	configPath := os.Getenv("BUILDER_DIR_PATH")
+
+	var path string
+	if (configPath != "") {
+	// used for 'config' cmd, set by builder.yaml
+	 path = configPath + "/" + name +"_"+strconv.FormatInt(currentTime, 10)
+	} else {
+	// local path, used for 'init' cmd/default
+	 path = "./" + name +"_"+strconv.FormatInt(currentTime, 10)
+	}
 
 	parentDir(path)
 
