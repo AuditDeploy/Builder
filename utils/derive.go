@@ -30,6 +30,8 @@ func ProjectType() {
 			log.Fatal(err)
 		}
 
+		fmt.Println(fileExists)
+
 		//if file exists run a swith statement
 		if fileExists {
 			switch file {
@@ -52,11 +54,14 @@ func ProjectType() {
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
 				break
+			default:
+				deriveProjectByExtension()
 			}
 		} else {
-			deriveProjectByExtension() 
+			fmt.Println("SHOULD NOT PRINT OUT")
+			// deriveProjectByExtension()
 		}
-	} 
+	}
 }
 
 //derive projects by Extensions
@@ -68,8 +73,7 @@ func deriveProjectByExtension() {
 
 	for _, ext := range extensions {
 		err := exec.Command("find", parentDir+"/"+".hidden", "-name", fmt.Sprintf("*%s", ext)).Run()
-		fmt.Println("THIS IS THE ERROR MSG ")
-		fmt.Println(err)
+
 		if err != nil {
 			log.Fatal(err)
 		} else {
