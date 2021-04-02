@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
+	"path/filepath"
 )
 
 //ProjectType will derive the poject type(go, node, java repo) and execute its compiler
@@ -30,8 +30,6 @@ func ProjectType() {
 			log.Fatal(err)
 		}
 
-		fmt.Println(fileExists)
-
 		//if file exists run a swith statement
 		if fileExists {
 			switch file {
@@ -54,14 +52,13 @@ func ProjectType() {
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
 				break
-			default:
-				deriveProjectByExtension()
+				// default:
+				// 	deriveProjectByExtension()
 			}
-		} else {
-			fmt.Println("SHOULD NOT PRINT OUT")
-			// deriveProjectByExtension()
 		}
+
 	}
+	deriveProjectByExtension()
 }
 
 //derive projects by Extensions
@@ -72,11 +69,9 @@ func deriveProjectByExtension() {
 	extensions := []string{".csproj"}
 
 	for _, ext := range extensions {
-		err := exec.Command("find", parentDir+"/"+".hidden", "-name", fmt.Sprintf("*%s", ext)).Run()
+		extExists := extExists(parentDir+"/"+".hidden", ext)
 
-		if err != nil {
-			log.Fatal(err)
-		} else {
+		if extExists {
 			switch ext {
 			case ".csproj":
 				CopyDir()
@@ -89,6 +84,7 @@ func deriveProjectByExtension() {
 		}
 
 	}
+
 }
 
 //checks if file exists
@@ -104,4 +100,32 @@ func exists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func extExists(dirPath string, ext string) bool {
+	found := false
+
+	d, err := os.Open(dirPath)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	defer d.Close()
+
+	files, err := d.Readdir(-1)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	for _, file := range files {
+		if file.Mode().IsRegular() {
+			if filepath.Ext(file.Name()) == ext {
+				// Process rpm file, and:
+				found = true
+			}
+		}
+	}
+
+	return found
 }
