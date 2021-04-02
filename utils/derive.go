@@ -52,8 +52,6 @@ func ProjectType() {
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
 				break
-				// default:
-				// 	deriveProjectByExtension()
 			}
 		}
 
@@ -66,7 +64,7 @@ func deriveProjectByExtension() {
 	//parentDir = the name of the project
 	parentDir := os.Getenv("BUILDER_PARENT_DIR")
 
-	extensions := []string{".csproj"}
+	extensions := []string{".csproj", ".sln"}
 
 	for _, ext := range extensions {
 		extExists := extExists(parentDir+"/"+".hidden", ext)
@@ -75,7 +73,14 @@ func deriveProjectByExtension() {
 			switch ext {
 			case ".csproj":
 				CopyDir()
-				logger.InfoLogger.Println("C# project detected")
+				logger.InfoLogger.Println("C# project detected Ext csproj")
+
+				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
+				compile.CSharp(workspace)
+				break
+			case ".sln":
+				CopyDir()
+				logger.InfoLogger.Println("C# project detected Ext sln")
 
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.CSharp(workspace)
@@ -121,7 +126,7 @@ func extExists(dirPath string, ext string) bool {
 	for _, file := range files {
 		if file.Mode().IsRegular() {
 			if filepath.Ext(file.Name()) == ext {
-				// Process rpm file, and:
+
 				found = true
 			}
 		}
