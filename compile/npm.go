@@ -13,7 +13,6 @@ import (
 //Npm creates zip from files passed in as arg
 func Npm() {
 
-	//copies contents of .hidden to workspace
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 	tempWorkspace := workspaceDir + "/temp/" 

@@ -13,7 +13,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-func parentDir(path string) (bool, error) {
+func MakeParentDir(path string) (bool, error) {
 	//check if file path exists, returns err = nil if file exists
 	_, err := os.Stat(path)
 
@@ -74,7 +74,7 @@ func yesNo() bool {
 }
 
 //MakeParentDir does...
-func MakeParentDir() {
+func MakeDirs() {
 	args := os.Args[1:]
 
 	//handles -n flag
@@ -95,7 +95,7 @@ func MakeParentDir() {
 	 path = "./" + name +"_"+strconv.FormatInt(currentTime, 10)
 	}
 
-	parentDir(path)
+	MakeParentDir(path)
 
 	MakeHiddenDir(path)
 	MakeLogDir(path)
