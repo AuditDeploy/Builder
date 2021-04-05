@@ -9,22 +9,30 @@ import (
 	"path/filepath"
 )
 
-//ProjectType will derive the poject type(go, node, java repo) and execute its compiler
+//ProjectType will derive the project type and execute its compiler
 func ProjectType() {
 
-	//parentDir = the name of the project
+	//parentDir = the path of the project
 	parentDir := os.Getenv("BUILDER_PARENT_DIR")
+	//check for user defined type from builder.yaml
+	configType := os.Getenv("BUILDER_PROJECT_TYPE")
 
-	//languages we are currently compiling
-	files := []string{"main.go", "package.json", "pom.xml", "gemfile.lock"}
+	var files []string
+	//if type is anything besides "", define the files var instead of looking for it
+	if (configType != "") {
+		//check value of config type, return string array of languages build file/files
+		files = ConfigDerive()
+	}	else {
+		//set files var to default
+		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock"}
+	}
 
+	//look for those files inside hidden dir
 	for _, file := range files {
 
 		filePath := parentDir + "/" + ".hidden" + "/" + file
-
-		//checking if the filepath exists
+		//check if the filepath exists
 		fileExists, err := exists(filePath)
-
 		if err != nil {
 			logger.ErrorLogger.Println("No Go, Npm, Ruby or Java File Exists")
 			log.Fatal(err)
@@ -52,17 +60,15 @@ func ProjectType() {
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
 				break
-
 			}
 		}
-
 	}
 	deriveProjectByExtension()
 }
 
 //derive projects by Extensions
 func deriveProjectByExtension() {
-	//parentDir = the name of the project
+	//parentDir = the path of the project
 	parentDir := os.Getenv("BUILDER_PARENT_DIR")
 
 	extensions := []string{".csproj", ".sln"}
