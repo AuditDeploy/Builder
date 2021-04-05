@@ -102,6 +102,9 @@ init:
 --- check "BUILDER_HIDDEN_DIR', if "", clone into tempRepo dir (used for 'config')
 --- clone repo into hiddenDir 
 ~ ProjectType: 
+--- check "BUILDER_PROJECT_TYPE", if exists call ConfigDerive:
+----- checks env var, returns []string containing languages potential build file/files
+--- set files []string to builder.yaml val or default
 --- cycle through hidden dir to find the project type
 --- if file path for one of the project types exists, compile project
 --- GO --> 
@@ -198,6 +201,9 @@ config:
 --- check "BUILDER_HIDDEN_DIR', if "", clone into tempRepo dir (used for 'config')
 --- clone repo into hiddenDir 
 ~ ProjectType: 
+--- check "BUILDER_PROJECT_TYPE", if exists call ConfigDerive:
+----- checks env var, returns []string containing languages potential build file/files
+--- set files []string to builder.yaml val or default
 --- cycle through hidden dir to find the project type
 --- if file path for one of the project types exists, compile project
 --- GO --> 
