@@ -16,7 +16,7 @@ func ProjectType() {
 	parentDir := os.Getenv("BUILDER_PARENT_DIR")
 
 	//languages we are currently compiling
-	files := []string{"main.go", "package.json", "pom.xml"}
+	files := []string{"main.go", "package.json", "pom.xml", "gemfile.lock"}
 
 	for _, file := range files {
 
@@ -26,7 +26,7 @@ func ProjectType() {
 		fileExists, err := exists(filePath)
 
 		if err != nil {
-			logger.ErrorLogger.Println("No Go, Npm, or Java File Exists")
+			logger.ErrorLogger.Println("No Go, Npm, Ruby or Java File Exists")
 			log.Fatal(err)
 		}
 
@@ -52,6 +52,7 @@ func ProjectType() {
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
 				break
+
 			}
 		}
 

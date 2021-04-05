@@ -232,3 +232,4 @@ config:
 ~ GlobalLogs: 
 --- create globalLogs dir and .txt if it doesn't exists
 --- copy current builds logs.txt contents into globalLogs.txt
+
