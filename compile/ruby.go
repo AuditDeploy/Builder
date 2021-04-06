@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 //Npm creates zip from files passed in as arg
@@ -22,8 +23,25 @@ func Ruby() {
 
 	//add hidden dir contents to temp dir, install dependencies
 	exec.Command("cp", "-a", hiddenDir+"/.", tempWorkspace).Run()
- 	cmd :=	exec.Command("bundle", "install", tempWorkspace).Run()
+		
+	//install dependencies/build, if yaml build type exists install accordingly
+	buildType := strings.ToLower(os.Getenv("BUILDER_BUILD_TYPE"))
+	var cmd *exec.Cmd
+	if (buildType == "bundler") {
+		fmt.Println(buildType)
+		cmd = exec.Command("bundle", "install", tempWorkspace)
+	} else {
+		//default
+		cmd = exec.Command("bundle", "install", tempWorkspace)
+	}
+
+	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
+	err := cmd.Run()
+	if err != nil {
+		logger.ErrorLogger.Println("Node project failed to compile.")
+		log.Fatal(err)
+	}
 
 	// Zip temp dir.
 	outFile, err := os.Create(workspaceDir+"/temp.zip")
