@@ -25,10 +25,10 @@ func Ruby() {
 	exec.Command("cp", "-a", hiddenDir+"/.", tempWorkspace).Run()
 		
 	//install dependencies/build, if yaml build type exists install accordingly
-	buildType := strings.ToLower(os.Getenv("BUILDER_BUILD_TYPE"))
+	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	var cmd *exec.Cmd
-	if (buildType == "bundler") {
-		fmt.Println(buildType)
+	if (buildTool == "bundler") {
+		fmt.Println(buildTool)
 		cmd = exec.Command("bundle", "install", tempWorkspace)
 	} else {
 		//default
@@ -39,7 +39,7 @@ func Ruby() {
 	logger.InfoLogger.Println(cmd)
 	err := cmd.Run()
 	if err != nil {
-		logger.ErrorLogger.Println("Node project failed to compile.")
+		logger.ErrorLogger.Println("Ruby project failed to compile.")
 		log.Fatal(err)
 	}
 

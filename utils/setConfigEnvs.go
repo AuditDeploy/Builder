@@ -34,7 +34,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for build type
-	if val, ok := bldyml["buildType"]; ok {
+	if val, ok := bldyml["buildTool"]; ok {
 		_, present := os.LookupEnv("BUILDER_BUILD_TOOL")
 		if !present {
 			//convert val interface{} to string to be set as env var

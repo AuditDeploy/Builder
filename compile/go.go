@@ -19,10 +19,10 @@ func Go(filepath string) {
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 
 	//install dependencies/build, if yaml build type exists install accordingly
-	buildType := strings.ToLower(os.Getenv("BUILDER_BUILD_TYPE"))
+	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	var cmd *exec.Cmd
-	if (buildType == "go") {
-		fmt.Println(buildType)
+	if (buildTool == "go") {
+		fmt.Println(buildTool)
 		cmd = exec.Command("go", "build", "-o", workspaceDir, filepath)
 	} else {
 		//default
