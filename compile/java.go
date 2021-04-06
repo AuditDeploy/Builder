@@ -13,12 +13,12 @@ import (
 func Java(filePath string) {
 
 	//install dependencies/build, if yaml build type exists install accordingly
-	buildType := strings.ToLower(os.Getenv("BUILDER_BUILD_TYPE"))
+	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	var cmd *exec.Cmd
-	if (buildType == "maven" || buildType == "mvn") {
-		fmt.Println(buildType)
+	if (buildTool == "maven" || buildTool == "mvn") {
+		fmt.Println(buildTool)
 		cmd = exec.Command("mvn", "clean", "install", "-f", filePath)
-	} else if (buildType == "grendle") {
+	} else if (buildTool == "grendle") {
 		// grendle, etc.
 	} else {
 		//default

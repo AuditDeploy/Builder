@@ -24,10 +24,10 @@ func Npm() {
 	exec.Command("cp", "-a", hiddenDir+"/.", tempWorkspace).Run()
 
 	//install dependencies/build, if yaml build type exists install accordingly
-	buildType := strings.ToLower(os.Getenv("BUILDER_BUILD_TYPE"))
+	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	var cmd *exec.Cmd
-	if (buildType == "npm") {
-		fmt.Println(buildType)
+	if (buildTool == "npm") {
+		fmt.Println(buildTool)
 		cmd = exec.Command("npm", "install", tempWorkspace)
 	} else {
 		//default
