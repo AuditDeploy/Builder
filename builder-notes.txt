@@ -24,7 +24,7 @@ all build logs will be added to (in addition to their own logs file)
 
 ~~~~ Project Type Examples:
 Go: https://github.com/ilarocca/helloworld   <-- Has builder.yaml included
-Java: https://github.com/Coveros/helloworld
+Java: https://github.com/ilarocca/helloworld-1 <-- Has builder.yaml included
 Node: https://github.com/johnpapa/node-hello 
 C#: https://github.com/cloudfoundry-samples/dotnet-core-hello-world
 Ruby: https://github.com/amckinnell/basic-ruby-project
@@ -51,6 +51,7 @@ Native env vars:
 Envs set by builder.config:
 - "BUILDER_DIR_PATH": user defined parent dir path
 - "BUILDER_PROJECT_TYPE": user defined project type
+- "BUILDER_BUILD_TYPE": user defined build tool
 
 
 ~~~ Builder Signal Flow/Layout
