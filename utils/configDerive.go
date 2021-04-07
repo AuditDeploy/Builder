@@ -21,6 +21,8 @@ func ConfigDerive() []string {
 		files = []string{"gemfile.lock"}
 	} else if (configType == "c#" || configType == "csharp") {
 		files = []string{".csproj", ".sln"}
+	} else if (configType == "python") {
+		files = []string{"pipfile.lock"}
 	}
 
 	return files
