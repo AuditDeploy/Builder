@@ -24,7 +24,7 @@ func ProjectType() {
 		files = ConfigDerive()
 	}	else {
 		//set files var to default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock"}
+		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "pipfile.lock"}
 	}
 
 	//look for those files inside hidden dir
@@ -34,7 +34,7 @@ func ProjectType() {
 		//check if the filepath exists
 		fileExists, err := exists(filePath)
 		if err != nil {
-			logger.ErrorLogger.Println("No Go, Npm, Ruby or Java File Exists")
+			logger.ErrorLogger.Println("No Go, Npm, Ruby, Python or Java File Exists")
 			log.Fatal(err)
 		}
 
@@ -61,6 +61,10 @@ func ProjectType() {
 				//executes ruby compiler
 				logger.InfoLogger.Println("Ruby project detected")
 				compile.Ruby()
+			case "pipfile.lock":
+				//executes python compiler
+				logger.InfoLogger.Println("Python project detected")
+				compile.Python()
 			}
 		}
 	}
