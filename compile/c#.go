@@ -12,10 +12,10 @@ import (
 func CSharp(filepath string) {
 
 	//install dependencies/build, if yaml build type exists install accordingly
-	buildType := strings.ToLower(os.Getenv("BUILDER_BUILD_TYPE"))
+	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	var cmd *exec.Cmd
-	if (buildType == "dotnet") {
-		fmt.Println(buildType)
+	if (buildTool == "dotnet") {
+		fmt.Println(buildTool)
 		cmd = exec.Command("dotnet", "build", filepath)
 	} else {
 		//default

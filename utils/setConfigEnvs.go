@@ -11,7 +11,6 @@ func ConfigEnvs(byi interface{}) {
 	bldyml, _ := byi.(map[string]interface{})
 
 	//~~~Check for specific key and create env var based on value~~~
-
 	
 	//check for dir path
 	if val, ok := bldyml["path"]; ok {

@@ -54,7 +54,7 @@ func Npm() {
 	w := zip.NewWriter(outFile)
 
 	// Add files from temp dir to the archive.
-	addFiles(w, tempWorkspace, "")
+	addNpmFiles(w, tempWorkspace, "")
 
 	err = w.Close()
 	if err != nil {
@@ -70,7 +70,7 @@ func Npm() {
 }
 
 //recursively add files
-func addFiles(w *zip.Writer, basePath, baseInZip string) {
+func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
 	// Open the Directory
 	files, err := ioutil.ReadDir(basePath)
 	if err != nil {
@@ -97,7 +97,7 @@ func addFiles(w *zip.Writer, basePath, baseInZip string) {
 
 					// Recurse
 					newBase := basePath + file.Name() + "/"
-					addFiles(w, newBase, baseInZip  + file.Name() + "/")
+					addNpmFiles(w, newBase, baseInZip  + file.Name() + "/")
 			}
 	}
 }
