@@ -35,7 +35,7 @@ func CheckArgs() {
 		log.Fatal("Repo Provided Does Not Exists")
 	}
 
-	//check if artifact path is passed in
+	//check if artifact path is passed in 
 	var artifactPath string
 	for i, v := range cArgs { 
 		if v == "--path" || v == "-p" {

@@ -55,7 +55,7 @@ func Ruby() {
 	w := zip.NewWriter(outFile)
 
 	// Add files from temp dir to the archive.
-	addFiles(w, tempWorkspace, "")
+	addRubyFiles(w, tempWorkspace, "")
 
 	err = w.Close()
 	if err != nil {
@@ -98,7 +98,7 @@ func addRubyFiles(w *zip.Writer, basePath, baseInZip string) {
 
 					// Recurse
 					newBase := basePath + file.Name() + "/"
-					addFiles(w, newBase, baseInZip  + file.Name() + "/")
+					addRubyFiles(w, newBase, baseInZip  + file.Name() + "/")
 			}
 	}
 }

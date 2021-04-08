@@ -18,8 +18,8 @@ func Java(filePath string) {
 	if (buildTool == "maven" || buildTool == "mvn") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("mvn", "clean", "install", "-f", filePath)
-	} else if (buildTool == "grendle") {
-		// grendle, etc.
+	} else if (buildTool == "gradle") {
+		// gradle, etc.
 	} else {
 		//default
 		cmd = exec.Command("mvn", "clean", "install", "-f", filePath)

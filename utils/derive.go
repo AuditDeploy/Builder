@@ -46,12 +46,10 @@ func ProjectType() {
 				CopyDir()
 				logger.InfoLogger.Println("Go project detected")
 				compile.Go(filePath)
-				break
 			case "package.json":
 				//executes node compiler
 				logger.InfoLogger.Println("Npm project detected")
 				compile.Npm()
-				break
 			case "pom.xml":
 				//executes java compiler
 				CopyDir()
@@ -59,7 +57,10 @@ func ProjectType() {
 
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.Java(workspace)
-				break
+			case "gemfile.lock":
+				//executes ruby compiler
+				logger.InfoLogger.Println("Ruby project detected")
+				compile.Ruby()
 			}
 		}
 	}
@@ -84,14 +85,12 @@ func deriveProjectByExtension() {
 
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.CSharp(workspace)
-				break
 			case ".sln":
 				CopyDir()
 				logger.InfoLogger.Println("C# project detected Ext sln")
 
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 				compile.CSharp(workspace)
-				break
 			}
 		}
 
