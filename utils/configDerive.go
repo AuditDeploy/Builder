@@ -7,22 +7,50 @@ import (
 
 //ConfigDerive checks "BUILDER_PROJECT_TYPE" env var and returns string arr based on type
 func ConfigDerive() []string {
+
 	//make type lowercase
 	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
+	buildFile := strings.ToLower(os.Getenv("BUILDER_BUILD_FILE"))
 
 	var files []string
 	if (configType == "go") {
-		files = []string{"main.go"}
+		if (buildFile != "") {
+			//custom build file from build.yaml
+			files = []string{buildFile}
+		} else {
+			//default
+			files = []string{"main.go"}
+		}
 	} else if (configType == "node" || configType == "npm") {
-		files = []string{"package.json"}
+		if (buildFile != "") {
+			files = []string{buildFile}
+		} else {
+			files = []string{"package.json"}
+		}
 	} else if (configType == "java") {
-		files = []string{"pom.xml"}
+		if (buildFile != "") {
+			files = []string{buildFile}
+		} else {
+			files = []string{"pom.xml"}
+		}
 	} else if (configType == "ruby") {
-		files = []string{"gemfile.lock"}
+		if (buildFile != "") {
+			files = []string{buildFile}
+		} else {
+			files = []string{"gemfile.lock"} 
+		}
 	} else if (configType == "c#" || configType == "csharp") {
-		files = []string{".csproj", ".sln"}
+		if (buildFile != "") {
+			files = []string{buildFile}
+		} else {
+			files = []string{".csproj", ".sln"}
+		}
 	} else if (configType == "python") {
-		files = []string{"pipfile.lock"}
+		if (buildFile != "") {
+			files = []string{buildFile}
+		} else {
+			files = []string{"pipfile.lock"}
+		}
 	}
 
 	return files
