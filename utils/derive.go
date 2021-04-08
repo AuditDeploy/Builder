@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 //ProjectType will derive the project type and execute its compiler
@@ -15,15 +16,15 @@ func ProjectType() {
 	//parentDir = the path of the project
 	parentDir := os.Getenv("BUILDER_PARENT_DIR")
 	//check for user defined type from builder.yaml
-	configType := os.Getenv("BUILDER_PROJECT_TYPE")
+	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
 
 	var files []string
-	//if type is anything besides "", define the files var instead of looking for it
+	//projectType exists in builder.yaml
 	if (configType != "") {
 		//check value of config type, return string array of languages build file/files
 		files = ConfigDerive()
-	}	else {
-		//set files var to default
+	} else {
+		//default
 		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "pipfile.lock"}
 	}
 
@@ -40,34 +41,33 @@ func ProjectType() {
 
 		//if file exists run a swith statement
 		if fileExists {
-			switch file {
-			case "main.go":
-				//executes go compiler
-				CopyDir()
-				logger.InfoLogger.Println("Go project detected")
-				compile.Go(filePath)
-			case "package.json":
-				//executes node compiler
-				logger.InfoLogger.Println("Npm project detected")
-				compile.Npm()
-			case "pom.xml":
-				//executes java compiler
-				CopyDir()
-				logger.InfoLogger.Println("Java project detected")
+			if (file == "main.go" || configType == "go") {
+					//executes go compiler
+					CopyDir()
+					logger.InfoLogger.Println("Go project detected")
+					compile.Go(filePath)
+				} else if (file == "package.json" || configType == "node" || configType == "npm") {
+					//executes node compiler
+					logger.InfoLogger.Println("Npm project detected")
+					compile.Npm()
+				} else if (file == "pom.xml" || configType == "java") {
+					//executes java compiler
+					CopyDir()
+					logger.InfoLogger.Println("Java project detected")
 
-				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
-				compile.Java(workspace)
-			case "gemfile.lock":
-				//executes ruby compiler
-				logger.InfoLogger.Println("Ruby project detected")
-				compile.Ruby()
-			case "pipfile.lock":
-				//executes python compiler
-				logger.InfoLogger.Println("Python project detected")
-				compile.Python()
+					workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
+					compile.Java(workspace)
+				} else if (file == "gemfile.lock" || configType == "ruby") {
+					//executes ruby compiler
+					logger.InfoLogger.Println("Ruby project detected")
+					compile.Ruby()
+				} else if (file == "pipfile.lock" || configType == "python") {
+					//executes python compiler
+					logger.InfoLogger.Println("Python project detected")
+					compile.Python()
+				}
 			}
 		}
-	}
 	deriveProjectByExtension()
 }
 

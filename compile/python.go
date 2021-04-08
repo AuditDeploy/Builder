@@ -55,7 +55,7 @@ func Python() {
 	w := zip.NewWriter(outFile)
 
 	// Add files from temp dir to the archive.
-	addFiles(w, tempWorkspace, "")
+	addPythonFiles(w, tempWorkspace, "")
 
 	err = w.Close()
 	if err != nil {
@@ -98,7 +98,7 @@ func addPythonFiles(w *zip.Writer, basePath, baseInZip string) {
 
 					// Recurse
 					newBase := basePath + file.Name() + "/"
-					addFiles(w, newBase, baseInZip  + file.Name() + "/")
+					addPythonFiles(w, newBase, baseInZip  + file.Name() + "/")
 			}
 	}
 }
