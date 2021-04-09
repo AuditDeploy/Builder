@@ -13,7 +13,6 @@ func CloneRepo() {
 
 	repo := GetRepoURL()
 	
-	
 	//clone repo with url from args
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 
@@ -30,11 +29,13 @@ func CloneRepo() {
 		bFlagExists, branchName := cloneBranch()
 
 		if bFlagExists {
-			cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir).Run()
+			cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
+			cmd.Run()
 			logger.InfoLogger.Println(cmd)
 		} else {
-			cmd := exec.Command("git", "clone", repo, hiddenDir).Run()
-			logger.InfoLogger.Println(cmd)
+			cmd := exec.Command("git", "clone", repo, hiddenDir)
+			cmd.Run()
+			logger.InfoLogger.Println(cmd) 
 		}
 
 	}
