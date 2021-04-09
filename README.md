@@ -15,14 +15,29 @@
 - '--yes' or '-y': bypass prompts
 - '--branch' or '-b': specify repo branch
 
+## Builder Compatibility
+
+### Languages/Frameworks with default build/install commands:
+
+- Golang (go build)
+- Node (npm install)
+- Java (maven)
+- C# (dotnet)
+- Python (pipenv)
+- Ruby (bundle install)
+
 ## Builder.yaml Parameters
+
+If you are specifying a buildFile within the builder.yaml, you MUST include the projectType.
 
 - projectType: provide language/framework being used
   - (Node, Java, Go, Ruby, Python, C#, Ruby)
 - buildTool: provide tool used to install dependencies/build project
-  - (maven, npm, bundler, pip)
+  - (maven, npm, bundler, pipenv)
+- buildFile: provide file name needed to install dep/build project
+  - Can be any user specified file. (myCoolProject.go, package.json etc)
 - path: provide path for project to be built
-  - (C:/Users/Name/Project", etc)
+  - ("C:/Users/Name/Projects", etc)
 
 ## Builder ENV Vars
 
@@ -35,9 +50,10 @@
 
 ### Envs set by builder.config:
 
-- "BUILDER_DIR_PATH": user defined parent dir path
-- "BUILDER_PROJECT_TYPE": user defined project type
-- "BUILDER_BUILD_TOOL": user defined build tool
+- "BUILDER_DIR_PATH": user defined parent dir path for specific build
+- "BUILDER_PROJECT_TYPE": user defined project type (go, java, etc)
+- "BUILDER_BUILD_TOOL": user defined build tool (maven, gradle, npm, yarn, etc)
+- "BUILDER_BUILD_FILE": user defined build file (myCoolProject.go)
 
 ## Builder Signal Flow/Layout
 
@@ -99,26 +115,29 @@
 #### 4. ProjectType:
 
 - check "BUILDER_PROJECT_TYPE", if exists call ConfigDerive:
-  - checks env var, returns []string containing languages potential build file/files
+  - check "BUILDER_BUILD_FILE", if exists, return user specified build file/files
+  - checks env var, returns []string containing languages default build file/files
 - set files []string to builder.yaml val or default
 - cycle through hidden dir to find the project type
 - if file path for one of the project types exists, compile project
 - GO -->
   - copy contents of hidden into workspace dir
   - compile.Go:
-  - run 'go mod init' in workspace path
-  - run 'go build' in workspace path
-  - if "BUILDER_OUTPUT_PATH" exists, copy artifact to that path
+    - check "BUILDER_BUILD_TOOL" if exists, run that build tool, else run default
+    - run 'go build' (default) in workspace path
+    - if "BUILDER_OUTPUT_PATH" exists, copy artifact to that path
 - JAVA -->
   - copy contents of hidden into workspace dir
   - compile.Java:
-    - run 'mvn clean install' in workspace path
+    - check "BUILDER_BUILD_TOOL" if exists, run that build tool, else run default
+    - run 'mvn clean install' (default) in workspace path
     - if "BUILDER_OUTPUT_PATH" exists, copy artifact to that path
 - NPM -->
   - compile.Npm:
     - create temp directory inside workspace dir
     - copy hidden dir contents (repo) into temp dir
-    - run 'npm install' in temp dir path
+    - check "BUILDER_BUILD_TOOL" if exists, run that build tool, else run default
+    - run 'npm install' (default) in temp dir path
     - create temp.zip dir
     - recursively add files from temp dir to temp.zip
     - if "BUILDER_OUTPUT_PATH" exists, copy artifact (zip file in this case) to that path
@@ -172,6 +191,8 @@
 - pass the map int{} into ConfigEvens:
   - check for specific keys in map and create env vars based on value
   - check "projectType" and create 'BUILDER_PROJECT_TYPE' env var
+  - check "buildTool" and create 'BUILDER_BUILD_TOOL' env var
+  - check "buildFile" and create 'BUILDER_BUILD_FILE' env var
   - check "path" (this is parent dir path) and create 'BUILDER_DIR_PATH' env var
 - delete tempRepo dir
 

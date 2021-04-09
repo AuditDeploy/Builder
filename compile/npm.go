@@ -28,10 +28,10 @@ func Npm() {
 	var cmd *exec.Cmd
 	if (buildTool == "npm") {
 		fmt.Println(buildTool)
-		cmd = exec.Command("npm", "install", tempWorkspace)
+		cmd = exec.Command("npm", "install", tempWorkspace, "--prefix", tempWorkspace)
 	} else {
 		//default
-		cmd = exec.Command("npm", "install", tempWorkspace)
+		cmd = exec.Command("npm", "install", tempWorkspace, "--prefix", tempWorkspace)
 	}
 
 	//run cmd, check for err, log cmd
