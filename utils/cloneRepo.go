@@ -12,7 +12,7 @@ import (
 func CloneRepo() {
 
 	repo := GetRepoURL()
-	
+
 	//clone repo with url from args
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 
@@ -26,25 +26,35 @@ func CloneRepo() {
 		cmd.Run()
 	} else {
 		//if init cmd, clone to hidden dir
-		bFlagExists, branchName := cloneBranch()
+		bFlagExists, branchName := CloneBranch()
+
+		//check if branch exist
+		branches, _, _, _ := GitHashAndName()
+		branchExists, _ := BranchNameExists(branches)
 
 		if bFlagExists {
-			cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
-			cmd.Run()
-			logger.InfoLogger.Println(cmd)
+			if branchExists {
+				cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
+				cmd.Run()
+				logger.InfoLogger.Println(cmd)
+			} else {
+				log.Fatal("Branch does not exists")
+			}
+
 		} else {
 			cmd := exec.Command("git", "clone", repo, hiddenDir)
 			cmd.Run()
-			logger.InfoLogger.Println(cmd) 
+			logger.InfoLogger.Println(cmd)
 		}
 
 	}
 }
 
-func cloneBranch() (bool, string) {
+func CloneBranch() (bool, string) {
 	args := os.Args[1:]
 
-	var branchName string
+	//if branch is empty string strings.Contain does not work, function found in metadata
+	branchName := "%$F"
 	branchFlag := false
 
 	for i, v := range args {
