@@ -21,15 +21,17 @@ func Metadata() {
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
 	homeDir := GetUserData().HomeDir
-	gitHash := GitHash()
+	_, masterGitHash, branchHash, branchName := GitHashAndName()
 
 	//Contains a collection of fileds with user's metadata
 	userMetaData := AllMetaData{
-		UserName:  userName,
-		HomeDir:   homeDir,
-		IP:        ip,
-		Timestamp: timestamp,
-		GitHash:   gitHash}
+		UserName:      userName,
+		HomeDir:       homeDir,
+		IP:            ip,
+		Timestamp:     timestamp,
+		MasterGitHash: masterGitHash,
+		BranchName:    branchName,
+		BranchHash:    branchHash}
 
 	OutputMetadata(&userMetaData)
 
@@ -37,11 +39,13 @@ func Metadata() {
 
 //AllMetaData holds the stuct of all the arguments
 type AllMetaData struct {
-	UserName  string
-	HomeDir   string
-	IP        string
-	Timestamp string
-	GitHash   string
+	UserName      string
+	HomeDir       string
+	IP            string
+	Timestamp     string
+	MasterGitHash string
+	BranchName    string
+	BranchHash    string
 }
 
 //GetUserData return username and userdir
@@ -91,7 +95,7 @@ func OutputMetadata(allData *AllMetaData) {
 }
 
 //GitHas gets the latest git commit id in a repo
-func GitHash() string {
+func GitHashAndName() ([]string, string, string, string) {
 	//Get repoURL
 	repo := GetRepoURL()
 
@@ -99,14 +103,40 @@ func GitHash() string {
 	output, _ := exec.Command("git", "ls-remote", repo).Output()
 
 	//stringify output - []byte to string
-	stringGitHash := string(output)
+	stringGitHashAndName := string(output)
+	// fmt.Println(stringGitHash)
 
 	//return an array with all the git commit hashs
-	arrayGitHashs := strings.Split(stringGitHash, "\n")
+	arrayGitHashAndName := strings.Split(stringGitHashAndName, "\n")
+	branchExists, branchNameAndHash := BranchNameExists(arrayGitHashAndName)
 
-	//gets the hash of type []string
-	hashStringArray := strings.Fields(arrayGitHashs[0])
+	//gets the hash of type []string of master branch
+	masterHashStringArray := strings.Fields(arrayGitHashAndName[0])
+	masterHash := masterHashStringArray[0]
 
-	return hashStringArray[0]
+	if branchExists {
+		//gets hash and name of type []string of a specific branch
+		branchHash := strings.Fields(branchNameAndHash)[0]
+		branchName := strings.Fields(branchNameAndHash)[1]
+		return arrayGitHashAndName, masterHash[0:7], branchHash[0:7], branchName
+	} else {
+		return arrayGitHashAndName, masterHash[0:7], "", ""
+	}
 
+}
+
+func BranchNameExists(branches []string) (bool, string) {
+	branchExists := false
+	var branchNameAndHash string
+
+	_, clonedBranchName := CloneBranch()
+
+	for _, branch := range branches {
+		if branch[strings.LastIndex(branch, "/")+1:] == clonedBranchName {
+			branchExists = true
+			branchNameAndHash = branch
+		}
+	}
+
+	return branchExists, branchNameAndHash
 }
