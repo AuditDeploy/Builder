@@ -23,9 +23,9 @@ all build logs will be added to (in addition to their own logs file)
 
 
 ~~~~ Project Type Examples:
-Go: https://github.com/ilarocca/helloworld   <-- Has builder.yaml included
+Go: https://github.com/ilarocca/helloworld   <-- Has builder.yaml included (main branch does NOT have main.go, will not work with 'init')
 Java: https://github.com/ilarocca/helloworld-1 <-- Has builder.yaml included
-Node: https://github.com/johnpapa/node-hello 
+Node: https://github.com/ilarocca/simple-reactjs-app <-- Has builder.yaml included 
 C#: https://github.com/cloudfoundry-samples/dotnet-core-hello-world
 Ruby: https://github.com/amckinnell/basic-ruby-project
 Python: https://github.com/denyszamiatin/PythonBasic1.git

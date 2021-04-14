@@ -36,7 +36,7 @@ If you are specifying a buildFile within the builder.yaml, you MUST include the 
   - (maven, npm, bundler, pipenv)
 - buildFile: provide file name needed to install dep/build project
   - Can be any user specified file. (myCoolProject.go, package.json etc)
-- path: provide path for project to be built
+- projectPath: provide path for project to be built
   - ("C:/Users/Name/Projects", etc)
 
 ## Builder ENV Vars
