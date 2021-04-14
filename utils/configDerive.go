@@ -15,7 +15,7 @@ func ConfigDerive() []string {
 	var files []string
 	if (configType == "go") {
 		if (buildFile != "") {
-			//custom build file from build.yaml
+			//custom build file from builder.yaml
 			files = []string{buildFile}
 		} else {
 			//default

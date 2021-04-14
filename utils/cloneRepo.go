@@ -22,6 +22,28 @@ func CloneRepo() {
 		if errDir != nil {
 			fmt.Println(errDir)
 		}
+
+		//if init cmd, clone to hidden dir
+		bFlagExists, branchName := CloneBranch()
+
+		//check if branch exist
+		branches, _, _, _ := GitHashAndName()
+		branchExists, _ := BranchNameExists(branches)
+
+		if bFlagExists {
+			if branchExists {
+				cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, "./tempRepo")
+				cmd.Run()
+			} else {
+				log.Fatal("Branch does not exists")
+			}
+
+		} else {
+			cmd := exec.Command("git", "clone", repo, "./tempRepo")
+			cmd.Run()
+		}
+
+
 		cmd := exec.Command("git", "clone", repo, "./tempRepo")
 		cmd.Run()
 	} else {
