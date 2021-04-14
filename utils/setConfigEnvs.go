@@ -13,7 +13,7 @@ func ConfigEnvs(byi interface{}) {
 	//~~~Check for specific key and create env var based on value~~~
 	
 	//check for dir path
-	if val, ok := bldyml["path"]; ok {
+	if val, ok := bldyml["projectPath"]; ok {
 		_, present := os.LookupEnv("BUILDER_DIR_PATH")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -49,6 +49,16 @@ func ConfigEnvs(byi interface{}) {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILDER_BUILD_FILE", valStr)
+		}
+	}
+
+	//check for build type
+	if val, ok := bldyml["outputPath"]; ok {
+		_, present := os.LookupEnv("BUILDER_OUTPUT_PATH")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("BUILDER_OUTPUT_PATH", valStr)
 		}
 	}
 }

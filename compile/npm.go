@@ -23,15 +23,29 @@ func Npm() {
 	//add hidden dir contents to temp dir, install dependencies
 	exec.Command("cp", "-a", hiddenDir+"/.", tempWorkspace).Run()
 
+	//define dir path for command to run
+	var fullPath string
+	configPath := os.Getenv("BUILDER_DIR_PATH")
+	//if user defined path in builder.yaml, full path is included in tempWorkspace, else add the local path 
+	if (configPath != "") {
+		fullPath = tempWorkspace
+	} else {
+		path, _ := os.Getwd()
+		//combine local path to newly created tempWorkspace, gets rid of "." in path name
+		fullPath = path + tempWorkspace[strings.Index(tempWorkspace, ".")+1:]
+	}
+
 	//install dependencies/build, if yaml build type exists install accordingly
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	var cmd *exec.Cmd
 	if (buildTool == "npm") {
 		fmt.Println(buildTool)
-		cmd = exec.Command("npm", "install", tempWorkspace, "--prefix", tempWorkspace)
+		cmd = exec.Command("npm", "install")
+    cmd.Dir = fullPath       // or whatever directory it's in
 	} else {
 		//default
-		cmd = exec.Command("npm", "install", tempWorkspace, "--prefix", tempWorkspace)
+		cmd = exec.Command("npm", "install") 
+    cmd.Dir = fullPath       // or whatever directory it's in
 	}
 
 	//run cmd, check for err, log cmd
@@ -40,7 +54,7 @@ func Npm() {
 	if err != nil {
 		logger.ErrorLogger.Println("Node project failed to compile.")
 		log.Fatal(err)
-	}
+	} 
 
 	// Zip temp dir.
 	outFile, err := os.Create(workspaceDir+"/temp.zip")
