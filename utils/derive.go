@@ -14,11 +14,9 @@ import (
 func ProjectType() {
 
 	//parentDir = the path of the project
-	parentDir := os.Getenv("BUILDER_PARENT_DIR")
+	// parentDir := os.Getenv("BUILDER_PARENT_DIR")
 	//check for user defined type from builder.yaml
 	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
-
-	recurseExists()
 
 	var files []string
 	//projectType exists in builder.yaml
@@ -33,8 +31,8 @@ func ProjectType() {
 	//look for those files inside hidden dir
 	for _, file := range files {
 
-		filePath := parentDir + "/" + ".hidden" + "/" + file
-		//check if the filepath exists
+		//recursiveFile check, pass file inside func to see if it's in hiddenDir
+		filePath := findPath(file)
 		fileExists, err := exists(filePath)
 		if err != nil {
 			logger.ErrorLogger.Println("No Go, Npm, Ruby, Python or Java File Exists")
@@ -104,26 +102,24 @@ func deriveProjectByExtension() {
 
 }
 
-func recurseExists() ([]string, error) {
+//takes in file, searches hiddenDir to find a match and returns path to file
+func findPath(file string) (string) {
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 
-	fileList := make([]string, 0)
-	e := filepath.Walk(hiddenDir, func(path string, f os.FileInfo, err error) error {
-		if (f.Name() == "main.go") {
-			fileList = append(fileList, path)
+	// if f.Name is == to file passed in "coolProject.go", filePath becomes the path that file exists in 
+	var filePath string
+	err := filepath.Walk(hiddenDir, func(path string, f os.FileInfo, err error) error {
+		if (strings.EqualFold(f.Name(), file)) {
+			filePath = path
 		}
 		return err
 	})
 	
-	if e != nil {
-		panic(e)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	for _, file := range fileList {
-		fmt.Println(file)
-	}
-
-	return fileList, nil
+	return filePath
 }
 
 
