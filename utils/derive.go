@@ -18,6 +18,8 @@ func ProjectType() {
 	//check for user defined type from builder.yaml
 	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
 
+	recurseExists()
+
 	var files []string
 	//projectType exists in builder.yaml
 	if (configType != "") {
@@ -101,6 +103,29 @@ func deriveProjectByExtension() {
 	}
 
 }
+
+func recurseExists() ([]string, error) {
+	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+
+	fileList := make([]string, 0)
+	e := filepath.Walk(hiddenDir, func(path string, f os.FileInfo, err error) error {
+		if (f.Name() == "main.go") {
+			fileList = append(fileList, path)
+		}
+		return err
+	})
+	
+	if e != nil {
+		panic(e)
+	}
+
+	for _, file := range fileList {
+		fmt.Println(file)
+	}
+
+	return fileList, nil
+}
+
 
 //checks if file exists
 func exists(path string) (bool, error) {

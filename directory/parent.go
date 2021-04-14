@@ -23,7 +23,7 @@ func MakeDirs() {
 	//add Unix timestamp to dir name
 	currentTime := time.Now().Unix()
 
-	//check for path env from builder.yaml
+	//check for projectPath env from builder.yaml
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 
 	var path string
@@ -64,7 +64,7 @@ func MakeParentDir(path string) (bool, error) {
 			//prompt user if they'd like dir to be created
 			mk := yesNo()
 
-			if mk == true {
+			if mk {
 				errDir := os.MkdirAll(path, 0755)
 				//should return nil once directory is made, if not, throw err
 				if errDir != nil {

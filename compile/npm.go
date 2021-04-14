@@ -16,7 +16,7 @@ func Npm() {
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
-	tempWorkspace := workspaceDir + "/temp/" 
+	tempWorkspace := workspaceDir + "\\temp\\" 
 	//make temp dir
 	os.Mkdir(tempWorkspace, 0755)
 
@@ -25,13 +25,18 @@ func Npm() {
 
 	//install dependencies/build, if yaml build type exists install accordingly
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
+	//get user working dir, add temp wrkSpace dir
+	path, _ := os.Getwd()
+	fullPath := path + tempWorkspace
 	var cmd *exec.Cmd
 	if (buildTool == "npm") {
 		fmt.Println(buildTool)
-		cmd = exec.Command("npm", "install", tempWorkspace, "--prefix", tempWorkspace)
+		cmd = exec.Command("npm", "install") // or whatever the program is
+    cmd.Dir = fullPath       // or whatever directory it's in
 	} else {
+		cmd = exec.Command("npm", "install") // or whatever the program is
+    cmd.Dir = fullPath       // or whatever directory it's in
 		//default
-		cmd = exec.Command("npm", "install", tempWorkspace, "--prefix", tempWorkspace)
 	}
 
 	//run cmd, check for err, log cmd
@@ -40,7 +45,7 @@ func Npm() {
 	if err != nil {
 		logger.ErrorLogger.Println("Node project failed to compile.")
 		log.Fatal(err)
-	}
+	} 
 
 	// Zip temp dir.
 	outFile, err := os.Create(workspaceDir+"/temp.zip")

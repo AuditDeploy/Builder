@@ -38,9 +38,9 @@ func CheckArgs() {
 	//check if artifact path is passed in 
 	var artifactPath string
 	for i, v := range cArgs { 
-		if v == "--path" || v == "-p" {
+		if v == "--output" || v == "-o" {
 			if len(cArgs) <= i+1 {
-				log.Fatal("No Path Provided")
+				log.Fatal("No Output Path Provided")
 
 			} else {
 				artifactPath = cArgs[i+1]

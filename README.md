@@ -10,7 +10,7 @@
 ### Flags:
 
 - '--help' or '-h': provide info for Builder
-- '--path' or '-p': user defined output path for artifact
+- '--output' or '-o': user defined output path for artifact
 - '--name' or '-n': user defined project name
 - '--yes' or '-y': bypass prompts
 - '--branch' or '-b': specify repo branch
@@ -70,7 +70,7 @@ If you are specifying a buildFile within the builder.yaml, you MUST include the 
 - check for '--help or -h' flag
 - if no repo, exit
 - if repo exists, check to ls-remote to see if it's a real git repo
-- check for '--path or -p' flag (artifact/output path)
+- check for '--output or -o' flag (artifact/output path)
   - set 'BUILDER_OUTPUT_PATH' (either "" or user defined path)
 
 #### 2. MakeDirs:
@@ -170,7 +170,7 @@ If you are specifying a buildFile within the builder.yaml, you MUST include the 
 - check for '--help or -h' flag
 - if no repo, exit
 - if repo exists, check to ls-remote to see if it's a real git repo
-- check for '--path or -p' flag (artifact/output path)
+- check for '--output or -o' flag (artifact/output path)
   - set 'BUILDER_OUTPUT_PATH' (either "" or user defined path)
 
 #### 2. CloneRepo:
