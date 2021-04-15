@@ -9,4 +9,6 @@ require (
 	golang.org/x/tools/gopls v0.6.9 // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	k8s.io/api v0.21.0 // indirect
+	knative.dev/pkg v0.0.0-20210412173742-b51994e3b312 // indirect
 )
