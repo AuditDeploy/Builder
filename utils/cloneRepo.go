@@ -23,12 +23,7 @@ func CloneRepo() {
 			fmt.Println(errDir)
 		}
 
-		//if init cmd, clone to hidden dir
-		bFlagExists, branchName := CloneBranch()
-
-		//check if branch exist
-		branches, _, _, _ := GitHashAndName()
-		branchExists, _ := BranchNameExists(branches)
+		bFlagExists, branchExists, branchName := bFlagAndBranchExists()
 
 		if bFlagExists {
 			if branchExists {
@@ -43,16 +38,11 @@ func CloneRepo() {
 			cmd.Run()
 		}
 
-
 		cmd := exec.Command("git", "clone", repo, "./tempRepo")
 		cmd.Run()
 	} else {
-		//if init cmd, clone to hidden dir
-		bFlagExists, branchName := CloneBranch()
 
-		//check if branch exist
-		branches, _, _, _ := GitHashAndName()
-		branchExists, _ := BranchNameExists(branches)
+		bFlagExists, branchExists, branchName := bFlagAndBranchExists()
 
 		if bFlagExists {
 			if branchExists {
@@ -70,6 +60,17 @@ func CloneRepo() {
 		}
 
 	}
+}
+
+func bFlagAndBranchExists() (bool, bool, string) {
+	//if init cmd, clone to hidden dir
+	bFlagExists, branchName := CloneBranch()
+
+	//check if branch exist
+	branches, _, _, _ := GitHashAndName()
+	branchExists, _ := BranchNameExists(branches)
+
+	return bFlagExists, branchExists, branchName
 }
 
 func CloneBranch() (bool, string) {
