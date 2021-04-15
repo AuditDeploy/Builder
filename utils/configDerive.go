@@ -37,7 +37,7 @@ func ConfigDerive() []string {
 		if (buildFile != "") {
 			files = []string{buildFile}
 		} else {
-			files = []string{"gemfile.lock"} 
+			files = []string{"gemfile.lock", "gemfile"} 
 		}
 	} else if (configType == "c#" || configType == "csharp") {
 		if (buildFile != "") {
