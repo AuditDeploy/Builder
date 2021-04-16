@@ -23,7 +23,7 @@ func ProjectType() {
 		files = ConfigDerive()
 	} else {
 		//default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "pipfile.lock"}
+		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "pipfile.lock"}
 	}
 
 	//look for those files inside hidden dir
@@ -59,7 +59,7 @@ func ProjectType() {
 					workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 					compile.Java(workspace)
 					return
-				} else if (file == "gemfile.lock" || configType == "ruby") {
+				} else if (file == "gemfile.lock" || file == "gemfile" || configType == "ruby") {
 					//executes ruby compiler
 					logger.InfoLogger.Println("Ruby project detected")
 					compile.Ruby()
