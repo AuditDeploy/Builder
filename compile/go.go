@@ -13,7 +13,7 @@ import (
 )
 
 //Go creates exe from file passed in as arg
-func Go(filepath string) {
+func Go(filePath string) {
 
 	//define dir path for command to run in
 	var fullPath string
@@ -21,13 +21,13 @@ func Go(filepath string) {
 	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path 
 	if (configPath != "") {
 		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
-		fullPath = filepath
+		fullPath = filePath
 	} else {
 		path, _ := os.Getwd()
 		//combine local path to newly created tempWorkspace, 
 		//gets rid of "." in path name
 		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
-		fullPath = path + filepath[strings.Index(filepath, ".")+1:]
+		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
 	}
 	
 	//install dependencies/build, if yaml build type exists install accordingly
