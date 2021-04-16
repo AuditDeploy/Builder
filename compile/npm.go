@@ -47,7 +47,6 @@ func Npm() {
 		cmd = exec.Command("npm", "install") 
     cmd.Dir = fullPath       // or whatever directory it's in
 	}
-	fmt.Println(cmd.Dir)
 
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
