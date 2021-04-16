@@ -15,19 +15,42 @@ import (
 //Go creates exe from file passed in as arg
 func Go(filepath string) {
 
-	//copies contents of .hidden to workspace
-	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
-
+	//define dir path for command to run in
+	var fullPath string
+	configPath := os.Getenv("BUILDER_DIR_PATH")
+	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path 
+	if (configPath != "") {
+		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
+		fullPath = filepath
+	} else {
+		path, _ := os.Getwd()
+		//combine local path to newly created tempWorkspace, 
+		//gets rid of "." in path name
+		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
+		fullPath = path + filepath[strings.Index(filepath, ".")+1:]
+	}
+	
 	//install dependencies/build, if yaml build type exists install accordingly
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
+	//find 'go file' to be built
+	buildFile := strings.ToLower(os.Getenv("BUILDER_BUILD_FILE"))
+	//if no file defined by user, use default main.go
+	if (buildFile == "") {
+		buildFile = "main.go"
+	}
+
 	var cmd *exec.Cmd
 	if (buildTool == "go") {
 		fmt.Println(buildTool)
-		cmd = exec.Command("go", "build", "-o", workspaceDir, filepath)
+		cmd = exec.Command("go", "build", buildFile)
+		cmd.Dir = fullPath       // or whatever directory it's in
 	} else {
 		//default
-		cmd = exec.Command("go", "build", "-o", workspaceDir, filepath)
+		cmd = exec.Command("go", "build", buildFile)
+		cmd.Dir = fullPath       // or whatever directory it's in
 	}
+
+	fmt.Println("go full path: "+cmd.Dir)
 
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
@@ -39,7 +62,7 @@ func Go(filepath string) {
 
 	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	if (artifactPath != "") {
-		exec.Command("cp", "-a", workspaceDir+"/main.exe", artifactPath).Run()
+		exec.Command("cp", "-a", fullPath+"/main.exe", artifactPath).Run()
 	}
 
 	logger.InfoLogger.Println("Go project compiled successfully.")
