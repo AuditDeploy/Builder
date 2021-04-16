@@ -10,7 +10,7 @@ func ConfigDerive() []string {
 
 	//make type lowercase
 	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
-	buildFile := strings.ToLower(os.Getenv("BUILDER_BUILD_FILE"))
+	buildFile := os.Getenv("BUILDER_BUILD_FILE")
 
 	var files []string
 	if (configType == "go") {

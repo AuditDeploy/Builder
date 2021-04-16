@@ -43,10 +43,11 @@ func Npm() {
 		cmd = exec.Command("npm", "install")
     cmd.Dir = fullPath       // or whatever directory it's in
 	} else {
-		//default
+		//default 
 		cmd = exec.Command("npm", "install") 
     cmd.Dir = fullPath       // or whatever directory it's in
 	}
+	fmt.Println(cmd.Dir)
 
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
@@ -56,7 +57,7 @@ func Npm() {
 		log.Fatal(err)
 	} 
 
-	// Zip temp dir.
+	// CreateZip temp dir.
 	outFile, err := os.Create(workspaceDir+"/temp.zip")
 	if err != nil {
 		 log.Fatal(err)
@@ -108,7 +109,6 @@ func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
 							fmt.Println(err)
 					}
 			} else if file.IsDir() {
-
 					// Recurse
 					newBase := basePath + file.Name() + "/"
 					addNpmFiles(w, newBase, baseInZip  + file.Name() + "/")

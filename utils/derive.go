@@ -13,15 +13,13 @@ import (
 //ProjectType will derive the project type and execute its compiler
 func ProjectType() {
 
-	//parentDir = the path of the project
-	// parentDir := os.Getenv("BUILDER_PARENT_DIR")
-	//check for user defined type from builder.yaml
+	//check for user defined project type from builder.yaml to define string array files
 	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
 
 	var files []string
 	//projectType exists in builder.yaml
 	if (configType != "") {
-		//check value of config type, return string array of languages build file/files
+		//check value of config type, return string array of language's build file/files
 		files = ConfigDerive()
 	} else {
 		//default
@@ -31,25 +29,28 @@ func ProjectType() {
 	//look for those files inside hidden dir
 	for _, file := range files {
 
-		//recursiveFile check, pass file inside func to see if it's in hiddenDir
+		//recursively check for file in hidden dir, return path if found
 		filePath := findPath(file)
+		//double check it exists
 		fileExists, err := exists(filePath)
 		if err != nil {
 			logger.ErrorLogger.Println("No Go, Npm, Ruby, Python or Java File Exists")
 			log.Fatal(err)
 		}
-
-		//if file exists run a swith statement
-		if fileExists {
+		//if file exists and filePath isn't empty, run conditional to find correct compiler
+		if (fileExists && filePath != "" && filePath != "./") {
 			if (file == "main.go" || configType == "go") {
 					//executes go compiler
+					finalPath := createFinalPath(filePath, file)
 					CopyDir()
 					logger.InfoLogger.Println("Go project detected")
-					compile.Go(filePath)
+					compile.Go(finalPath)
+					return
 				} else if (file == "package.json" || configType == "node" || configType == "npm") {
 					//executes node compiler
 					logger.InfoLogger.Println("Npm project detected")
 					compile.Npm()
+					return
 				} else if (file == "pom.xml" || configType == "java") {
 					//executes java compiler
 					CopyDir()
@@ -57,14 +58,17 @@ func ProjectType() {
 
 					workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 					compile.Java(workspace)
+					return
 				} else if (file == "gemfile.lock" || configType == "ruby") {
 					//executes ruby compiler
 					logger.InfoLogger.Println("Ruby project detected")
 					compile.Ruby()
+					return
 				} else if (file == "pipfile.lock" || configType == "python") {
 					//executes python compiler
 					logger.InfoLogger.Println("Python project detected")
 					compile.Python()
+					return
 				}
 			}
 		}
@@ -97,15 +101,14 @@ func deriveProjectByExtension() {
 				compile.CSharp(workspace)
 			}
 		}
-
 	}
-
 }
 
 //takes in file, searches hiddenDir to find a match and returns path to file
 func findPath(file string) (string) {
+	fmt.Println(file)
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
-
+	fmt.Println(hiddenDir)
 	// if f.Name is == to file passed in "coolProject.go", filePath becomes the path that file exists in 
 	var filePath string
 	err := filepath.Walk(hiddenDir, func(path string, f os.FileInfo, err error) error {
@@ -118,8 +121,23 @@ func findPath(file string) (string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(filePath)
 
-	return filePath
+	configPath := os.Getenv("BUILDER_DIR_PATH")
+	//if user defined path in builder.yaml, filePath has fullPath included, if not, run it locally
+	if (configPath != "") {
+		return filePath
+	} else {
+		return "./"+filePath
+	}
+}
+
+//changes .hidden to workspace for langs that produce binary, get's rid of file name in path
+func createFinalPath(path string, file string) string {
+	workFilePath := strings.Replace(path, ".hidden", "workspace", 1)
+	finalPath :=	strings.Replace(workFilePath, file, "", -1)
+
+	return finalPath
 }
 
 
