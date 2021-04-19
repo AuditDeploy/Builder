@@ -99,7 +99,7 @@ func deriveProjectByExtension() {
 
 	//checks if there's more than more file to compile from and if it does, prompt user to select path
 	if len(filePathsFoundInRepo) > 1 {
-		pathToCompileFrom := strings.Replace(selectPathToCompileFrom(filePathsFoundInRepo), ".hidden", "workspace", 1) 
+		pathToCompileFrom := strings.Replace(selectPathToCompileFrom(filePathsFoundInRepo), ".hidden", "workspace", 1)
 		CopyDir()
 		logger.InfoLogger.Println("C# project detected")
 		compile.CSharp(pathToCompileFrom)
