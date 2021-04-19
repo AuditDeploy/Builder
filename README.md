@@ -38,6 +38,7 @@ If you are specifying a buildFile within the builder.yaml, you MUST include the 
   - Can be any user specified file. (myCoolProject.go, package.json etc)
 - projectPath: provide path for project to be built
   - ("C:/Users/Name/Projects", etc)
+- buildCmd: provide full command to build/compile project
 
 ## Builder ENV Vars
 
