@@ -29,8 +29,13 @@ func Java(filePath string) {
 
 	//install dependencies/build, if yaml build type exists install accordingly
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
+	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+
 	var cmd *exec.Cmd
-	if (buildTool == "maven" || buildTool == "mvn") {
+	if buildCmd != "" {
+		//user specified cmd
+		cmd = exec.Command(buildCmd)
+	} else if (buildTool == "maven" || buildTool == "mvn") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("mvn", "clean", "install")
 		cmd.Dir = fullPath       // or whatever directory it's in

@@ -37,8 +37,13 @@ func Npm() {
 
 	//install dependencies/build, if yaml build type exists install accordingly
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
+	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+
 	var cmd *exec.Cmd
-	if (buildTool == "npm") {
+	if buildCmd != "" {
+		//user specified cmd
+		cmd = exec.Command(buildCmd)
+	} else if (buildTool == "npm") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("npm", "install")
     cmd.Dir = fullPath       // or whatever directory it's in
