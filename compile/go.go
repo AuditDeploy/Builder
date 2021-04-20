@@ -34,13 +34,17 @@ func Go(filePath string) {
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	//find 'go file' to be built
 	buildFile := strings.ToLower(os.Getenv("BUILDER_BUILD_FILE"))
+	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 	//if no file defined by user, use default main.go
 	if (buildFile == "") {
 		buildFile = "main.go"
 	}
 
 	var cmd *exec.Cmd
-	if (buildTool == "go") {
+	if buildCmd != "" {
+		//user specified cmd
+		cmd = exec.Command(buildCmd)
+	} else if (buildTool == "go") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("go", "build", buildFile)
 		cmd.Dir = fullPath       // or whatever directory it's in
@@ -49,8 +53,6 @@ func Go(filePath string) {
 		cmd = exec.Command("go", "build", buildFile)
 		cmd.Dir = fullPath       // or whatever directory it's in
 	}
-
-	fmt.Println("go full path: "+cmd.Dir)
 
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)

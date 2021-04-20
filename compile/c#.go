@@ -25,10 +25,16 @@ func CSharp(filePath string) {
 		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
 	}
 
-	//install dependencies/build, if yaml build type exists install accordingly
+	//install dependencies/build, 
+	// if yaml build type exists install accordingly, if buildCmd exists, 
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
+	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+
 	var cmd *exec.Cmd
-	if buildTool == "dotnet" {
+	if buildCmd != "" {
+		//user specified cmd
+		cmd = exec.Command(buildCmd)
+	} else if buildTool == "dotnet" {
 		cmd = exec.Command("dotnet", "build", fullPath)
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else {

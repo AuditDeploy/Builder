@@ -52,6 +52,16 @@ func ConfigEnvs(byi interface{}) {
 		}
 	}
 
+	//check for build file
+	if val, ok := bldyml["buildCmd"]; ok {
+		_, present := os.LookupEnv("BUILDER_BUILD_COMMAND")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("BUILDER_BUILD_COMMAND", valStr)
+		}
+	}
+
 	//check for build type
 	if val, ok := bldyml["outputPath"]; ok {
 		_, present := os.LookupEnv("BUILDER_OUTPUT_PATH")

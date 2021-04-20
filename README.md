@@ -30,15 +30,16 @@
 
 If you are specifying a buildFile within the builder.yaml, you MUST include the projectType.
 
+- projectPath: provide path for project to be built
+  - ("C:/Users/Name/Projects", etc)
 - projectType: provide language/framework being used
   - (Node, Java, Go, Ruby, Python, C#, Ruby)
 - buildTool: provide tool used to install dependencies/build project
-  - (maven, npm, bundler, pipenv)
+  - (maven, npm, bundler, pipenv, etc)
 - buildFile: provide file name needed to install dep/build project
   - Can be any user specified file. (myCoolProject.go, package.json etc)
-- projectPath: provide path for project to be built
-  - ("C:/Users/Name/Projects", etc)
 - buildCmd: provide full command to build/compile project
+  - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
 
 ## Builder ENV Vars
 

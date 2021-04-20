@@ -26,8 +26,13 @@ func Python() {
 		
 	//install dependencies/build, if yaml build type exists install accordingly
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
+	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+
 	var cmd *exec.Cmd
-	if (buildTool == "pipenv") {
+	if buildCmd != "" {
+		//user specified cmd
+		cmd = exec.Command(buildCmd)
+	} else if (buildTool == "pipenv") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("pipenv", "install", tempWorkspace)
 	} else {
