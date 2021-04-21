@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -79,35 +80,47 @@ func ProjectType() {
 
 //derive projects by Extensions
 func deriveProjectByExtension() {
-
-	parentDir := os.Getenv("BUILDER_PARENT_DIR")
+	hiddeDir := os.Getenv("BUILDER_HIDDEN_DIR")
 
 	extensions := []string{".csproj", ".sln"}
 
-	var filePathsFoundInRepo []string
-
-	//finds all the paths of files with ext .csproj and .sln and appends them to
-	//filePathsFoundInRepo array
 	for _, ext := range extensions {
-		extExists, fileNameArray := extExistsFunction(parentDir+"/"+".hidden", ext)
-		if extExists {
-			for _, fileName := range fileNameArray {
-				filePathsFoundInRepo = append(filePathsFoundInRepo, findPath(fileName))
+		extFound, fileName := extExistsFunction(hiddeDir, ext)
+		if extFound {
+			switch ext {
+			case ".csproj":
+				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
+				CopyDir()
+				logger.InfoLogger.Println("C# project detected, Ext .csproj")
+				compile.CSharp(filePath)
+
+			case ".sln":
+				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
+				CopyDir()
+				listOfProjects, err := exec.Command("dotnet", "sln", filePath, "list").Output()
+
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				stringifyListOfProjects := string(listOfProjects)
+				listOfProjectsArray := strings.Split(stringifyListOfProjects, "\n")[2:]
+
+				if len(listOfProjectsArray) > 5 {
+					logger.InfoLogger.Println("C# project detected, Ext .sln. More than 5 projects in solution not supported")
+					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of file in the builder.yml")
+				} else {
+					pathToCompileFrom := selectPathToCompileFrom(listOfProjectsArray)
+					workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
+					pathToCompileFrom = workspace + "/" + pathToCompileFrom
+
+					CopyDir()
+					logger.InfoLogger.Println("C# project detected, Ext .sln")
+					compile.CSharp(pathToCompileFrom)
+
+				}
 			}
 		}
-	}
-
-	//checks if there's more than more file to compile from and if it does, prompt user to select path
-	if len(filePathsFoundInRepo) > 1 {
-		pathToCompileFrom := selectPathToCompileFrom(filePathsFoundInRepo)
-		CopyDir()
-		logger.InfoLogger.Println("C# project detected")
-		compile.CSharp(pathToCompileFrom)
-
-	} else {
-		CopyDir()
-		logger.InfoLogger.Println("C# project detected")
-		compile.CSharp(filePathsFoundInRepo[0])
 	}
 
 }
@@ -161,7 +174,7 @@ func fileExistsInDir(path string) (bool, error) {
 	return false, err
 }
 
-func extExistsFunction(dirPath string, ext string) (bool, []string) {
+func extExistsFunction(dirPath string, ext string) (bool, string) {
 	found := false
 
 	d, err := os.Open(dirPath)
@@ -177,18 +190,18 @@ func extExistsFunction(dirPath string, ext string) (bool, []string) {
 		os.Exit(1)
 	}
 
-	var fileNameArray []string
+	var fileName string
 
 	for _, file := range files {
 		if file.Mode().IsRegular() {
 			if filepath.Ext(file.Name()) == ext {
-				fileNameArray = append(fileNameArray, file.Name())
+				fileName = file.Name()
 				found = true
 			}
 		}
 	}
 
-	return found, fileNameArray
+	return found, fileName
 }
 
 func selectPathToCompileFrom(filePaths []string) string {
