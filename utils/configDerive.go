@@ -49,7 +49,7 @@ func ConfigDerive() []string {
 		if (buildFile != "") {
 			files = []string{buildFile}
 		} else {
-			files = []string{"pipfile.lock"}
+			files = []string{"pipfile.lock", "pipfile", "requirements.txt"}
 		}
 	}
 

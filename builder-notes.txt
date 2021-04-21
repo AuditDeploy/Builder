@@ -28,5 +28,5 @@ Java: https://github.com/ilarocca/helloworld-1 <-- Has builder.yaml included
 Node: https://github.com/ilarocca/simple-reactjs-app <-- Has builder.yaml included 
 C#: https://github.com/aspnetboilerplate/aspnetboilerplate
 Ruby: https://github.com/Shopify/example-ruby-app
-Python: https://github.com/denyszamiatin/PythonBasic1.git
+Python: https://github.com/Rhoynar/sample-python.git
 

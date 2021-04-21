@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-//Npm creates zip from files passed in as arg
+//Ruby creates zip from files passed in as arg
 func Python() {
 
 	//copies contents of .hidden to workspace
@@ -23,6 +23,20 @@ func Python() {
 
 	//add hidden dir contents to temp dir, install dependencies
 	exec.Command("cp", "-a", hiddenDir+"/.", tempWorkspace).Run()
+
+	//define dir path for command to run
+	var fullPath string
+	configPath := os.Getenv("BUILDER_DIR_PATH")
+	//if user defined path in builder.yaml, full path is included in tempWorkspace, else add the local path 
+	if (configPath != "") {
+		fullPath = tempWorkspace
+	} else {
+		path, _ := os.Getwd()
+		//combine local path to newly created tempWorkspace, gets rid of "." in path name
+		fullPath = path + tempWorkspace[strings.Index(tempWorkspace, ".")+1:]
+		fmt.Println(path)
+		fmt.Println(fullPath)
+	}
 		
 	//install dependencies/build, if yaml build type exists install accordingly
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
@@ -34,17 +48,19 @@ func Python() {
 		cmd = exec.Command(buildCmd)
 	} else if (buildTool == "pipenv") {
 		fmt.Println(buildTool)
-		cmd = exec.Command("pipenv", "install", tempWorkspace)
+		cmd = exec.Command("pipenv", "install")
+    cmd.Dir = fullPath       // or whatever directory it's in
 	} else {
 		//default
-		cmd = exec.Command("pipenv", "install", tempWorkspace)
+		cmd = exec.Command("pipenv", "install") 
+    cmd.Dir = fullPath       // or whatever directory it's in
 	}
-
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
 	err := cmd.Run()
 	if err != nil {
 		logger.ErrorLogger.Println("Python project failed to compile.")
+		fmt.Println(err)
 		log.Fatal(err)
 	}
 
