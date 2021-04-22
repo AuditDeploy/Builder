@@ -88,12 +88,14 @@ func deriveProjectByExtension() {
 		extFound, fileName := extExistsFunction(hiddeDir, ext)
 		if extFound {
 			switch ext {
+			//checks if ext exists, if it's .csprocj it will pass down the filePath to c# compiler
 			case ".csproj":
 				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
 				CopyDir()
 				logger.InfoLogger.Println("C# project detected, Ext .csproj")
 				compile.CSharp(filePath)
 
+			//if it's .sln, it will find all the project path in the solution(repo)
 			case ".sln":
 				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
 				CopyDir()
@@ -105,11 +107,12 @@ func deriveProjectByExtension() {
 
 				stringifyListOfProjects := string(listOfProjects)
 				listOfProjectsArray := strings.Split(stringifyListOfProjects, "\n")[2:]
-
+				//if there's more than 5 projects in solution(repo), user will be asked to use builder config instead
 				if len(listOfProjectsArray) > 5 {
 					logger.InfoLogger.Println("C# project detected, Ext .sln. More than 5 projects in solution not supported")
-					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of file in the builder.yml")
+					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml")
 				} else {
+					// < 5 projects in solution(repo), user will be prompt to choose a project path.
 					pathToCompileFrom := selectPathToCompileFrom(listOfProjectsArray)
 					workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 					pathToCompileFrom = workspace + "/" + pathToCompileFrom
