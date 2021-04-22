@@ -81,7 +81,7 @@ func OutputMetadata(allData *AllMetaData) {
 	jsonData, _ := json.Marshal(allData)
 
 	err := ioutil.WriteFile(parentDir+"/metedata.json", jsonData, 0644)
-	err2 := ioutil.WriteFile(parentDir+"/metedata.yml", yamlData, 0644)
+	err2 := ioutil.WriteFile(parentDir+"/metedata.yaml", yamlData, 0644)
 
 	if err != nil {
 		logger.ErrorLogger.Println("JSON Metadata creation unsuccessful.")
