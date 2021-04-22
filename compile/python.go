@@ -34,8 +34,8 @@ func Python() {
 		path, _ := os.Getwd()
 		//combine local path to newly created tempWorkspace, gets rid of "." in path name
 		fullPath = path + tempWorkspace[strings.Index(tempWorkspace, ".")+1:]
-		fmt.Println(path)
-		fmt.Println(fullPath)
+		// fmt.Println(path)
+		// fmt.Println(fullPath)
 	}
 		
 	//install dependencies/build, if yaml build type exists install accordingly
@@ -48,12 +48,12 @@ func Python() {
 		cmd = exec.Command(buildCmd)
 	} else if (buildTool == "pipenv") {
 		fmt.Println(buildTool)
-		cmd = exec.Command("pipenv", "install")
+		cmd = exec.Command("pip", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements") 
     cmd.Dir = fullPath       // or whatever directory it's in
 	} else {
 		//default
-		cmd = exec.Command("pipenv", "install") 
-    cmd.Dir = fullPath       // or whatever directory it's in
+		cmd = exec.Command("pip", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements") 
+    cmd.Dir = fullPath      // or whatever directory it's in
 	}
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
