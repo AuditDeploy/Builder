@@ -46,13 +46,13 @@ func Python() {
 	if buildCmd != "" {
 		//user specified cmd
 		cmd = exec.Command(buildCmd)
-	} else if (buildTool == "pipenv") {
+	} else if (buildTool == "pip") {
 		fmt.Println(buildTool)
-		cmd = exec.Command("pip", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements") 
+		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements") 
     cmd.Dir = fullPath       // or whatever directory it's in
 	} else {
 		//default
-		cmd = exec.Command("pip", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements") 
+		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements") 
     cmd.Dir = fullPath      // or whatever directory it's in
 	}
 	//run cmd, check for err, log cmd

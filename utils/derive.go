@@ -26,7 +26,7 @@ func ProjectType() {
 		files = ConfigDerive()
 	} else {
 		//default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "pipfile", "requirements.txt", "pipfile.lock"}
+		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt"}
 	}
 
 	//look for those files inside hidden dir
@@ -67,7 +67,7 @@ func ProjectType() {
 				logger.InfoLogger.Println("Ruby project detected")
 				compile.Ruby()
 				return
-			} else if file == "pipfile.lock" || file == "pipfile" || file == "requirements.txt" || configType == "python" {
+			} else if file == "requirements.txt" || configType == "python" {
 				//executes python compiler
 				logger.InfoLogger.Println("Python project detected")
 				compile.Python()
