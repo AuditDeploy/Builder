@@ -5,6 +5,7 @@ package compile
 
 import (
 	"Builder/logger"
+	"Builder/yaml"
 	"fmt"
 	"log"
 	"os"
@@ -28,6 +29,7 @@ func Go(filePath string) {
 		//gets rid of "." in path name
 		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
 		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
+		os.Setenv("BUILDER_DIR_PATH", fullPath)
 	}
 	
 	//install dependencies/build, if yaml build type exists install accordingly
@@ -38,6 +40,7 @@ func Go(filePath string) {
 	//if no file defined by user, use default main.go
 	if (buildFile == "") {
 		buildFile = "main.go"
+		os.Setenv("BUILDER_BUILD_FILE", buildFile)
 	}
 
 	var cmd *exec.Cmd
@@ -52,6 +55,7 @@ func Go(filePath string) {
 		//default
 		cmd = exec.Command("go", "build", buildFile)
 		cmd.Dir = fullPath       // or whatever directory it's in
+		// os.Setenv("BUILDER_BUILD_COMMAND", cmd)
 	}
 
 	//run cmd, check for err, log cmd
@@ -62,6 +66,8 @@ func Go(filePath string) {
 		log.Fatal(err)
 	}
 
+	yaml.CreateBuilderYaml(fullPath)
+
 	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	if (artifactPath != "") {
 		exec.Command("cp", "-a", fullPath+"/main.exe", artifactPath).Run()
@@ -69,4 +75,3 @@ func Go(filePath string) {
 
 	logger.InfoLogger.Println("Go project compiled successfully.")
 }
-
