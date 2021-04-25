@@ -3,12 +3,11 @@ module Builder
 go 1.15
 
 require (
+	github.com/kr/text v0.2.0 // indirect
 	github.com/manifoldco/promptui v0.8.0
-	github.com/ramya-rao-a/go-outline v0.0.0-20200117021646-2a048b4510eb // indirect
-	github.com/uudashr/gopkgs/v2 v2.1.2 // indirect
-	golang.org/x/tools/gopls v0.6.9 // indirect
+	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
+	golang.org/x/sys v0.0.0-20210330210617-4fbd30eecc44 // indirect
+	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
-	k8s.io/api v0.21.0 // indirect
-	knative.dev/pkg v0.0.0-20210412173742-b51994e3b312 // indirect
 )
