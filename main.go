@@ -3,10 +3,12 @@ package main
 import (
 	"Builder/cmd"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
 )
 
-func main() {	
+func main() {
 
 	if len(os.Args) > 1 {
 		builderCommand := os.Args[1]
@@ -19,6 +21,21 @@ func main() {
 			fmt.Println("expected command: 'init' or 'config'")
 		}
 	} else {
-		fmt.Println("builder in local path")
+		builder()
 	}
+}
+
+func builder() {
+	path, _ := os.Getwd()
+	if _, err := os.Stat(path + "/" + "builder.yaml"); err == nil {
+		exec.Command("git", "pull").Run()
+
+		//project type
+		//buildFile
+		//buildPath
+		exec.Command("go", "build", path+"/"+"main.go").Run()
+	} else {
+		log.Fatal("bulder.yaml file not found or cd into workspace")
+	}
+
 }
