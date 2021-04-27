@@ -35,7 +35,7 @@ func Go(filePath string) {
 		//gets rid of "." in path name
 		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
 		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
-		os.Setenv("BUILDER_DIR_PATH", fullPath)
+		os.Setenv("BUILDER_DIR_PATH", path)
 	}
 	
 	//install dependencies/build, if yaml build type exists install accordingly

@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/logger"
+	"Builder/yaml"
 	"archive/zip"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +14,11 @@ import (
 
 //Npm creates zip from files passed in as arg
 func Npm() {
+	//Set default project type env for builder.yaml creation
+	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	if projectType == "" {
+		os.Setenv("BUILDER_PROJECT_TYPE", "node")
+	}
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -33,6 +39,7 @@ func Npm() {
 		path, _ := os.Getwd()
 		//combine local path to newly created tempWorkspace, gets rid of "." in path name
 		fullPath = path + tempWorkspace[strings.Index(tempWorkspace, ".")+1:]
+		os.Setenv("BUILDER_DIR_PATH", path)
 	}
 
 	//install dependencies/build, if yaml build type exists install accordingly
@@ -51,6 +58,8 @@ func Npm() {
 		//default 
 		cmd = exec.Command("npm", "install") 
     cmd.Dir = fullPath       // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_TOOL", "npm")
+		os.Setenv("BUILDER_BUILD_COMMAND", "npm install")
 	}
 
 	//run cmd, check for err, log cmd
@@ -60,6 +69,8 @@ func Npm() {
 		logger.ErrorLogger.Println("Node project failed to compile.")
 		log.Fatal(err)
 	} 
+
+	yaml.CreateBuilderYaml(fullPath)
 
 	// CreateZip temp dir.
 	outFile, err := os.Create(workspaceDir+"/temp.zip")
