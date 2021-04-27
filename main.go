@@ -2,7 +2,7 @@ package main
 
 import (
 	"Builder/cmd"
-	"Builder/utils"
+	"Builder/yaml"
 	"fmt"
 	"log"
 	"os"
@@ -36,7 +36,7 @@ func builder() {
 		exec.Command("git", "pull").Run()
 
 		//pareses builder.yaml
-		utils.YamlParser(path + "/" + "builder.yaml")
+		yaml.YamlParser(path + "/" + "builder.yaml")
 
 		// projectPath := os.Getenv("BUILDER_DIR_PATH")
 		// projectType := os.Getenv("BUILDER_PROJECT_TYPE")
