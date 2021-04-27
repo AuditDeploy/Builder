@@ -50,6 +50,7 @@ func CSharp(filePath string) {
 		// cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_TOOL", "dotnet")
 		os.Setenv("BUILDER_BUILD_COMMAND", "dotnet build "+fullPath)
+		os.Setenv("BUILDER_BUILD_FILE", fullPath[strings.LastIndex(fullPath, "/")+1:])
 	}
 
 	//run cmd, check for err, log cmd
