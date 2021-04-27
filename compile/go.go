@@ -16,6 +16,12 @@ import (
 //Go creates exe from file passed in as arg
 func Go(filePath string) {
 
+	//Set default project type env for builder.yaml creation
+  projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	if projectType == "" {
+		os.Setenv("BUILDER_PROJECT_TYPE", "go")
+	}
+
 	//define dir path for command to run in
 	var fullPath string
 	configPath := os.Getenv("BUILDER_DIR_PATH")
@@ -55,7 +61,7 @@ func Go(filePath string) {
 		//default
 		cmd = exec.Command("go", "build", buildFile)
 		cmd.Dir = fullPath       // or whatever directory it's in
-		// os.Setenv("BUILDER_BUILD_COMMAND", cmd)
+		os.Setenv("BUILDER_BUILD_COMMAND", "go build "+buildFile)
 	}
 
 	//run cmd, check for err, log cmd

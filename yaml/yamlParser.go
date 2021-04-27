@@ -1,4 +1,4 @@
-package utils
+package yaml
 
 import (
 	"io/ioutil"
@@ -36,7 +36,9 @@ func YamlParser() {
 	//pass map int{} to callback that sets env vars
 	ConfigEnvs(f)
 
+	// if env var BUILDER_COMMAND != true 
 	removeTempDir()
+	//else 
 }
 
 func removeTempDir() {
