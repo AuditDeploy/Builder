@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/logger"
+	"Builder/yaml"
 	"archive/zip"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +14,11 @@ import (
 
 //Ruby creates zip from files passed in as arg
 func Ruby() {
+	//Set default project type env for builder.yaml creation
+	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	if projectType == "" {
+		os.Setenv("BUILDER_PROJECT_TYPE", "ruby")
+	}
 
 	//copies contents of .hidden to workspace
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
@@ -34,8 +40,7 @@ func Ruby() {
 		path, _ := os.Getwd()
 		//combine local path to newly created tempWorkspace, gets rid of "." in path name
 		fullPath = path + tempWorkspace[strings.Index(tempWorkspace, ".")+1:]
-		fmt.Println(path)
-		fmt.Println(fullPath)
+		os.Setenv("BUILDER_DIR_PATH", path)
 	}
 		
 	//install dependencies/build, if yaml build type exists install accordingly
@@ -54,6 +59,8 @@ func Ruby() {
 		//default
 		cmd = exec.Command("bundle", "install", "--path", "vendor/bundle") 
     cmd.Dir = fullPath       // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_TOOL", "bundler")
+		os.Setenv("BUILDER_BUILD_COMMAND", "bundle install --path vendor/bundle")
 	}
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
@@ -63,6 +70,8 @@ func Ruby() {
 		fmt.Println(err)
 		log.Fatal(err)
 	}
+
+	yaml.CreateBuilderYaml(fullPath)
 
 	// Zip temp dir.
 	outFile, err := os.Create(workspaceDir+"/temp.zip")

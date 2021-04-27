@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/logger"
+	"Builder/yaml"
 	"log"
 	"os"
 	"os/exec"
@@ -9,6 +10,11 @@ import (
 )
 
 func CSharp(filePath string) {
+	//Set default project type env for builder.yaml creation
+	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	if projectType == "" {
+		os.Setenv("BUILDER_PROJECT_TYPE", "c#")
+	}
 
 	//define dir path for command to run in
 	var fullPath string
@@ -23,6 +29,7 @@ func CSharp(filePath string) {
 		//gets rid of "." in path name
 		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
 		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
+		os.Setenv("BUILDER_DIR_PATH", path)
 	}
 
 	//install dependencies/build, 
@@ -41,6 +48,8 @@ func CSharp(filePath string) {
 		//default
 		cmd = exec.Command("dotnet", "build", fullPath)
 		// cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_TOOL", "dotnet")
+		os.Setenv("BUILDER_BUILD_COMMAND", "dotnet build "+fullPath)
 	}
 
 	//run cmd, check for err, log cmd
@@ -51,5 +60,12 @@ func CSharp(filePath string) {
 		log.Fatal(err)
 	}
 
+	yaml.CreateBuilderYaml(fullPath)
+
+	// artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	// if (artifactPath != "") {
+	// 	exec.Command("cp", "-a", fullPath+"/main.exe", artifactPath).Run()
+	// }
+	
 	logger.InfoLogger.Println("C# project compiled successfully.")
 }

@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/logger"
+	"Builder/yaml"
 	"fmt"
 	"log"
 	"os"
@@ -11,6 +12,11 @@ import (
 
 //Java does ...
 func Java(filePath string) {
+	//Set default project type env for builder.yaml creation
+  projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	if projectType == "" {
+		os.Setenv("BUILDER_PROJECT_TYPE", "java")
+	}
 
 	//define dir path for command to run in
 	var fullPath string
@@ -25,6 +31,8 @@ func Java(filePath string) {
 		//gets rid of "." in path name
 		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
 		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
+		os.Setenv("BUILDER_DIR_PATH", path)
+
 	}
 
 	//install dependencies/build, if yaml build type exists install accordingly
@@ -45,6 +53,8 @@ func Java(filePath string) {
 		//default
 		cmd = exec.Command("mvn", "clean", "install")
 		cmd.Dir = fullPath       // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_TOOL", "maven")
+		os.Setenv("BUILDER_BUILD_COMMAND", "mvn clean install")
 	}
 
 	//run cmd, check for err, log cmd
@@ -54,6 +64,8 @@ func Java(filePath string) {
 		logger.ErrorLogger.Println("Java project failed to compile.")
 		log.Fatal(err)
 	}
+
+	yaml.CreateBuilderYaml(fullPath)
 
 	//if artifact path exists, copy contents
 	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
