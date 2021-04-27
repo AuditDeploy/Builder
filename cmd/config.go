@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	directory "Builder/directory"
+	"Builder/directory"
 	"Builder/logger"
 	"Builder/utils"
+	"Builder/yaml"
 )
 
 func Config() {
@@ -14,7 +15,7 @@ func Config() {
 	utils.CloneRepo()
 
 	//set yaml info as env vars
-	utils.YamlParser()
+	yaml.YamlParser()
 
 	// make dirs
 	directory.MakeDirs()

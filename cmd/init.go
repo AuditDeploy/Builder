@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	directory "Builder/directory"
+	"Builder/directory"
 	"Builder/logger"
-	utils "Builder/utils"
+	"Builder/utils"
 )
 
 func Init() {
