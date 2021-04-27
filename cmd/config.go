@@ -15,7 +15,7 @@ func Config() {
 	utils.CloneRepo()
 
 	//set yaml info as env vars
-	yaml.YamlParser()
+	yaml.YamlParser("./tempRepo/builder.yaml")
 
 	// make dirs
 	directory.MakeDirs()
