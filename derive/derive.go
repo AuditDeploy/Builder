@@ -1,8 +1,9 @@
-package utils
+package derive
 
 import (
 	"Builder/compile"
 	"Builder/logger"
+	"Builder/utils"
 	"fmt"
 	"log"
 	"os"
@@ -23,7 +24,7 @@ func ProjectType() {
 	//projectType exists in builder.yaml
 	if configType != "" {
 		//check value of config type, return string array of language's build file/files
-		files = ConfigDerive()
+		files = utils.ConfigDerive()
 	} else {
 		//default
 		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt"}
@@ -45,7 +46,7 @@ func ProjectType() {
 			if file == "main.go" || configType == "go" {
 				//executes go compiler
 				finalPath := createFinalPath(filePath, file)
-				CopyDir()
+				utils.CopyDir()
 				logger.InfoLogger.Println("Go project detected")
 				compile.Go(finalPath)
 				return
@@ -56,7 +57,7 @@ func ProjectType() {
 				return
 			} else if file == "pom.xml" || configType == "java" {
 				//executes java compiler
-				CopyDir()
+				utils.CopyDir()
 				logger.InfoLogger.Println("Java project detected")
 
 				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -91,14 +92,14 @@ func deriveProjectByExtension() {
 			//checks if ext exists, if it's .csprocj it will pass down the filePath to c# compiler
 			case ".csproj":
 				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
-				CopyDir()
+				utils.CopyDir()
 				logger.InfoLogger.Println("C# project detected, Ext .csproj")
 				compile.CSharp(filePath)
 
 			//if it's .sln, it will find all the project path in the solution(repo)
 			case ".sln":
 				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
-				CopyDir()
+				utils.CopyDir()
 				listOfProjects, err := exec.Command("dotnet", "sln", filePath, "list").Output()
 
 				if err != nil {
@@ -117,7 +118,7 @@ func deriveProjectByExtension() {
 					workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
 					pathToCompileFrom = workspace + "/" + pathToCompileFrom
 
-					CopyDir()
+					utils.CopyDir()
 					logger.InfoLogger.Println("C# project detected, Ext .sln")
 					compile.CSharp(pathToCompileFrom)
 

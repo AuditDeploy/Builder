@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"Builder/derive"
 	"Builder/directory"
 	"Builder/logger"
 	"Builder/utils"
@@ -26,10 +27,10 @@ func Config() {
 	logger.InfoLogger.Println("Repo cloned successfully.")
 
 	// compile logic to derive project type
-	utils.ProjectType()
+	derive.ProjectType()
 
 	//Get build metadata
-	utils.Metadata()
+	// utils.Metadata()
 	logger.InfoLogger.Println("Metadata created successfully.")
 
 	//makes hidden dir read-only

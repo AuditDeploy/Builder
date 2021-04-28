@@ -45,5 +45,4 @@ func builder() {
 	} else {
 		log.Fatal("bulder.yaml file not found or cd into workspace")
 	}
-
 }
