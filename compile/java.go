@@ -1,6 +1,7 @@
 package compile
 
 import (
+	"Builder/artifact"
 	"Builder/logger"
 	"Builder/yaml"
 	"fmt"
@@ -65,13 +66,18 @@ func Java(filePath string) {
 		log.Fatal(err)
 	}
 
+	//creates default builder.yaml if it doesn't exist
 	yaml.CreateBuilderYaml(fullPath)
 
-	//if artifact path exists, copy contents
+	//rename artifact by adding Unix timestamp
+	_, extName := artifact.ExtExistsFunction(fullPath+"/target", ".jar")
+	artifactName := artifact.NameArtifact(fullPath+"/target/", extName)
+
+	//if artifact path exists, copy artifact
 	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	if (artifactPath != "") {
-		exec.Command("cp", "-a", fullPath+"/target", artifactPath).Run()
+		exec.Command("cp", "-a", fullPath+"/target"+artifactName, artifactPath).Run()
 	}
-	logger.InfoLogger.Println("Java project compiled successfully.")
 
+	logger.InfoLogger.Println("Java project compiled successfully.")
 }
