@@ -4,6 +4,7 @@
 package compile
 
 import (
+	"Builder/artifact"
 	"Builder/logger"
 	"Builder/yaml"
 	"fmt"
@@ -49,6 +50,7 @@ func Go(filePath string) {
 		os.Setenv("BUILDER_BUILD_FILE", buildFile)
 	}
 
+	//buildName = buildfile (get rid of ".go") + Unix timestamp
 	var cmd *exec.Cmd
 	if buildCmd != "" {
 		//user specified cmd
@@ -73,10 +75,15 @@ func Go(filePath string) {
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
+	
+	//rename artifact by adding Unix timestamp
+	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
+	artifactName := artifact.NameArtifact(fullPath, extName)
 
+	//send artifact to user specified path
 	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	if (artifactPath != "") {
-		exec.Command("cp", "-a", fullPath+"/main.exe", artifactPath).Run()
+		exec.Command("cp", "-a", fullPath+"/"+artifactName, artifactPath).Run()
 	}
 
 	logger.InfoLogger.Println("Go project compiled successfully.")

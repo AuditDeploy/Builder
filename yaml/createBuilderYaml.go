@@ -9,36 +9,40 @@ import (
 )
 
 type BuilderYaml struct {
-	ProjectType string
-	BuildTool   string
-	BuildFile   string
-	BuildCmd    string
+	ProjectPath string
+	ProjectType string 
+	BuildTool 	string
+	BuildFile  	string
+	BuildCmd		string
 }
 
-func CreateBuilderYaml(projectPath string) {
+func CreateBuilderYaml(fullPath string) {
+
+	projectPath := os.Getenv("BUILDER_DIR_PATH")
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
 	buildTool := os.Getenv("BUILDER_BUILD_TOOL")
 	buildFile := os.Getenv("BUILDER_BUILD_FILE")
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 
-	builderData := BuilderYaml{
-		ProjectType: projectType,
-		BuildTool:   buildTool,
-		BuildFile:   buildFile,
-		BuildCmd:    buildCmd}
+	builderData := BuilderYaml {
+		ProjectPath:  projectPath,
+		ProjectType: 	projectType, 
+		BuildTool: 		buildTool,
+		BuildFile: 		buildFile,
+		BuildCmd: 		buildCmd}
 
-	_, err := os.Stat(projectPath + "/builder.yaml")
+	_, err := os.Stat(fullPath+"/builder.yaml")
 	if err == nil {
 		logger.WarningLogger.Println("builder.yaml already exists")
 	} else {
-		OutputData(projectPath, &builderData)
+		OutputData(fullPath, &builderData)
 		logger.WarningLogger.Println("Default builder.yaml created")
 	}
 }
 
-func OutputData(projectPath string, allData *BuilderYaml) {
+func OutputData(fullPath string, allData *BuilderYaml) {
 	yamlData, _ := yaml.Marshal(allData)
-	err := ioutil.WriteFile(projectPath+"/builder.yaml", yamlData, 0644)
+	err := ioutil.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
 
 	if err != nil {
 		logger.ErrorLogger.Println("builder.yaml creation unsuccessful.")
