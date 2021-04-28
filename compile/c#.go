@@ -40,7 +40,8 @@ func CSharp(filePath string) {
 	var cmd *exec.Cmd
 	if buildCmd != "" {
 		//user specified cmd
-		cmd = exec.Command(buildCmd)
+		buildCmdArray := strings.Fields(buildCmd)
+		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 	} else if buildTool == "dotnet" {
 		cmd = exec.Command("dotnet", "build", fullPath)
 		cmd.Dir = fullPath // or whatever directory it's in

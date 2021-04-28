@@ -50,7 +50,8 @@ func Ruby() {
 	var cmd *exec.Cmd
 	if buildCmd != "" {
 		//user specified cmd
-		cmd = exec.Command(buildCmd)
+		buildCmdArray := strings.Fields(buildCmd)
+		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 	} else if (buildTool == "Bundler") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("bundle", "install", "--path", "vendor/bundle")

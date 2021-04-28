@@ -2,12 +2,13 @@ package main
 
 import (
 	"Builder/cmd"
+	"Builder/derive"
+	"Builder/logger"
 	"Builder/yaml"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
-	"strings"
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 }
 
 func builder() {
+	os.Setenv("BUILDER_COMMAND", "true")
 	path, _ := os.Getwd()
 
 	//checks if yaml file exists in path
@@ -37,10 +39,12 @@ func builder() {
 		//pareses builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
 
+		//append logs
+		logger.CreateLogs(os.Getenv("BUILDER_LOGS_DIR"))
+
+		//run derive 
 		//creates a new binary
-		buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
-		buildCmdArray := strings.Fields(buildCmd)
-		exec.Command(buildCmdArray[0], buildCmdArray[1:]...).Run()
+		derive.ProjectType()
 
 	} else {
 		log.Fatal("bulder.yaml file not found or cd into workspace")

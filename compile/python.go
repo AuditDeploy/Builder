@@ -50,7 +50,8 @@ func Python() {
 	var cmd *exec.Cmd
 	if buildCmd != "" {
 		//user specified cmd
-		cmd = exec.Command(buildCmd)
+		buildCmdArray := strings.Fields(buildCmd)
+		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 	} else if (buildTool == "pip") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements") 
