@@ -33,6 +33,6 @@ func ExtExistsFunction(dirPath string, ext string) (bool, string) {
 			}
 		}
 	}
-
+ fmt.Println(fileName)
 	return found, fileName
 }

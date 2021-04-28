@@ -81,6 +81,7 @@ func ProjectType() {
 
 //derive projects by Extensions
 func deriveProjectByExtension() {
+	fmt.Println("deriveext")
 	hiddeDir := os.Getenv("BUILDER_HIDDEN_DIR")
 
 	extensions := []string{".csproj", ".sln"}
@@ -131,11 +132,18 @@ func deriveProjectByExtension() {
 
 //takes in file, searches hiddenDir to find a match and returns path to file
 func findPath(file string) string {
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+	
+	var dirPath string
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		currentDir, _ := os.Getwd()
+		dirPath = currentDir
+	} else {
+		dirPath = os.Getenv("BUILDER_HIDDEN_DIR")
+	}
 
 	// if f.Name is == to file passed in "coolProject.go", filePath becomes the path that file exists in
 	var filePath string
-	err := filepath.Walk(hiddenDir, func(path string, f os.FileInfo, err error) error {
+	err := filepath.Walk(dirPath, func(path string, f os.FileInfo, err error) error {
 		if strings.EqualFold(f.Name(), file) {
 			filePath = path
 		}

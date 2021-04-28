@@ -1,7 +1,6 @@
 package artifact
 
 import (
-	"Builder/logger"
 	"archive/zip"
 	"fmt"
 	"io/ioutil"
@@ -32,7 +31,6 @@ func ZipArtifactDir() {
 
 	err = w.Close()
 	if err != nil {
-		logger.ErrorLogger.Println("Npm project failed to compile.")
 		 log.Fatal(err)
 	}
 }

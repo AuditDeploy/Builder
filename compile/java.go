@@ -44,7 +44,8 @@ func Java(filePath string) {
 	var cmd *exec.Cmd
 	if buildCmd != "" {
 		//user specified cmd
-		cmd = exec.Command(buildCmd)
+		buildCmdArray := strings.Fields(buildCmd)
+		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 	} else if (buildTool == "maven" || buildTool == "mvn") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("mvn", "clean", "install")

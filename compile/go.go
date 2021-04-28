@@ -55,7 +55,8 @@ func Go(filePath string) {
 	var cmd *exec.Cmd
 	if buildCmd != "" {
 		//user specified cmd
-		cmd = exec.Command(buildCmd)
+		buildCmdArray := strings.Fields(buildCmd)
+		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 	} else if (buildTool == "go") {
 		fmt.Println(buildTool)
 		cmd = exec.Command("go", "build", buildFile)
@@ -76,7 +77,7 @@ func Go(filePath string) {
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
-
+	// fmt.Println("past yaml creation")
 	packageGoArtifact(fullPath)
 
 	logger.InfoLogger.Println("Go project compiled successfully.")
@@ -85,6 +86,7 @@ func Go(filePath string) {
 func packageGoArtifact(fullPath string) {
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	fmt.Println(artifactDir)
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
 	//copy artifact, then remove artifact in workspace
