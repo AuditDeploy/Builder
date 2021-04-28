@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/logger"
+	"Builder/utils"
 	"Builder/yaml"
 	"archive/zip"
 	"fmt"
@@ -9,7 +10,9 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
+	"time"
 )
 
 //Npm creates zip from files passed in as arg
@@ -22,7 +25,7 @@ func Npm() {
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
-	tempWorkspace := workspaceDir + "/temp/" 
+	tempWorkspace := workspaceDir + "/temp/"
 	//make temp dir
 	os.Mkdir(tempWorkspace, 0755)
 
@@ -71,9 +74,11 @@ func Npm() {
 	} 
 
 	yaml.CreateBuilderYaml(fullPath)
+	utils.Metadata(tempWorkspace)
 
-	// CreateZip temp dir.
-	outFile, err := os.Create(workspaceDir+"/temp.zip")
+	// CreateZip artifact dir with timestamp
+	currentTime := time.Now().Unix()
+	outFile, err := os.Create(workspaceDir+"/artifact_"+strconv.FormatInt(currentTime, 10)+".zip")
 	if err != nil {
 		 log.Fatal(err)
 	}

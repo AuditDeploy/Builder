@@ -6,6 +6,7 @@ package compile
 import (
 	"Builder/artifact"
 	"Builder/logger"
+	"Builder/utils"
 	"Builder/yaml"
 	"fmt"
 	"log"
@@ -75,16 +76,35 @@ func Go(filePath string) {
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
-	
-	//rename artifact by adding Unix timestamp
-	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
-	artifactName := artifact.NameArtifact(fullPath, extName)
 
-	//send artifact to user specified path
-	artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
-	if (artifactPath != "") {
-		exec.Command("cp", "-a", fullPath+"/"+artifactName, artifactPath).Run()
-	}
+	packageGoArtifact(fullPath)
 
 	logger.InfoLogger.Println("Go project compiled successfully.")
+}
+
+func packageGoArtifact(fullPath string) {
+	artifact.ArtifactDir()
+	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	//find artifact by extension
+	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
+	//copy artifact, then remove artifact in workspace
+	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
+	exec.Command("rm", fullPath+"/"+extName).Run()
+
+	//create metadata, then copy contents to zip dir
+	utils.Metadata(artifactDir)
+	artifact.ZipArtifactDir()
+
+	//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
+	exec.Command("cp", "-a", artifactDir+".zip", artifactDir).Run()
+	exec.Command("rm", artifactDir+".zip").Run()
+
+	// artifactName := artifact.NameArtifact(fullPath, extName)
+
+	// send artifact to user specified path
+	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
+	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	if (outputPath != "") {
+		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
+	}
 }

@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
-	"os"
 	"os/exec"
 	"os/user"
 	"strings"
@@ -15,7 +14,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func Metadata() {
+func Metadata(path string) {
 	//Metedata
 	timestamp := time.Now().Format(time.RFC850)
 	ip := GetIPAdress().String()
@@ -33,7 +32,7 @@ func Metadata() {
 		BranchName:    branchName,
 		BranchHash:    branchHash}
 
-	OutputMetadata(&userMetaData)
+	OutputMetadata(path, &userMetaData)
 
 }
 
@@ -74,14 +73,12 @@ func GetIPAdress() net.IP {
 }
 
 //OutputJSONall  outputs allMetaData struct in JSON format
-func OutputMetadata(allData *AllMetaData) {
-	parentDir := os.Getenv("BUILDER_PARENT_DIR")
-
+func OutputMetadata(path string, allData *AllMetaData) {
 	yamlData, _ := yaml.Marshal(allData)
 	jsonData, _ := json.Marshal(allData)
 
-	err := ioutil.WriteFile(parentDir+"/metedata.json", jsonData, 0644)
-	err2 := ioutil.WriteFile(parentDir+"/metedata.yaml", yamlData, 0644)
+	err := ioutil.WriteFile(path+"/metedata.json", jsonData, 0644)
+	err2 := ioutil.WriteFile(path+"/metedata.yaml", yamlData, 0644)
 
 	if err != nil {
 		logger.ErrorLogger.Println("JSON Metadata creation unsuccessful.")
