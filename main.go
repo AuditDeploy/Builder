@@ -2,7 +2,11 @@ package main
 
 import (
 	"Builder/cmd"
+<<<<<<< Updated upstream
 	"Builder/yaml"
+=======
+	"Builder/utils"
+>>>>>>> Stashed changes
 	"fmt"
 	"log"
 	"os"
@@ -28,6 +32,8 @@ func main() {
 }
 
 func builder() {
+	os.Setenv("BUILDER_CMD", "true")
+
 	path, _ := os.Getwd()
 
 	//checks if yaml file exists in path
