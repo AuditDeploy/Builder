@@ -32,8 +32,8 @@ func CSharp(filePath string) {
 		os.Setenv("BUILDER_DIR_PATH", path)
 	}
 
-	//install dependencies/build, 
-	// if yaml build type exists install accordingly, if buildCmd exists, 
+	//install dependencies/build,
+	// if yaml build type exists install accordingly, if buildCmd exists,
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 
@@ -50,6 +50,7 @@ func CSharp(filePath string) {
 		// cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_TOOL", "dotnet")
 		os.Setenv("BUILDER_BUILD_COMMAND", "dotnet build "+fullPath)
+		os.Setenv("BUILDER_BUILD_FILE", fullPath[strings.LastIndex(fullPath, "/")+1:])
 	}
 
 	//run cmd, check for err, log cmd
@@ -60,12 +61,13 @@ func CSharp(filePath string) {
 		log.Fatal(err)
 	}
 
+	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
 	yaml.CreateBuilderYaml(fullPath)
 
 	// artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	// if (artifactPath != "") {
 	// 	exec.Command("cp", "-a", fullPath+"/main.exe", artifactPath).Run()
 	// }
-	
+
 	logger.InfoLogger.Println("C# project compiled successfully.")
 }

@@ -10,12 +10,12 @@ import (
 func Config() {
 	//check args normally,
 	utils.CheckArgs()
-	
-  //clone repo into temp dir to pull builder.yaml info 
+
+	//clone repo into temp dir to pull builder.yaml info
 	utils.CloneRepo()
 
 	//set yaml info as env vars
-	yaml.YamlParser()
+	yaml.YamlParser("./tempRepo/builder.yaml")
 
 	// make dirs
 	directory.MakeDirs()

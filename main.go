@@ -2,10 +2,12 @@ package main
 
 import (
 	"Builder/cmd"
+	"Builder/yaml"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 func main() {
@@ -27,13 +29,19 @@ func main() {
 
 func builder() {
 	path, _ := os.Getwd()
+
+	//checks if yaml file exists in path
 	if _, err := os.Stat(path + "/" + "builder.yaml"); err == nil {
 		exec.Command("git", "pull").Run()
 
-		//project type
-		//buildFile
-		//buildPath
-		exec.Command("go", "build", path+"/"+"main.go").Run()
+		//pareses builder.yaml
+		yaml.YamlParser(path + "/" + "builder.yaml")
+
+		//creates a new binary
+		buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+		buildCmdArray := strings.Fields(buildCmd)
+		exec.Command(buildCmdArray[0], buildCmdArray[1:]...).Run()
+
 	} else {
 		log.Fatal("bulder.yaml file not found or cd into workspace")
 	}

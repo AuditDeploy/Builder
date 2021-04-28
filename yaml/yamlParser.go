@@ -8,27 +8,27 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func YamlParser() {
+func YamlParser(yamlPath string) {
 	// Initial declaration
- m := map[string]interface{}{
-	"key": "value",
-}
-// Dynamically add a sub-map
- m["sub"] = map[string]interface{}{
-	"deepKey": "deepValue",
-}
-// returns map
- var f interface{}
+	m := map[string]interface{}{
+		"key": "value",
+	}
+	// Dynamically add a sub-map
+	m["sub"] = map[string]interface{}{
+		"deepKey": "deepValue",
+	}
+	// returns map
+	var f interface{}
 
-//takes yaml path and read file
-	source, err := ioutil.ReadFile("./tempRepo/builder.yaml")
+	//takes yaml path and read file
+	source, err := ioutil.ReadFile(yamlPath)
 	if err != nil {
 		removeTempDir()
 		log.Fatal(err)
 	}
 
 	//unpacks yaml file in a map int{}
-	err = yaml.Unmarshal([]byte(source), &f) 
+	err = yaml.Unmarshal([]byte(source), &f)
 	if err != nil {
 		log.Printf("error: %v", err)
 	}
@@ -45,6 +45,6 @@ func removeTempDir() {
 	//delete tempRepo dir
 	err := os.RemoveAll("./tempRepo")
 	if err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 }
