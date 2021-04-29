@@ -71,14 +71,4 @@ func ConfigEnvs(byi interface{}) {
 			os.Setenv("BUILDER_OUTPUT_PATH", valStr)
 		}
 	}
-
-	//check for build type
-	if val, ok := bldyml["logsdir"]; ok {
-		_, present := os.LookupEnv("BUILDER_LOGS_DIR")
-		if !present {
-			//convert val interface{} to string to be set as env var
-			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_LOGS_DIR", valStr)
-		}
-	}
 }
