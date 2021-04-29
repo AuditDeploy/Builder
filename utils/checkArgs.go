@@ -50,7 +50,7 @@ func CheckArgs() {
 * '--yes' or '-y': bypass prompts
 * '--branch' or '-b': specify repo branch
 			`)
-			os.Exit(1)
+			os.Exit(0)
 		}
 	}
 

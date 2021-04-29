@@ -2,7 +2,6 @@ package logger
 
 import (
 	"Builder/artifact"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -27,7 +26,6 @@ func CreateLogs(filePath string) {
 		} else if strings.Contains(path, "workspace") {
 			dirPath = strings.TrimRight(path, "\\workspace")
 		}
-		fmt.Println(dirPath)
 
 		_, extName := artifact.ExtExistsFunction(dirPath+"/logs/", ".txt")
 		file, err := os.OpenFile(dirPath+"/logs/"+extName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)

@@ -4,7 +4,6 @@ import (
 	"Builder/derive"
 	"Builder/logger"
 	"Builder/yaml"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -21,16 +20,13 @@ func Builder() {
 		//pareses builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
 
-		fmt.Println("before logs")
 		//append logs
 		logger.CreateLogs(os.Getenv("BUILDER_LOGS_DIR"))
 
-		fmt.Println("before derive")
-		//run derive 
-		//creates a new binary
+		//creates a new artifact
 		derive.ProjectType()
 
 	} else {
-		log.Fatal("bulder.yaml file not found or cd into workspace")
+		log.Fatal("bulder.yaml file not found. cd into it's location.")
 	}
 }

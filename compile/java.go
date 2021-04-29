@@ -73,16 +73,6 @@ func Java(filePath string) {
 
 	packageJavaArtifact(fullPath+"/target")
 
-	// //rename artifact by adding Unix timestamp
-	// _, extName := artifact.ExtExistsFunction(fullPath+"/target", ".jar")
-	// // artifactName := artifact.NameArtifact(fullPath+"/target/", extName)
-
-	// //if artifact path exists, copy artifact
-	// artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
-	// if (artifactPath != "") {
-	// 	exec.Command("cp", "-a", fullPath+"/target"+artifactName, artifactPath).Run()
-	// }
-
 	logger.InfoLogger.Println("Java project compiled successfully.")
 }
 func packageJavaArtifact(fullPath string) {

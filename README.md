@@ -55,6 +55,7 @@ You must have the language or package manager previously installed in order to b
   - Must have package.json in order to install dependencies by default.
 - Java
   - Uses `mvn clean install` as default command.
+  - Must have pom.xml as default buildfile.
 - C#
   - Uses `dotnet build [file path]` as default command.
 - Python
