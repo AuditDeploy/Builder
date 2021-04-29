@@ -3,9 +3,11 @@ package utils
 import (
 	"Builder/logger"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
+	"os"
 	"os/exec"
 	"os/user"
 	"strings"
@@ -19,8 +21,12 @@ func Metadata(path string) {
 	timestamp := time.Now().Format(time.RFC850)
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
-	homeDir := GetUserData().HomeDir
-	_, masterGitHash, branchHash, branchName := GitHashAndName()
+	homeDir := GetUserData().HomeDir 
+	
+	var masterGitHash, branchHash, branchName string
+	if os.Getenv("BUILDER_COMMAND") != "true" {
+		_, masterGitHash, branchHash, branchName = GitHashAndName()
+	}
 
 	//Contains a collection of fileds with user's metadata
 	userMetaData := AllMetaData{
@@ -77,8 +83,9 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	yamlData, _ := yaml.Marshal(allData)
 	jsonData, _ := json.Marshal(allData)
 
-	err := ioutil.WriteFile(path+"/metedata.json", jsonData, 0644)
-	err2 := ioutil.WriteFile(path+"/metedata.yaml", yamlData, 0644)
+	fmt.Println(path)
+	err := ioutil.WriteFile(path+"/metadata.json", jsonData, 0666)
+	err2 := ioutil.WriteFile(path+"/metadata.yaml", yamlData, 0666)
 
 	if err != nil {
 		logger.ErrorLogger.Println("JSON Metadata creation unsuccessful.")

@@ -75,11 +75,31 @@ func Npm() {
 	} 
 
 	yaml.CreateBuilderYaml(fullPath)
-	utils.Metadata(tempWorkspace)
+
+	//sets path for metadata, and addFiles (covers when wrkspace dir env doesn't exist)
+	var addPath string 
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		path, _ := os.Getwd()
+		addPath = path+"/"
+	} else {
+		addPath = tempWorkspace
+	}
+
+	utils.Metadata(addPath)
+
+	//sets path for zip creation 
+	var dirPath string 
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		path, _ := os.Getwd() 
+		dirPath = strings.Replace(path, "\\temp", "", 1)
+	} else {
+		dirPath = workspaceDir
+	}
 
 	// CreateZip artifact dir with timestamp
 	currentTime := time.Now().Unix()
-	outFile, err := os.Create(workspaceDir+"/artifact_"+strconv.FormatInt(currentTime, 10)+".zip")
+	
+	outFile, err := os.Create(dirPath+"/artifact_"+strconv.FormatInt(currentTime, 10)+".zip")
 	if err != nil {
 		 log.Fatal(err)
 	}
@@ -90,7 +110,7 @@ func Npm() {
 	w := zip.NewWriter(outFile)
 
 	// Add files from temp dir to the archive.
-	addNpmFiles(w, tempWorkspace, "")
+	addNpmFiles(w, addPath, "")
 
 	err = w.Close()
 	if err != nil {

@@ -23,7 +23,7 @@ func GetRepoURL() string {
 	}
 	if repo == "" {
 		// logger.ErrorLogger.Println("No Repo Url Provided")
-		log.Fatal("No Repo Url Provided")
+		log.Fatal("No Repo Url Provided") 
 	}
 	return repo
 }

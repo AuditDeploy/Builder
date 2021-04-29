@@ -39,9 +39,11 @@ func builder() {
 		//pareses builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
 
+		fmt.Println("before logs")
 		//append logs
 		logger.CreateLogs(os.Getenv("BUILDER_LOGS_DIR"))
 
+		fmt.Println("before derive")
 		//run derive 
 		//creates a new binary
 		derive.ProjectType()
