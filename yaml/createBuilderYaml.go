@@ -14,7 +14,7 @@ type BuilderYaml struct {
 	BuildTool 	string
 	BuildFile  	string
 	BuildCmd		string
-	LogsDir		string
+	OutputPath		string
 }
 
 func CreateBuilderYaml(fullPath string) {
@@ -24,7 +24,7 @@ func CreateBuilderYaml(fullPath string) {
 	buildTool := os.Getenv("BUILDER_BUILD_TOOL")
 	buildFile := os.Getenv("BUILDER_BUILD_FILE")
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
-	logsDir := os.Getenv("BUILDER_LOGS_DIR")
+	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 
 	builderData := BuilderYaml {
 		ProjectPath:  projectPath,
@@ -32,7 +32,7 @@ func CreateBuilderYaml(fullPath string) {
 		BuildTool: 		buildTool,
 		BuildFile: 		buildFile,
 		BuildCmd: 		buildCmd,
-		LogsDir:			logsDir,
+		OutputPath:		outputPath,
 	}
 
 	_, err := os.Stat(fullPath+"/builder.yaml")

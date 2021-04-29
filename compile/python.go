@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/logger"
+	"Builder/utils"
 	"Builder/yaml"
 	"archive/zip"
 	"fmt"
@@ -9,7 +10,9 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
+	"time"
 )
 
 //Ruby creates zip from files passed in as arg
@@ -68,16 +71,37 @@ func Python() {
 	err := cmd.Run()
 	if err != nil {
 		logger.ErrorLogger.Println("Python project failed to compile.")
-		fmt.Println(err)
 		log.Fatal(err)
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
 
-	// Zip temp dir.
-	outFile, err := os.Create(workspaceDir+"/temp.zip")
+	//sets path for metadata, and addFiles (covers when workspace dir env doesn't exist)
+	var addPath string
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		path, _ := os.Getwd()
+		addPath = path+"/"
+	} else {
+		addPath = tempWorkspace
+	}
+	
+	utils.Metadata(addPath)
+
+	//sets path for zip creation
+	var dirPath string
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		path, _ := os.Getwd()
+		dirPath = strings.Replace(path, "\\temp", "", 1)
+	} else {
+		dirPath = workspaceDir
+	}
+
+	// CreateZip artifact dir with timestamp
+	currentTime := time.Now().Unix()
+
+	outFile, err := os.Create(dirPath+"/artifact_"+strconv.FormatInt(currentTime, 10)+".zip")
 	if err != nil {
-		 log.Fatal(err)
+		log.Fatal(err)
 	}
 	
 	defer outFile.Close()
@@ -86,7 +110,7 @@ func Python() {
 	w := zip.NewWriter(outFile)
 
 	// Add files from temp dir to the archive.
-	addPythonFiles(w, tempWorkspace, "")
+	addPythonFiles(w, addPath, "")
 
 	err = w.Close()
 	if err != nil {

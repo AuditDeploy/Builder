@@ -17,8 +17,40 @@ func CheckArgs() {
 	//check for help flag
 	for _, v := range cArgs {
 		if v == "--help" || v == "-h" {
-			fmt.Println("**Info about Builder**")
-			os.Exit(1)
+			fmt.Println(`
+			BUILDER
+													
+	       #%&&&%  ,&&            
+	    ##. #&&&&&&&&& &&&&&      
+		.&&&#        &&&&/    
+		.&&&%         &&&&    
+		.&&&#        &&&&,    
+		.&&&% &&&&&&&&&&      
+		.&&&# ......,#&&&&%   
+		.&&&#           &&&&  
+		.&&&#           #&&&. 
+		.&&&#          %&&&#  
+		.&&&% &&&&&&&&&&&&.   
+		.&&&% &&&&&&&#,       										
+
+			Commands
+
+* builder init: auto default build a project (creates packaged artifact) 
+  with metadata and logs, creates default builder.yaml
+* builder config: user defined (user created builder.yaml) project build 
+  that creates artifact with metadata and logs
+* builder: user cds into a project path with a builder.yaml, it then pulls 
+  changes, creates new artifact and new metadata
+
+			Flags
+
+* '--help' or '-h': provide info for Builder
+* '--output' or '-o': user defined output path for artifact
+* '--name' or '-n': user defined project name
+* '--yes' or '-y': bypass prompts
+* '--branch' or '-b': specify repo branch
+			`)
+			os.Exit(0)
 		}
 	}
 
@@ -52,5 +84,6 @@ func CheckArgs() {
 		os.Setenv("BUILDER_OUTPUT_PATH", artifactPath)
 	} else {
 		fmt.Println("BUILDER_OUTPUT_PATH", val)
+		fmt.Println("Output Path already present")
 	}
 }

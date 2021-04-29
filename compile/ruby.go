@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/logger"
+	"Builder/utils"
 	"Builder/yaml"
 	"archive/zip"
 	"fmt"
@@ -9,7 +10,9 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
+	"time"
 )
 
 //Ruby creates zip from files passed in as arg
@@ -20,7 +23,6 @@ func Ruby() {
 		os.Setenv("BUILDER_PROJECT_TYPE", "ruby")
 	}
 
-	//copies contents of .hidden to workspace
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 	tempWorkspace := workspaceDir + "/temp/" 
@@ -74,10 +76,32 @@ func Ruby() {
 
 	yaml.CreateBuilderYaml(fullPath)
 
-	// Zip temp dir.
-	outFile, err := os.Create(workspaceDir+"/temp.zip")
+	//sets path for metadata, and addFiles (covers when workspace dir env doesn't exist)
+	var addPath string
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		path, _ := os.Getwd()
+		addPath = path+"/"
+	} else {
+		addPath = tempWorkspace
+	}
+
+	utils.Metadata(addPath)
+
+	//sets path for zip creation
+	var dirPath string
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		path, _ := os.Getwd()
+		dirPath = strings.Replace(path, "\\temp", "", 1)
+	} else {
+		dirPath = workspaceDir
+	}
+	
+	//CreateZip artifact dir with timestamp
+	currentTime := time.Now().Unix()
+
+	outFile, err := os.Create(dirPath+"/artifact_"+strconv.FormatInt(currentTime, 10)+".zip")
 	if err != nil {
-		 log.Fatal(err)
+		log.Fatal(err)
 	}
 	
 	defer outFile.Close()

@@ -57,11 +57,12 @@ func ProjectType() {
 				return
 			} else if file == "pom.xml" || configType == "java" {
 				//executes java compiler
+				finalPath := createFinalPath(filePath, file)
+
 				utils.CopyDir()
 				logger.InfoLogger.Println("Java project detected")
 
-				workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
-				compile.Java(workspace)
+				compile.Java(finalPath)
 				return
 			} else if file == "gemfile.lock" || file == "gemfile" || configType == "ruby" {
 				//executes ruby compiler
