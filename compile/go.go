@@ -77,7 +77,7 @@ func Go(filePath string) {
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
-	// fmt.Println("past yaml creation")
+	
 	packageGoArtifact(fullPath)
 
 	logger.InfoLogger.Println("Go project compiled successfully.")
@@ -86,7 +86,6 @@ func Go(filePath string) {
 func packageGoArtifact(fullPath string) {
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
-	fmt.Println(artifactDir)
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
 	//copy artifact, then remove artifact in workspace
@@ -94,7 +93,7 @@ func packageGoArtifact(fullPath string) {
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
-	utils.Metadata(artifactDir)
+	utils.Metadata(artifactDir) 
 	artifact.ZipArtifactDir()
 
 	//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
