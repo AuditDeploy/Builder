@@ -27,7 +27,7 @@ func ZipArtifactDir() {
 	w := zip.NewWriter(outFile)
 
 	// Add files from artifact dir to the artifact zip.
-	addNpmFiles(w, artifactDir+"/", "")
+	addFiles(w, artifactDir+"/", "")
 
 	err = w.Close()
 	if err != nil {
@@ -36,7 +36,7 @@ func ZipArtifactDir() {
 }
 
 //recursively add files
-func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
+func addFiles(w *zip.Writer, basePath, baseInZip string) {
 	// Open the Directory
 	files, err := ioutil.ReadDir(basePath)
 	if err != nil {
@@ -62,7 +62,7 @@ func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
 			} else if file.IsDir() {
 					// Recurse
 					newBase := basePath + file.Name() + "/"
-					addNpmFiles(w, newBase, baseInZip  + file.Name() + "/")
+					addFiles(w, newBase, baseInZip  + file.Name() + "/")
 			}
 	}
 }

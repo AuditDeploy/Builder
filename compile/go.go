@@ -8,7 +8,6 @@ import (
 	"Builder/logger"
 	"Builder/utils"
 	"Builder/yaml"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -58,7 +57,6 @@ func Go(filePath string) {
 		buildCmdArray := strings.Fields(buildCmd)
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 	} else if (buildTool == "go") {
-		fmt.Println(buildTool)
 		cmd = exec.Command("go", "build", buildFile)
 		cmd.Dir = fullPath       // or whatever directory it's in
 	} else {
@@ -75,9 +73,8 @@ func Go(filePath string) {
 		logger.ErrorLogger.Println("Go project failed to compile.")
 		log.Fatal(err)
 	}
-
 	yaml.CreateBuilderYaml(fullPath)
-	
+
 	packageGoArtifact(fullPath)
 
 	logger.InfoLogger.Println("Go project compiled successfully.")

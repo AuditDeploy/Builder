@@ -3,7 +3,6 @@ package utils
 import (
 	"Builder/logger"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -83,7 +82,6 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	yamlData, _ := yaml.Marshal(allData)
 	jsonData, _ := json.Marshal(allData)
 
-	fmt.Println(path)
 	err := ioutil.WriteFile(path+"/metadata.json", jsonData, 0666)
 	err2 := ioutil.WriteFile(path+"/metadata.yaml", yamlData, 0666)
 
