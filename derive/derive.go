@@ -81,19 +81,27 @@ func ProjectType() {
 
 //derive projects by Extensions
 func deriveProjectByExtension() {
-	fmt.Println("deriveext")
-	hiddeDir := os.Getenv("BUILDER_HIDDEN_DIR")
-
+	var dirPathExtToFound string
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		path, _ := os.Getwd()
+		dirPathExtToFound = path
+	} else {
+		dirPathExtToFound = os.Getenv("BUILDER_HIDDEN_DIR")
+	}
 	extensions := []string{".csproj", ".sln"}
 
 	for _, ext := range extensions {
-		extFound, fileName := extExistsFunction(hiddeDir, ext)
+		extFound, fileName := extExistsFunction(dirPathExtToFound, ext)
+
 		if extFound {
 			switch ext {
 			//checks if ext exists, if it's .csprocj it will pass down the filePath to c# compiler
 			case ".csproj":
 				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
-				utils.CopyDir()
+
+				if os.Getenv("BUILDER_COMMAND") != "true" {
+					utils.CopyDir()
+				}
 				logger.InfoLogger.Println("C# project detected, Ext .csproj")
 				compile.CSharp(filePath)
 
@@ -132,7 +140,7 @@ func deriveProjectByExtension() {
 
 //takes in file, searches hiddenDir to find a match and returns path to file
 func findPath(file string) string {
-	
+
 	var dirPath string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
 		currentDir, _ := os.Getwd()

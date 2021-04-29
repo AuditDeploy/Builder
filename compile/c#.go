@@ -1,15 +1,20 @@
 package compile
 
 import (
+	"Builder/artifact"
 	"Builder/logger"
+	"Builder/utils"
 	"Builder/yaml"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
 func CSharp(filePath string) {
+	fmt.Println("C# filePath: " + filePath)
 	//Set default project type env for builder.yaml creation
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
 	if projectType == "" {
@@ -63,12 +68,60 @@ func CSharp(filePath string) {
 	}
 
 	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
+
 	yaml.CreateBuilderYaml(fullPath)
 
-	// artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
-	// if (artifactPath != "") {
-	// 	exec.Command("cp", "-a", fullPath+"/main.exe", artifactPath).Run()
-	// }
+	packageCSharpArtifact(fullPath)
 
 	logger.InfoLogger.Println("C# project compiled successfully.")
+}
+
+func packageCSharpArtifact(fullPath string) {
+	artifact.ArtifactDir()
+	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	//find artifact by extension
+	artifactsArray, _ := WalkMatch(fullPath, "*.dll")
+
+	//copy artifact, then remove artifact in workspace
+	exec.Command("cp", "-a", artifactsArray[0], artifactDir).Run()
+	exec.Command("rm", artifactsArray[0]).Run()
+
+	//create metadata, then copy contents to zip dir
+	utils.Metadata(artifactDir)
+	artifact.ZipArtifactDir()
+
+	//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
+	exec.Command("cp", "-a", artifactDir+".zip", artifactDir).Run()
+	exec.Command("rm", artifactDir+".zip").Run()
+
+	// artifactName := artifact.NameArtifact(fullPath, extName)
+
+	// send artifact to user specified path
+	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
+	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	if outputPath != "" {
+		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
+	}
+}
+
+func WalkMatch(root, pattern string) ([]string, error) {
+	var matches []string
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if matched, err := filepath.Match(pattern, filepath.Base(path)); err != nil {
+			return err
+		} else if matched {
+			matches = append(matches, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return matches, nil
 }

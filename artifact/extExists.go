@@ -9,7 +9,6 @@ import (
 //find file with extension and return file name
 func ExtExistsFunction(dirPath string, ext string) (bool, string) {
 	found := false
-
 	d, err := os.Open(dirPath)
 	if err != nil {
 		fmt.Println(err)
@@ -22,7 +21,6 @@ func ExtExistsFunction(dirPath string, ext string) (bool, string) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
 	var fileName string
 
 	for _, file := range files {
@@ -33,6 +31,5 @@ func ExtExistsFunction(dirPath string, ext string) (bool, string) {
 			}
 		}
 	}
- fmt.Println(fileName)
 	return found, fileName
 }
