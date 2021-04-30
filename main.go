@@ -21,4 +21,5 @@ func main() {
 	} else {
 		cmd.Builder()
 	}
+	fmt.Println("Build Complete 🔨")
 }

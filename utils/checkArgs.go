@@ -18,7 +18,7 @@ func CheckArgs() {
 	for _, v := range cArgs {
 		if v == "--help" || v == "-h" {
 			fmt.Println(`
-			BUILDER
+		   🔨 BUILDER 🔨
 													
 	       #%&&&%  ,&&            
 	    ##. #&&&&&&&&& &&&&&      
