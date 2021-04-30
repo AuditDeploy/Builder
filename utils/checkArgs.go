@@ -76,14 +76,14 @@ func CheckArgs() {
 
 			} else {
 				artifactPath = cArgs[i+1]
+				val, present := os.LookupEnv("BUILDER_OUTPUT_PATH")
+				if !present {
+					os.Setenv("BUILDER_OUTPUT_PATH", artifactPath)
+				} else {
+					fmt.Println("BUILDER_OUTPUT_PATH", val)
+					fmt.Println("Output Path already present")
+				}
 			}
 		}
-	}
-	val, present := os.LookupEnv("BUILDER_OUTPUT_PATH")
-	if !present {
-		os.Setenv("BUILDER_OUTPUT_PATH", artifactPath)
-	} else {
-		fmt.Println("BUILDER_OUTPUT_PATH", val)
-		fmt.Println("Output Path already present")
 	}
 }
