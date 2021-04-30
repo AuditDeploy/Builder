@@ -1,4 +1,4 @@
-# Builder OS
+# Builder
 
 > A build tool with transparent logs and metadata tied to each build.
 
