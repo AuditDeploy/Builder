@@ -20,8 +20,8 @@ func Metadata(path string) {
 	timestamp := time.Now().Format(time.RFC850)
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
-	homeDir := GetUserData().HomeDir 
-	
+	homeDir := GetUserData().HomeDir
+
 	var masterGitHash, branchHash, branchName string
 	if os.Getenv("BUILDER_COMMAND") != "true" {
 		_, masterGitHash, branchHash, branchName = GitHashAndName()

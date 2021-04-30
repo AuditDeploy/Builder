@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-//Ruby creates zip from files passed in as arg
+//Python creates zip from files passed in as arg
 func Python() {
 	//Set default project type env for builder.yaml creation
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
