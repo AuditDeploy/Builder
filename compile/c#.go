@@ -9,35 +9,36 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
-//Java does ...
-func Java(filePath string) {
+func CSharp(filePath string) {
+	fmt.Println("C# filePath: " + filePath)
 	//Set default project type env for builder.yaml creation
-  projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
 	if projectType == "" {
-		os.Setenv("BUILDER_PROJECT_TYPE", "java")
+		os.Setenv("BUILDER_PROJECT_TYPE", "c#")
 	}
 
 	//define dir path for command to run in
 	var fullPath string
 	configPath := os.Getenv("BUILDER_DIR_PATH")
-	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path 
-	if (configPath != "") {
+	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path
+	if configPath != "" {
 		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
 		fullPath = filePath
 	} else {
 		path, _ := os.Getwd()
-		//combine local path to newly created tempWorkspace, 
+		//combine local path to newly created tempWorkspace,
 		//gets rid of "." in path name
 		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
 		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
 		os.Setenv("BUILDER_DIR_PATH", path)
-
 	}
 
-	//install dependencies/build, if yaml build type exists install accordingly
+	//install dependencies/build,
+	// if yaml build type exists install accordingly, if buildCmd exists,
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 
@@ -46,43 +47,44 @@ func Java(filePath string) {
 		//user specified cmd
 		buildCmdArray := strings.Fields(buildCmd)
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
-	} else if (buildTool == "maven" || buildTool == "mvn") {
-		fmt.Println(buildTool)
-		cmd = exec.Command("mvn", "clean", "install")
-		cmd.Dir = fullPath       // or whatever directory it's in
-	} else if (buildTool == "gradle") {
-		// gradle, etc.
+	} else if buildTool == "dotnet" {
+		cmd = exec.Command("dotnet", "build", fullPath)
+		cmd.Dir = fullPath // or whatever directory it's in
 	} else {
 		//default
-		cmd = exec.Command("mvn", "clean", "install")
-		cmd.Dir = fullPath       // or whatever directory it's in
-		os.Setenv("BUILDER_BUILD_TOOL", "maven")
-		os.Setenv("BUILDER_BUILD_COMMAND", "mvn clean install")
+		cmd = exec.Command("dotnet", "build", fullPath)
+		// cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_TOOL", "dotnet")
+		os.Setenv("BUILDER_BUILD_COMMAND", "dotnet build "+fullPath)
+		os.Setenv("BUILDER_BUILD_FILE", fullPath[strings.LastIndex(fullPath, "/")+1:])
 	}
 
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
 	err := cmd.Run()
 	if err != nil {
-		logger.ErrorLogger.Println("Java project failed to compile.")
+		logger.ErrorLogger.Println("C# project failed to compile.")
 		log.Fatal(err)
 	}
 
-	//creates default builder.yaml if it doesn't exist
+	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
+
 	yaml.CreateBuilderYaml(fullPath)
 
-	packageJavaArtifact(fullPath+"/target")
+	packageCSharpArtifact(fullPath)
 
-	logger.InfoLogger.Println("Java project compiled successfully.")
+	logger.InfoLogger.Println("C# project compiled successfully.")
 }
-func packageJavaArtifact(fullPath string) {
+
+func packageCSharpArtifact(fullPath string) {
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
-	_, extName := artifact.ExtExistsFunction(fullPath, ".jar")
+	artifactsArray, _ := WalkMatch(fullPath, "*.dll")
+
 	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
-	exec.Command("rm", fullPath+"/"+extName).Run()
+	exec.Command("cp", "-a", artifactsArray[0], artifactDir).Run()
+	exec.Command("rm", artifactsArray[0]).Run()
 
 	//create metadata, then copy contents to zip dir
 	utils.Metadata(artifactDir)
@@ -97,7 +99,29 @@ func packageJavaArtifact(fullPath string) {
 	// send artifact to user specified path
 	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
-	if (outputPath != "") {
+	if outputPath != "" {
 		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
 	}
+}
+
+func WalkMatch(root, pattern string) ([]string, error) {
+	var matches []string
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if matched, err := filepath.Match(pattern, filepath.Base(path)); err != nil {
+			return err
+		} else if matched {
+			matches = append(matches, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return matches, nil
 }
