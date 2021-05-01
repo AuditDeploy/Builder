@@ -1,31 +1,25 @@
 package main
 
 import (
+	"Builder/cmd"
+	"fmt"
 	"os"
-
-	compile "github.com/ilarocca/Builder/compile"
-	parent "github.com/ilarocca/Builder/makeDirFunctions/parent"
-	cloneRepo "github.com/ilarocca/Builder/utils/repo"
 )
 
 func main() {
-	args := os.Args[1:]
-	repoURL := os.Args[2]
 
-	// make parent
-	// make sub dirs
-	parent.MakeParentDir(repoURL)
+	if len(os.Args) > 1 {
+		builderCommand := os.Args[1]
 
-	// clone repo into workspace
-	cloneRepo.GetURL(args)
-
-	//install dependecies ('npm install', etc)
-	// dependency.Go()
-
-	// compile logic to derive project type
-	// compile source code from repo
-	compile.Go()
-
-	// pass source code into hidden dir AND workspace
-
+		if builderCommand == "init" {
+			cmd.Init()
+		} else if builderCommand == "config" {
+			cmd.Config()
+		} else {
+			fmt.Println("expected command: 'init' or 'config'")
+		}
+	} else {
+		cmd.Builder()
+	}
+	fmt.Println("Build Complete 🔨")
 }
