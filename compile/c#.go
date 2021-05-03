@@ -5,7 +5,6 @@ import (
 	"Builder/logger"
 	"Builder/utils"
 	"Builder/yaml"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -14,7 +13,6 @@ import (
 )
 
 func CSharp(filePath string) {
-	fmt.Println("C# filePath: " + filePath)
 	//Set default project type env for builder.yaml creation
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
 	if projectType == "" {
