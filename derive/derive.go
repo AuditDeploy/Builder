@@ -109,7 +109,11 @@ func deriveProjectByExtension() {
 			//if it's .sln, it will find all the project path in the solution(repo)
 			case ".sln":
 				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
-				utils.CopyDir()
+
+				if os.Getenv("BUILDER_COMMAND") != "true" {
+					utils.CopyDir()
+				}
+
 				listOfProjects, err := exec.Command("dotnet", "sln", filePath, "list").Output()
 
 				if err != nil {
@@ -118,20 +122,28 @@ func deriveProjectByExtension() {
 
 				stringifyListOfProjects := string(listOfProjects)
 				listOfProjectsArray := strings.Split(stringifyListOfProjects, "\n")[2:]
+
 				//if there's more than 5 projects in solution(repo), user will be asked to use builder config instead
 				if len(listOfProjectsArray) > 5 {
 					logger.InfoLogger.Println("C# project detected, Ext .sln. More than 5 projects in solution not supported")
-					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml")
+					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of the file you wish to compile in the builder.yml")
 				} else {
-					// < 5 projects in solution(repo), user will be prompt to choose a project path.
-					pathToCompileFrom := selectPathToCompileFrom(listOfProjectsArray)
-					workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
-					pathToCompileFrom = workspace + "/" + pathToCompileFrom
+					var pathToCompileFrom string
 
-					utils.CopyDir()
+					if os.Getenv("BUILDER_COMMAND") == "true" {
+						// path, _ := os.Getwd()
+						buildFile := os.Getenv("BUILDER_BUILD_FILE")
+						pathToCompileFrom = buildFile
+					} else {
+						// < 5 projects in solution(repo), user will be prompt to choose a project path.
+						pathToCompileFrom = selectPathToCompileFrom(listOfProjectsArray)
+						workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
+						pathToCompileFrom = workspace + "/" + pathToCompileFrom
+						utils.CopyDir()
+					}
+
 					logger.InfoLogger.Println("C# project detected, Ext .sln")
 					compile.CSharp(pathToCompileFrom)
-
 				}
 			}
 		}

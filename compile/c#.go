@@ -54,7 +54,7 @@ func CSharp(filePath string) {
 		// cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_TOOL", "dotnet")
 		os.Setenv("BUILDER_BUILD_COMMAND", "dotnet build "+fullPath)
-		os.Setenv("BUILDER_BUILD_FILE", fullPath[strings.LastIndex(fullPath, "/")+1:])
+		os.Setenv("BUILDER_BUILD_FILE", fullPath)
 	}
 
 	//run cmd, check for err, log cmd
@@ -65,7 +65,8 @@ func CSharp(filePath string) {
 		log.Fatal(err)
 	}
 
-	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
+	//workspace path
+	fullPath = fullPath[:strings.Index(fullPath, "workspace/")+10]
 
 	yaml.CreateBuilderYaml(fullPath)
 
