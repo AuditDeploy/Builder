@@ -62,10 +62,11 @@ func Java(filePath string) {
 
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
-	err := cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
-		logger.ErrorLogger.Println("Java project failed to compile.")
-		log.Fatal(err)
+		fmt.Printf("Combined Out:\n%s\n", string(out))
+		logger.ErrorLogger.Println("Go project failed to compile.")
+		log.Fatal("Failed to compile: ", err)
 	}
 
 	//creates default builder.yaml if it doesn't exist
