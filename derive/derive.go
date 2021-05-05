@@ -126,7 +126,7 @@ func deriveProjectByExtension() {
 				//if there's more than 5 projects in solution(repo), user will be asked to use builder config instead
 				if len(listOfProjectsArray) > 5 {
 					logger.InfoLogger.Println("C# project detected, Ext .sln. More than 5 projects in solution not supported")
-					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of the file you wish to compile in the builder.yml")
+					log.Fatal("There are more than 5 projects in this solution, please use Builder Config and specify the path of the file you wish to compile in the builder.yml")
 				} else {
 					var pathToCompileFrom string
 
