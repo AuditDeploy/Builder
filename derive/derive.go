@@ -30,11 +30,12 @@ func ProjectType() {
 		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt"}
 	}
 
+	var filePath string
 	//look for those files inside hidden dir
 	for _, file := range files {
 
 		//recursively check for file in hidden dir, return path if found
-		filePath := findPath(file)
+		filePath = findPath(file)
 		//double check it exists
 		fileExists, err := fileExistsInDir(filePath)
 		if err != nil {

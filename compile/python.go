@@ -68,10 +68,11 @@ func Python() {
 	}
 	//run cmd, check for err, log cmd
 	logger.InfoLogger.Println(cmd)
-	err := cmd.Run()
+	out, err := cmd.CombinedOutput()
 	if err != nil {
+		fmt.Printf("Combined Out:\n%s\n", string(out))
 		logger.ErrorLogger.Println("Python project failed to compile.")
-		log.Fatal(err)
+		log.Fatal("Failed to compile: ", err)
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
