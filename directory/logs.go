@@ -7,41 +7,36 @@ import (
 	"os"
 )
 
-func logDir(path string) (bool, error) {
-	//check if file path exists, returns err = nil if file exists
-	_, err := os.Stat(path)
+func MakeLogDir(parentDirPath string) {
+	logDirPath := parentDirPath + "/logs"
+
+	logDir(logDirPath)
+	logger.CreateLogs(logDirPath)
+}
+
+func logDir(logDirPath string) {
+	//check if logDir path exists
+	_, err := os.Stat(logDirPath)
 
 	if err == nil {
 		fmt.Println("Path already exists")
 		logger.WarningLogger.Println("Path already exists")
 	}
 
-	// should return true if file doesn't exist
 	if os.IsNotExist(err) {
+		errDir := os.Mkdir(logDirPath, 0755)
 
-		errDir := os.Mkdir(path, 0755)
-		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
 			log.Fatal(err)
 		}
 
 	}
 
-	//check workspace env exists, if not, create it
+	//check logsDir env exists, if not, create it
 	val, present := os.LookupEnv("BUILDER_LOGS_DIR")
 	if !present {
-		os.Setenv("BUILDER_LOGS_DIR", path)
+		os.Setenv("BUILDER_LOGS_DIR", logDirPath)
 	} else {
 		fmt.Println("BUILDER_LOGS_DIR", val)
 	}
-	return true, err
-}
-
-//MakeLogDir does...
-func MakeLogDir(path string) {
-
-	logPath := path + "/logs"
-
-	logDir(logPath)
-	logger.CreateLogs(path)
 }
