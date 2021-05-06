@@ -6,7 +6,6 @@ import (
 	"strings"
 )
 
-//GetName does ...
 func GetName(cArgs []string) string {
 	repoURL := os.Args[2]
 

@@ -5,10 +5,8 @@ import (
 	"io"
 	"log"
 	"os"
-	"strings"
 )
 
-//creates global logs
 func GlobalLogs() {
 	//create global logs if it does not exists
 	if _, err := os.Stat("./globalLogs"); os.IsNotExist(err) {
@@ -30,14 +28,10 @@ func GlobalLogs() {
 		fmt.Println("BUILDER_GLOBAL_LOGS_DIR", val)
 	}
 
-	//copy log over to global logs
 	logsDir := os.Getenv("BUILDER_LOGS_DIR")
-	parentDir := os.Getenv("BUILDER_PARENT_DIR")
 
-	fileName := parentDir[strings.LastIndex(parentDir, "/")+1:]
-
-	//append log to global logs
-	from, err := os.Open(logsDir + "/" + fileName + "_logs.txt")
+	//append local logs to global logs
+	from, err := os.Open(logsDir + "/" + "logs.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
