@@ -16,6 +16,11 @@ func CloneRepo() {
 	//clone repo with url from args
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 
+	bFlagExists := BranchFlagExists()
+	branchName := GetBranchName()
+	allRepoBranches := GetAllRepoBranches()
+	branchNameExists := BranchNameExists(allRepoBranches)
+
 	//if config cmd clone to temp dir
 	if hiddenDir == "" {
 		errDir := os.Mkdir("./tempRepo", 0755)
@@ -23,10 +28,8 @@ func CloneRepo() {
 			fmt.Println(errDir)
 		}
 
-		bFlagExists, branchExists, branchName := bFlagAndBranchExists()
-
 		if bFlagExists {
-			if branchExists {
+			if branchNameExists {
 				cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, "./tempRepo")
 				cmd.Run()
 			} else {
@@ -42,10 +45,8 @@ func CloneRepo() {
 		cmd.Run()
 	} else {
 
-		bFlagExists, branchExists, branchName := bFlagAndBranchExists()
-
 		if bFlagExists {
-			if branchExists {
+			if branchNameExists {
 				cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
 				cmd.Run()
 				logger.InfoLogger.Println(cmd)
@@ -60,38 +61,4 @@ func CloneRepo() {
 		}
 
 	}
-}
-
-func bFlagAndBranchExists() (bool, bool, string) {
-	//if init cmd, clone to hidden dir
-	bFlagExists, branchName := CloneBranch()
-
-	//check if branch exist
-	branches, _, _, _ := GitHashAndName()
-	branchExists, _ := BranchNameExists(branches)
-
-	return bFlagExists, branchExists, branchName
-}
-
-func CloneBranch() (bool, string) {
-	args := os.Args[1:]
-
-	//if branch is empty string strings.Contain does not work, function found in metadata
-	branchName := "%$F"
-	branchFlag := false
-
-	for i, v := range args {
-		if v == "-b" || v == "--branch" {
-			if len(args) <= i+1 {
-				logger.ErrorLogger.Println("No Repo Url Provided")
-				log.Fatal("No Branch Name Provided")
-
-			} else {
-				branchName = args[i+1]
-				branchFlag = true
-			}
-		}
-	}
-
-	return branchFlag, branchName
 }
