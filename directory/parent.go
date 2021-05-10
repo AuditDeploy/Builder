@@ -26,20 +26,20 @@ func MakeDirs() {
 	//check for projectPath env from builder.yaml
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 
-	var path string
-	if (configPath != "") {
-	// used for 'config' cmd, set by builder.yaml
-	 path = configPath + "/" + name +"_"+strconv.FormatInt(currentTime, 10)
+	var parentDirPath string
+	if configPath != "" {
+		// used for 'config' cmd, set by builder.yaml
+		parentDirPath = configPath + "/" + name + "_" + strconv.FormatInt(currentTime, 10)
 	} else {
-	// local path, used for 'init' cmd/default
-	 path = "./" + name +"_"+strconv.FormatInt(currentTime, 10)
+		// local path, used for 'init' cmd/default
+		parentDirPath = "./" + name + "_" + strconv.FormatInt(currentTime, 10)
 	}
 
-	MakeParentDir(path)
+	MakeParentDir(parentDirPath)
 
-	MakeHiddenDir(path)
-	MakeLogDir(path)
-	MakeWorkspaceDir(path)
+	MakeHiddenDir(parentDirPath)
+	MakeLogDir(parentDirPath)
+	MakeWorkspaceDir(parentDirPath)
 }
 
 func MakeParentDir(path string) (bool, error) {
@@ -79,7 +79,7 @@ func MakeParentDir(path string) (bool, error) {
 		}
 	}
 
-	//check workspace env exists, if not, create it
+	//check parent env exists, if not, create it
 	val, present := os.LookupEnv("BUILDER_PARENT_DIR")
 	if !present {
 		os.Setenv("BUILDER_PARENT_DIR", path)

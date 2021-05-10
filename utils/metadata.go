@@ -7,9 +7,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"os/exec"
 	"os/user"
-	"strings"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -22,9 +20,11 @@ func Metadata(path string) {
 	userName := GetUserData().Username
 	homeDir := GetUserData().HomeDir
 
-	var masterGitHash, branchHash, branchName string
+	var masterGitHash, branchGitHash, branchName string
 	if os.Getenv("BUILDER_COMMAND") != "true" {
-		_, masterGitHash, branchHash, branchName = GitHashAndName()
+		masterGitHash = GetMasterGitHash()
+		branchGitHash = GetBranchGitHash()
+		branchName = GetBranchName()
 	}
 
 	//Contains a collection of fileds with user's metadata
@@ -35,7 +35,8 @@ func Metadata(path string) {
 		Timestamp:     timestamp,
 		MasterGitHash: masterGitHash,
 		BranchName:    branchName,
-		BranchHash:    branchHash}
+		BranchGitHash: branchGitHash,
+	}
 
 	OutputMetadata(path, &userMetaData)
 
@@ -49,7 +50,7 @@ type AllMetaData struct {
 	Timestamp     string
 	MasterGitHash string
 	BranchName    string
-	BranchHash    string
+	BranchGitHash string
 }
 
 //GetUserData return username and userdir
@@ -94,51 +95,4 @@ func OutputMetadata(path string, allData *AllMetaData) {
 		logger.ErrorLogger.Println("YAML Metadata creation unsuccessful.")
 		panic(err2)
 	}
-}
-
-//GitHas gets the latest git commit id in a repo
-func GitHashAndName() ([]string, string, string, string) {
-	//Get repoURL
-	repo := GetRepoURL()
-
-	//outputs all the commits of the clone repo
-	output, _ := exec.Command("git", "ls-remote", repo).Output()
-
-	//stringify output - []byte to string
-	stringGitHashAndName := string(output)
-	// fmt.Println(stringGitHash)
-
-	//return an array with all the git commit hashs
-	arrayGitHashAndName := strings.Split(stringGitHashAndName, "\n")
-	branchExists, branchNameAndHash := BranchNameExists(arrayGitHashAndName)
-
-	//gets the hash of type []string of master branch
-	masterHashStringArray := strings.Fields(arrayGitHashAndName[0])
-	masterHash := masterHashStringArray[0]
-
-	if branchExists {
-		//gets hash and name of type []string of a specific branch
-		branchHash := strings.Fields(branchNameAndHash)[0]
-		branchName := strings.Fields(branchNameAndHash)[1]
-		return arrayGitHashAndName, masterHash[0:7], branchHash[0:7], branchName
-	} else {
-		return arrayGitHashAndName, masterHash[0:7], "", ""
-	}
-
-}
-
-func BranchNameExists(branches []string) (bool, string) {
-	branchExists := false
-	var branchNameAndHash string
-
-	_, clonedBranchName := CloneBranch()
-
-	for _, branch := range branches {
-		if branch[strings.LastIndex(branch, "/")+1:] == clonedBranchName {
-			branchExists = true
-			branchNameAndHash = branch
-		}
-	}
-
-	return branchExists, branchNameAndHash
 }
