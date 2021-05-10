@@ -14,30 +14,23 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-//ProjectType will derive the project type and execute its compiler
+//derive the project type and execute its compiler
 func ProjectType() {
-
-	//check for user defined project type from builder.yaml to define string array files
 	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
 
-	var files []string
-	//projectType exists in builder.yaml
+	var filesToCompileFrom []string
 	if configType != "" {
-		//check value of config type, return string array of language's build file/files
-		files = utils.ConfigDerive()
+		filesToCompileFrom = utils.ConfigDerive()
 	} else {
-		//default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt"}
+		filesToCompileFrom = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt"}
 	}
 
 	var filePath string
-	//look for those files inside hidden dir
-	for _, file := range files {
+	for _, file := range filesToCompileFrom {
 
-		//recursively check for file in hidden dir, return path if found
-		filePath = findPath(file)
-		//double check it exists
+		filePath = findFilePathInHiddenDir(file)
 		fileExists, err := fileExistsInDir(filePath)
+
 		if err != nil {
 			logger.ErrorLogger.Println("No Go, Npm, Ruby, Python or Java File Exists")
 			log.Fatal(err)
@@ -45,97 +38,92 @@ func ProjectType() {
 		//if file exists and filePath isn't empty, run conditional to find correct compiler
 		if fileExists && filePath != "" && filePath != "./" {
 			if file == "main.go" || configType == "go" {
-				//executes go compiler
+
 				finalPath := createFinalPath(filePath, file)
 				utils.CopyDir()
 				logger.InfoLogger.Println("Go project detected")
 				compile.Go(finalPath)
 				return
 			} else if file == "package.json" || configType == "node" || configType == "npm" {
-				//executes node compiler
+
 				logger.InfoLogger.Println("Npm project detected")
 				compile.Npm()
 				return
 			} else if file == "pom.xml" || configType == "java" {
-				//executes java compiler
-				finalPath := createFinalPath(filePath, file)
 
+				finalPath := createFinalPath(filePath, file)
 				utils.CopyDir()
 				logger.InfoLogger.Println("Java project detected")
-
 				compile.Java(finalPath)
 				return
 			} else if file == "gemfile.lock" || file == "gemfile" || configType == "ruby" {
-				//executes ruby compiler
+
 				logger.InfoLogger.Println("Ruby project detected")
 				compile.Ruby()
 				return
 			} else if file == "requirements.txt" || configType == "python" {
-				//executes python compiler
+
 				logger.InfoLogger.Println("Python project detected")
 				compile.Python()
 				return
 			}
 		}
 	}
+
+	//C# compiler
 	deriveProjectByExtension()
 }
 
 //derive projects by Extensions
 func deriveProjectByExtension() {
-	var dirPathExtToFound string
+
+	var dirPathToFindExt string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
-		path, _ := os.Getwd()
-		dirPathExtToFound = path
+		currentUserpPath, _ := os.Getwd()
+		dirPathToFindExt = currentUserpPath
 	} else {
-		dirPathExtToFound = os.Getenv("BUILDER_HIDDEN_DIR")
+		dirPathToFindExt = os.Getenv("BUILDER_HIDDEN_DIR")
 	}
+
 	extensions := []string{".csproj", ".sln"}
 
 	for _, ext := range extensions {
-		extFound, fileName := extExistsFunction(dirPathExtToFound, ext)
+		extFound, filePath := extExistsFunction(dirPathToFindExt, ext)
 
 		if extFound {
 			switch ext {
-			//checks if ext exists, if it's .csprocj it will pass down the filePath to c# compiler
 			case ".csproj":
-				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
 
 				if os.Getenv("BUILDER_COMMAND") != "true" {
 					utils.CopyDir()
 				}
+
 				logger.InfoLogger.Println("C# project detected, Ext .csproj")
 				compile.CSharp(filePath)
 
-			//if it's .sln, it will find all the project path in the solution(repo)
 			case ".sln":
-				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
 
 				if os.Getenv("BUILDER_COMMAND") != "true" {
 					utils.CopyDir()
 				}
 
-				listOfProjects, err := exec.Command("dotnet", "sln", filePath, "list").Output()
-
-				if err != nil {
-					log.Fatal(err)
-				}
-
-				stringifyListOfProjects := string(listOfProjects)
-				listOfProjectsArray := strings.Split(stringifyListOfProjects, "\n")[2:]
+				listOfProjectsArray := ListAllProjectsInSolution(filePath)
 
 				//if there's more than 5 projects in solution(repo), user will be asked to use builder config instead
 				if len(listOfProjectsArray) > 5 {
+
 					logger.InfoLogger.Println("C# project detected, Ext .sln. More than 5 projects in solution not supported")
 					log.Fatal("There are more than 5 projects in this solution, please use Builder Config and specify the path of the file you wish to compile in the builder.yml")
+
 				} else {
 					var pathToCompileFrom string
 
 					if os.Getenv("BUILDER_COMMAND") == "true" {
-						// path, _ := os.Getwd()
+
 						buildFile := os.Getenv("BUILDER_BUILD_FILE")
 						pathToCompileFrom = buildFile
 					} else {
+
 						// < 5 projects in solution(repo), user will be prompt to choose a project path.
 						pathToCompileFrom = selectPathToCompileFrom(listOfProjectsArray)
 						workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -152,8 +140,20 @@ func deriveProjectByExtension() {
 
 }
 
-//takes in file, searches hiddenDir to find a match and returns path to file
-func findPath(file string) string {
+func ListAllProjectsInSolution(filePath string) []string {
+	listOfProjects, err := exec.Command("dotnet", "sln", filePath, "list").Output()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	stringifyListOfProjects := string(listOfProjects)
+	listOfProjectsArray := strings.Split(stringifyListOfProjects, "\n")[2:]
+
+	return listOfProjectsArray
+}
+
+func findFilePathInHiddenDir(file string) string {
 
 	var dirPath string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
@@ -163,7 +163,6 @@ func findPath(file string) string {
 		dirPath = os.Getenv("BUILDER_HIDDEN_DIR")
 	}
 
-	// if f.Name is == to file passed in "coolProject.go", filePath becomes the path that file exists in
 	var filePath string
 	err := filepath.Walk(dirPath, func(path string, f os.FileInfo, err error) error {
 		if strings.EqualFold(f.Name(), file) {
@@ -177,7 +176,7 @@ func findPath(file string) string {
 	}
 
 	configPath := os.Getenv("BUILDER_DIR_PATH")
-	//if user defined path in builder.yaml, filePath has fullPath included, if not, run it locally
+
 	if configPath != "" {
 		return filePath
 	} else {
@@ -193,15 +192,13 @@ func createFinalPath(path string, file string) string {
 	return finalPath
 }
 
-//checks if file exists
 func fileExistsInDir(path string) (bool, error) {
-	//file exists
 	_, err := os.Stat(path)
-	//return true
+
 	if err == nil {
 		return true, nil
 	}
-	//return false
+
 	if os.IsNotExist(err) {
 		return false, nil
 	}
@@ -209,7 +206,7 @@ func fileExistsInDir(path string) (bool, error) {
 }
 
 func extExistsFunction(dirPath string, ext string) (bool, string) {
-	found := false
+	extFound := false
 
 	d, err := os.Open(dirPath)
 	if err != nil {
@@ -230,12 +227,17 @@ func extExistsFunction(dirPath string, ext string) (bool, string) {
 		if file.Mode().IsRegular() {
 			if filepath.Ext(file.Name()) == ext {
 				fileName = file.Name()
-				found = true
+				extFound = true
 			}
 		}
 	}
 
-	return found, fileName
+	var filePath string
+	if fileName != "" {
+		filePath = strings.Replace(findFilePathInHiddenDir(fileName), ".hidden", "workspace", 1)
+	}
+
+	return extFound, filePath
 }
 
 func selectPathToCompileFrom(filePaths []string) string {
