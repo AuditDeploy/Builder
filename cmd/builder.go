@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"Builder/derive"
-	"Builder/logger"
-	"Builder/yaml"
+	"builder/derive"
+	"builder/logger"
+	"builder/yaml"
 	"log"
 	"os"
 	"os/exec"
@@ -17,7 +17,7 @@ func Builder() {
 	if _, err := os.Stat(path + "/" + "builder.yaml"); err == nil {
 		exec.Command("git", "pull").Run()
 
-		//pareses builder.yaml
+		//parses builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
 
 		//append logs

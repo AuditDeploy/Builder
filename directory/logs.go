@@ -1,7 +1,7 @@
 package directory
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"fmt"
 	"log"
 	"os"

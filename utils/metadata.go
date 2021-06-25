@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"encoding/json"
 	"io/ioutil"
 	"log"

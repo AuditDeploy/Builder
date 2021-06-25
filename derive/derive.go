@@ -1,9 +1,9 @@
 package derive
 
 import (
-	"Builder/compile"
-	"Builder/logger"
-	"Builder/utils"
+	"builder/compile"
+	"builder/logger"
+	"builder/utils"
 	"fmt"
 	"log"
 	"os"

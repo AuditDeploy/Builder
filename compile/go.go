@@ -4,10 +4,10 @@
 package compile
 
 import (
-	"Builder/artifact"
-	"Builder/logger"
-	"Builder/utils"
-	"Builder/yaml"
+	"builder/artifact"
+	"builder/logger"
+	"builder/utils"
+	"builder/yaml"
 	"log"
 	"os"
 	"os/exec"

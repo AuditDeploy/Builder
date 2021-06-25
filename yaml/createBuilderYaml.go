@@ -1,7 +1,7 @@
 package yaml
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"io/ioutil"
 	"os"
 

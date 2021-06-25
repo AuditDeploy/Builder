@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"Builder/derive"
-	"Builder/directory"
-	"Builder/logger"
-	"Builder/utils"
-	"Builder/yaml"
+	"builder/derive"
+	"builder/directory"
+	"builder/logger"
+	"builder/utils"
+	"builder/yaml"
 )
 
 func Config() {

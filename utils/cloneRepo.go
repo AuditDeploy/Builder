@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"fmt"
 	"log"
 	"os"
@@ -52,7 +52,6 @@ func CloneRepo() {
 			} else {
 				log.Fatal("Branch does not exists")
 			}
-
 		} else {
 			cmd := exec.Command("git", "clone", repo, hiddenDir)
 			cmd.Run()

@@ -1,9 +1,9 @@
 package compile
 
 import (
-	"Builder/logger"
-	"Builder/utils"
-	"Builder/yaml"
+	"builder/logger"
+	"builder/utils"
+	"builder/yaml"
 	"archive/zip"
 	"fmt"
 	"io/ioutil"

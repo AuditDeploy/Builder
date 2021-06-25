@@ -63,6 +63,8 @@ You must have the language or package manager previously installed in order to b
   - As of now, a requirements.txt is necessary to build default python projects.
 - Ruby
   - Uses `bundle install --path vendor/bundle` as default command.
+- Rust
+  - uses `crate`
 
 To use other buildtools, buildcommands, or custome buildfiles you must create builder.yaml and run `config`.
 

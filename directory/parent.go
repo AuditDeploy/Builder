@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"Builder/logger"
-	"Builder/utils"
+	"builder/logger"
+	"builder/utils"
 
 	"github.com/manifoldco/promptui"
 )
