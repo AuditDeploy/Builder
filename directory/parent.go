@@ -27,12 +27,12 @@ func MakeDirs() {
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 
 	var path string
-	if (configPath != "") {
-	// used for 'config' cmd, set by builder.yaml
-	 path = configPath + "/" + name +"_"+strconv.FormatInt(currentTime, 10)
+	if configPath != "" {
+		// used for 'config' cmd, set by builder.yaml
+		path = configPath + "/" + name + "_" + strconv.FormatInt(currentTime, 10)
 	} else {
-	// local path, used for 'init' cmd/default
-	 path = "./" + name +"_"+strconv.FormatInt(currentTime, 10)
+		// local path, used for 'init' cmd/default
+		path = "./" + name + "_" + strconv.FormatInt(currentTime, 10)
 	}
 
 	MakeParentDir(path)
@@ -72,7 +72,7 @@ func MakeParentDir(path string) (bool, error) {
 				}
 
 			} else {
-				logger.ErrorLogger.Println("Please create a directory for the Builder")
+				//logger.ErrorLogger.Println("Please create a directory for the Builder")
 				log.Fatal("Please create a directory for the Builder")
 				return true, err
 			}

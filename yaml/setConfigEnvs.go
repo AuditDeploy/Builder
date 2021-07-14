@@ -20,6 +20,8 @@ func ConfigEnvs(byi interface{}) {
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILDER_DIR_PATH", valStr)
 		}
+	} else {
+		os.Setenv("BUILDER_DIR_PATH", "")
 	}
 
 	//check for project type
@@ -30,6 +32,8 @@ func ConfigEnvs(byi interface{}) {
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILDER_PROJECT_TYPE", valStr)
 		} 
+	} else {
+		os.Setenv("BUILDER_PROJECT_TYPE", "")
 	}
 
 	//check for build type
@@ -50,6 +54,8 @@ func ConfigEnvs(byi interface{}) {
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILDER_BUILD_FILE", valStr)
 		}
+	} else {
+		os.Setenv("BUILDER_BUILD_FILE", "")
 	}
 
 	//check for build file
