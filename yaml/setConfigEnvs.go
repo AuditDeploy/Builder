@@ -5,13 +5,12 @@ import (
 	"os"
 )
 
-
 func ConfigEnvs(byi interface{}) {
 	//change interface{} into map interface{}
 	bldyml, _ := byi.(map[string]interface{})
 
 	//~~~Check for specific key and create env var based on value~~~
-	
+
 	//check for dir path
 	if val, ok := bldyml["projectpath"]; ok {
 		_, present := os.LookupEnv("BUILDER_DIR_PATH")
@@ -31,7 +30,7 @@ func ConfigEnvs(byi interface{}) {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILDER_PROJECT_TYPE", valStr)
-		} 
+		}
 	} else {
 		os.Setenv("BUILDER_PROJECT_TYPE", "")
 	}
@@ -75,6 +74,16 @@ func ConfigEnvs(byi interface{}) {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILDER_OUTPUT_PATH", valStr)
+		}
+	}
+
+	//check for docker cmd
+	if val, ok := bldyml["dockercmd"]; ok {
+		_, present := os.LookupEnv("BUILDER_DOCKER_CMD")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("BUILDER_DOCKER_CMD", valStr)
 		}
 	}
 }

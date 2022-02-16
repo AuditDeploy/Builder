@@ -5,6 +5,7 @@ import (
 	"Builder/logger"
 	"Builder/utils"
 	"Builder/yaml"
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -15,7 +16,7 @@ import (
 //Java does ...
 func Java(filePath string) {
 	//Set default project type env for builder.yaml creation
-  projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "java")
 	}
@@ -23,13 +24,13 @@ func Java(filePath string) {
 	//define dir path for command to run in
 	var fullPath string
 	configPath := os.Getenv("BUILDER_DIR_PATH")
-	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path 
-	if (configPath != "") {
+	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path
+	if configPath != "" {
 		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
 		fullPath = filePath
 	} else {
 		path, _ := os.Getwd()
-		//combine local path to newly created tempWorkspace, 
+		//combine local path to newly created tempWorkspace,
 		//gets rid of "." in path name
 		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
 		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
@@ -46,16 +47,17 @@ func Java(filePath string) {
 		//user specified cmd
 		buildCmdArray := strings.Fields(buildCmd)
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
-	} else if (buildTool == "maven" || buildTool == "mvn") {
+		cmd.Dir = fullPath // or whatever directory it's in
+	} else if buildTool == "maven" || buildTool == "mvn" {
 		fmt.Println(buildTool)
 		cmd = exec.Command("mvn", "clean", "install")
-		cmd.Dir = fullPath       // or whatever directory it's in
-	} else if (buildTool == "gradle") {
+		cmd.Dir = fullPath // or whatever directory it's in
+	} else if buildTool == "gradle" {
 		// gradle, etc.
 	} else {
 		//default
 		cmd = exec.Command("mvn", "clean", "install")
-		cmd.Dir = fullPath       // or whatever directory it's in
+		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_TOOL", "maven")
 		os.Setenv("BUILDER_BUILD_COMMAND", "mvn clean install")
 	}
@@ -64,14 +66,18 @@ func Java(filePath string) {
 	logger.InfoLogger.Println(cmd)
 	err := cmd.Run()
 	if err != nil {
+		var outb, errb bytes.Buffer
+		cmd.Stdout = &outb
+		cmd.Stderr = &errb
 		logger.ErrorLogger.Println("Java project failed to compile.")
+		fmt.Println("out:", outb.String(), "err:", errb.String())
 		log.Fatal(err)
 	}
 
 	//creates default builder.yaml if it doesn't exist
 	yaml.CreateBuilderYaml(fullPath)
 
-	packageJavaArtifact(fullPath+"/target")
+	packageJavaArtifact(fullPath + "/target")
 
 	logger.InfoLogger.Println("Java project compiled successfully.")
 }
@@ -97,7 +103,7 @@ func packageJavaArtifact(fullPath string) {
 	// send artifact to user specified path
 	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
-	if (outputPath != "") {
+	if outputPath != "" {
 		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
 	}
 }

@@ -7,20 +7,22 @@ import (
 )
 
 //GetName does ...
-func GetName(cArgs []string) string {
+func GetName() string {
+	args := os.Args[1:]
+
 	repoURL := os.Args[2]
 
 	name := repoURL[strings.LastIndex(repoURL, "/")+1:]
 
-	for i, v := range cArgs {
+	for i, v := range args {
 		if v == "--name" || v == "-n" {
-			if len(cArgs) <= i+1 {
+			if len(args) <= i+1 {
 				log.Fatal("Please provide a name")
 			} else {
-				if specialChar(cArgs[i+1]) {
+				if specialChar(args[i+1]) {
 					log.Fatal("Special Characters Not Allowed In Names")
 				}
-				name = cArgs[i+1]
+				name = args[i+1]
 			}
 		}
 	}

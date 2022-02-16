@@ -8,6 +8,8 @@ import (
 	"Builder/logger"
 	"Builder/utils"
 	"Builder/yaml"
+	"bytes"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -18,7 +20,7 @@ import (
 func Go(filePath string) {
 
 	//Set default project type env for builder.yaml creation
-  projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "go")
 	}
@@ -26,26 +28,26 @@ func Go(filePath string) {
 	//define dir path for command to run in
 	var fullPath string
 	configPath := os.Getenv("BUILDER_DIR_PATH")
-	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path 
-	if (configPath != "") {
+	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path
+	if configPath != "" {
 		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
 		fullPath = filePath
 	} else {
 		path, _ := os.Getwd()
-		//combine local path to newly created tempWorkspace, 
+		//combine local path to newly created tempWorkspace,
 		//gets rid of "." in path name
 		// ex: C:/Users/Name/Projects + /helloworld_19293/workspace/dir
 		fullPath = path + filePath[strings.Index(filePath, ".")+1:]
 		os.Setenv("BUILDER_DIR_PATH", path)
 	}
-	
+
 	//install dependencies/build, if yaml build type exists install accordingly
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	//find 'go file' to be built
 	buildFile := strings.ToLower(os.Getenv("BUILDER_BUILD_FILE"))
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 	//if no file defined by user, use default main.go
-	if (buildFile == "") {
+	if buildFile == "" {
 		buildFile = "main.go"
 		os.Setenv("BUILDER_BUILD_FILE", buildFile)
 	}
@@ -56,13 +58,14 @@ func Go(filePath string) {
 		//user specified cmd
 		buildCmdArray := strings.Fields(buildCmd)
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
-	} else if (buildTool == "go") {
+		cmd.Dir = fullPath // or whatever directory it's in
+	} else if buildTool == "go" {
 		cmd = exec.Command("go", "build", buildFile)
-		cmd.Dir = fullPath       // or whatever directory it's in
+		cmd.Dir = fullPath // or whatever directory it's in
 	} else {
 		//default
 		cmd = exec.Command("go", "build", buildFile)
-		cmd.Dir = fullPath       // or whatever directory it's in
+		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_COMMAND", "go build "+buildFile)
 	}
 
@@ -70,7 +73,11 @@ func Go(filePath string) {
 	logger.InfoLogger.Println(cmd)
 	err := cmd.Run()
 	if err != nil {
+		var outb, errb bytes.Buffer
+		cmd.Stdout = &outb
+		cmd.Stderr = &errb
 		logger.ErrorLogger.Println("Go project failed to compile.")
+		fmt.Println("out:", outb.String(), "err:", errb.String())
 		log.Fatal(err)
 	}
 	yaml.CreateBuilderYaml(fullPath)
@@ -90,7 +97,7 @@ func packageGoArtifact(fullPath string) {
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
-	utils.Metadata(artifactDir) 
+	utils.Metadata(artifactDir)
 	artifact.ZipArtifactDir()
 
 	//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
@@ -102,7 +109,7 @@ func packageGoArtifact(fullPath string) {
 	// send artifact to user specified path
 	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
-	if (outputPath != "") {
+	if outputPath != "" {
 		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
 	}
 }

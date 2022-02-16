@@ -5,6 +5,7 @@ import (
 	"Builder/logger"
 	"Builder/utils"
 	"Builder/yaml"
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -47,6 +48,7 @@ func CSharp(filePath string) {
 		//user specified cmd
 		buildCmdArray := strings.Fields(buildCmd)
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
+		cmd.Dir = fullPath // or whatever directory it's in
 	} else if buildTool == "dotnet" {
 		cmd = exec.Command("dotnet", "build", fullPath)
 		cmd.Dir = fullPath // or whatever directory it's in
@@ -63,7 +65,11 @@ func CSharp(filePath string) {
 	logger.InfoLogger.Println(cmd)
 	err := cmd.Run()
 	if err != nil {
+		var outb, errb bytes.Buffer
+		cmd.Stdout = &outb
+		cmd.Stderr = &errb
 		logger.ErrorLogger.Println("C# project failed to compile.")
+		fmt.Println("out:", outb.String(), "err:", errb.String())
 		log.Fatal(err)
 	}
 

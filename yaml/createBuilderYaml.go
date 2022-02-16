@@ -10,11 +10,11 @@ import (
 
 type BuilderYaml struct {
 	ProjectPath string
-	ProjectType string 
-	BuildTool 	string
-	BuildFile  	string
-	BuildCmd		string
-	OutputPath		string
+	ProjectType string
+	BuildTool   string
+	BuildFile   string
+	BuildCmd    string
+	OutputPath  string
 }
 
 func CreateBuilderYaml(fullPath string) {
@@ -26,16 +26,16 @@ func CreateBuilderYaml(fullPath string) {
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 
-	builderData := BuilderYaml {
-		ProjectPath:  projectPath,
-		ProjectType: 	projectType, 
-		BuildTool: 		buildTool,
-		BuildFile: 		buildFile,
-		BuildCmd: 		buildCmd,
-		OutputPath:		outputPath,
+	builderData := BuilderYaml{
+		ProjectPath: projectPath,
+		ProjectType: projectType,
+		BuildTool:   buildTool,
+		BuildFile:   buildFile,
+		BuildCmd:    buildCmd,
+		OutputPath:  outputPath,
 	}
 
-	_, err := os.Stat(fullPath+"/builder.yaml")
+	_, err := os.Stat(fullPath + "/builder.yaml")
 	if err == nil {
 		logger.WarningLogger.Println("builder.yaml already exists")
 	} else {
