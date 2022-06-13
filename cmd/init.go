@@ -22,9 +22,12 @@ func Init() {
 	// compile logic to derive project type
 	derive.ProjectType()
 
-	//Get build metadata
+	//Get build metadata (deprecated, func moved inside compiler)
 	// utils.Metadata()
 	logger.InfoLogger.Println("Metadata created successfully.")
+
+	//Check for Dockerfile, then build image
+	utils.Docker()
 
 	//makes hidden dir read-only
 	utils.MakeHidden()

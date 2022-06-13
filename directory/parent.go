@@ -15,10 +15,8 @@ import (
 
 //MakeDirs does...
 func MakeDirs() {
-	args := os.Args[1:]
-
 	//handles -n flag
-	name := utils.GetName(args)
+	name := utils.GetName()
 
 	//add Unix timestamp to dir name
 	currentTime := time.Now().Unix()
@@ -26,13 +24,16 @@ func MakeDirs() {
 	//check for projectPath env from builder.yaml
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 
+	unixTime := strconv.FormatInt(currentTime, 10)
+	os.Setenv("BUILDER_TIMESTAMP", unixTime)
+
 	var path string
-	if (configPath != "") {
-	// used for 'config' cmd, set by builder.yaml
-	 path = configPath + "/" + name +"_"+strconv.FormatInt(currentTime, 10)
+	if configPath != "" {
+		// used for 'config' cmd, set by builder.yaml
+		path = configPath + "/" + name + "_" + unixTime
 	} else {
-	// local path, used for 'init' cmd/default
-	 path = "./" + name +"_"+strconv.FormatInt(currentTime, 10)
+		// local path, used for 'init' cmd/default
+		path = "./" + name + "_" + unixTime
 	}
 
 	MakeParentDir(path)
@@ -72,7 +73,7 @@ func MakeParentDir(path string) (bool, error) {
 				}
 
 			} else {
-				logger.ErrorLogger.Println("Please create a directory for the Builder")
+				//logger.ErrorLogger.Println("Please create a directory for the Builder")
 				log.Fatal("Please create a directory for the Builder")
 				return true, err
 			}
