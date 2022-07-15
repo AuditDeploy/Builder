@@ -73,7 +73,7 @@ If you are specifying a buildfile, buildtool, or buildcmd within the builder.yam
 At this point in time, please include ALL builder.yaml parameters (all keys must be lowercase), even if they are empty. (This will be addressed in the next update)
 
 - projectpath: provide path for project to be built
-  - ("C:/Users/Name/Projects", etc)
+  - ("/Users/Name/Projects", etc)
 - projecttype: provide language/framework being used
   - (Node, Java, Go, Ruby, Python, C#, Ruby)
 - buildtool: provide tool used to install dependencies/build project
@@ -83,8 +83,11 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - buildcmd: provide full command to build/compile project
   - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
 - outputpath: provide path for artifact to be sent
-  - ("C:/Users/Name/Artifacts", etc)
-
+  - ("/Users/Name/Artifacts", etc)
+- globallogs: specify path to global logs
+  - ("var/logs/global-logs/logs.txt")
+- dockercmd: specify docker command, if building a container
+  - ("docker build -t my-project:1.3 .")
 ## Builder ENV Vars
 
 ### Native env vars:
@@ -103,7 +106,7 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - "BUILDER_BUILD_COMMAND": user defined build commmand (yarn install)
 - "BUILDER_OUTPUT_PATH": user defined output path for artifact
 
-## Builder Signal Flow/Layout
+## Builder Funcionalty Layout
 
 ### main.go:
 

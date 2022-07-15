@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -8,11 +9,8 @@ import (
 
 //GetName does ...
 func GetName() string {
+	var name string
 	args := os.Args[1:]
-
-	repoURL := os.Args[2]
-
-	name := repoURL[strings.LastIndex(repoURL, "/")+1:]
 
 	for i, v := range args {
 		if v == "--name" || v == "-n" {
@@ -24,6 +22,11 @@ func GetName() string {
 				}
 				name = args[i+1]
 			}
+		} else if os.Getenv("BUILDER_COMMAND") == "true" {
+			fmt.Print("No name detected. Use '-n' to define one.")
+		} else {
+			repoURL := os.Args[2]
+			name = repoURL[strings.LastIndex(repoURL, "/")+1:]
 		}
 	}
 
