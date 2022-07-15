@@ -36,9 +36,9 @@ func YamlParser(yamlPath string) {
 	//pass map int{} to callback that sets env vars
 	ConfigEnvs(f)
 
-	// if env var BUILDER_COMMAND != true 
+	// if env var BUILDER_COMMAND != true
 	removeTempDir()
-	//else 
+	//else
 }
 
 func removeTempDir() {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"Builder/cmd"
+	"Builder/utils"
 	"fmt"
 	"os"
 )
@@ -9,14 +10,14 @@ import (
 func main() {
 
 	if len(os.Args) > 1 {
+		utils.Help()
 		builderCommand := os.Args[1]
-
 		if builderCommand == "init" {
 			cmd.Init()
 		} else if builderCommand == "config" {
 			cmd.Config()
 		} else {
-			fmt.Println("expected command: 'init' or 'config'")
+			cmd.Builder()
 		}
 	} else {
 		cmd.Builder()

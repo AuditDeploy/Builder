@@ -86,4 +86,14 @@ func ConfigEnvs(byi interface{}) {
 			os.Setenv("BUILDER_DOCKER_CMD", valStr)
 		}
 	}
+
+	//check for global logs path
+	if val, ok := bldyml["globallogs"]; ok {
+		_, present := os.LookupEnv("GLOBAL_LOGS_PATH")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("GLOBAL_LOGS_PATH", valStr)
+		}
+	}
 }

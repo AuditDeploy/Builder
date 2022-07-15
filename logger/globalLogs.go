@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"fmt"
 	"io"
 	"log"
 	"os"
@@ -10,25 +9,24 @@ import (
 
 //creates global logs
 func GlobalLogs() {
-	//create global logs if it does not exists
-	if _, err := os.Stat("./globalLogs"); os.IsNotExist(err) {
-		os.Mkdir("./globalLogs", 0755)
-
+	var globalLogsPath string
+	//look for global logs env var, add
+	val, present := os.LookupEnv("GLOBAL_LOGS_PATH")
+	if !present {
+		//create global logs if it does not exists
+		if _, err := os.Stat("./globalLogs"); os.IsNotExist(err) {
+			os.Mkdir("./globalLogs", 0755)
+		}
+		globalLogsPath = "./globalLogs/logs.txt"
+	} else {
+		globalLogsPath = val
 	}
 
-	file, err := os.OpenFile("./globalLogs/logs.txt", os.O_RDONLY|os.O_CREATE, 0644)
+	file, err := os.OpenFile(globalLogsPath, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
 	file.Close()
-
-	//create global logs environment
-	val, present := os.LookupEnv("BUILDER_GLOBAL_LOGS_DIR")
-	if !present {
-		os.Setenv("BUILDER_GLOBAL_LOGS_DIR", "./globalLogs")
-	} else {
-		fmt.Println("BUILDER_GLOBAL_LOGS_DIR", val)
-	}
 
 	//copy log over to global logs
 	logsDir := os.Getenv("BUILDER_LOGS_DIR")
@@ -43,7 +41,7 @@ func GlobalLogs() {
 	}
 	defer from.Close()
 
-	to, err := os.OpenFile("./globalLogs/logs.txt", os.O_RDWR|os.O_APPEND, 0666)
+	to, err := os.OpenFile(globalLogsPath, os.O_RDWR|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatal(err)
 	}
