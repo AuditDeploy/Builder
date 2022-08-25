@@ -6,7 +6,6 @@ import (
 	"Builder/logger"
 	"Builder/utils"
 	"Builder/yaml"
-	"log"
 	"os"
 	"os/exec"
 )
@@ -48,6 +47,7 @@ func Builder() {
 		logger.GlobalLogs()
 		// delete temp dir
 	} else {
-		log.Fatal("bulder.yaml file not found. cd into it's location.")
+		utils.Help()
+		//log.Fatal("bulder.yaml file not found. cd into it's location.")
 	}
 }

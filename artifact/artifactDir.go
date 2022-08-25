@@ -18,11 +18,13 @@ func ArtifactDir() {
 	// 		dirPath = strings.TrimRight(path, "\\temp")
 	// 	}
 	// } else {
+
 	dirPath = os.Getenv("BUILDER_PARENT_DIR")
+	dirName := os.Getenv("BUILDER_DIR_NAME")
 	// }
 
 	currentTime := time.Now().Unix()
-	artifactStamp := "artifact_" + strconv.FormatInt(currentTime, 10)
+	artifactStamp := dirName + "_artifact_" + strconv.FormatInt(currentTime, 10)
 	os.Setenv("BUILDER_ARTIFACT_STAMP", artifactStamp)
 	artifactDir := dirPath + "/" + artifactStamp
 
