@@ -12,8 +12,8 @@ import (
 func CopyDir() {
 
 	//copies contents of .hidden to workspace
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
-	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
+	hiddenDir := os.Getenv("builder_HIDDEN_DIR")
+	workspaceDir := os.Getenv("builder_WORKSPACE_DIR")
 	exec.Command("cp", "-a", hiddenDir+"/.", workspaceDir).Run()
 }
 

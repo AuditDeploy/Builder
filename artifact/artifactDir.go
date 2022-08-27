@@ -10,7 +10,7 @@ import (
 
 func ArtifactDir() {
 	var dirPath string
-	// if os.Getenv("BUILDER_COMMAND") == "true" {
+	// if os.Getenv("builder_COMMAND") == "true" {
 	// 	path, _ := os.Getwd()
 	// 	if strings.Contains(path, "workspace") {
 	// 		dirPath = strings.TrimRight(path, "\\workspace")
@@ -18,12 +18,12 @@ func ArtifactDir() {
 	// 		dirPath = strings.TrimRight(path, "\\temp")
 	// 	}
 	// } else {
-	dirPath = os.Getenv("BUILDER_PARENT_DIR")
+	dirPath = os.Getenv("builder_PARENT_DIR")
 	// }
 
 	currentTime := time.Now().Unix()
 	artifactStamp := "artifact_" + strconv.FormatInt(currentTime, 10)
-	os.Setenv("BUILDER_ARTIFACT_STAMP", artifactStamp)
+	os.Setenv("builder_ARTIFACT_STAMP", artifactStamp)
 	artifactDir := dirPath + "/" + artifactStamp
 
 	err := os.Mkdir(artifactDir, 0755)
@@ -33,10 +33,10 @@ func ArtifactDir() {
 	}
 
 	//check workspace env exists, if not, create it
-	val, present := os.LookupEnv("BUILDER_ARTIFACT_DIR")
+	val, present := os.LookupEnv("builder_ARTIFACT_DIR")
 	if !present {
-		os.Setenv("BUILDER_ARTIFACT_DIR", artifactDir)
+		os.Setenv("builder_ARTIFACT_DIR", artifactDir)
 	} else {
-		fmt.Println("BUILDER_ARTIFACT_DIR", val)
+		fmt.Println("builder_ARTIFACT_DIR", val)
 	}
 }

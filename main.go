@@ -1,8 +1,8 @@
 package main
 
 import (
-	"Builder/cmd"
-	"Builder/utils"
+	"builder/cmd"
+	"builder/utils"
 	"fmt"
 	"os"
 )

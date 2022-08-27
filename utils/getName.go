@@ -22,7 +22,7 @@ func GetName() string {
 				}
 				name = args[i+1]
 			}
-		} else if os.Getenv("BUILDER_COMMAND") == "true" {
+		} else if os.Getenv("builder_COMMAND") == "true" {
 			fmt.Print("No name detected. Use '-n' to define one.")
 		} else {
 			repoURL := os.Args[2]

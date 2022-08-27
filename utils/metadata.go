@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"encoding/json"
 	"io/ioutil"
 	"log"
@@ -23,7 +23,7 @@ func Metadata(path string) {
 	homeDir := GetUserData().HomeDir
 
 	var masterGitHash, branchHash, branchName string
-	if os.Getenv("BUILDER_COMMAND") != "true" {
+	if os.Getenv("builder_COMMAND") != "true" {
 		_, masterGitHash, branchHash, branchName = GitHashAndName()
 	}
 

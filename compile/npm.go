@@ -1,10 +1,10 @@
 package compile
 
 import (
-	"Builder/artifact"
-	"Builder/logger"
-	"Builder/utils"
-	"Builder/yaml"
+	"builder/artifact"
+	"builder/logger"
+	"builder/utils"
+	"builder/yaml"
 	"archive/zip"
 	"bytes"
 	"fmt"
@@ -20,13 +20,13 @@ import (
 //Npm creates zip from files passed in as arg
 func Npm() {
 	//Set default project type env for builder.yaml creation
-	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	projectType := os.Getenv("builder_PROJECT_TYPE")
 	if projectType == "" {
-		os.Setenv("BUILDER_PROJECT_TYPE", "node")
+		os.Setenv("builder_PROJECT_TYPE", "node")
 	}
 
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
-	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
+	hiddenDir := os.Getenv("builder_HIDDEN_DIR")
+	workspaceDir := os.Getenv("builder_WORKSPACE_DIR")
 	tempWorkspace := workspaceDir + "/temp/"
 	//make temp dir
 	os.Mkdir(tempWorkspace, 0755)
@@ -36,7 +36,7 @@ func Npm() {
 
 	//define dir path for command to run
 	var fullPath string
-	configPath := os.Getenv("BUILDER_DIR_PATH")
+	configPath := os.Getenv("builder_DIR_PATH")
 	//if user defined path in builder.yaml, full path is included in tempWorkspace, else add the local path
 	if configPath != "" {
 		fullPath = tempWorkspace
@@ -44,12 +44,12 @@ func Npm() {
 		path, _ := os.Getwd()
 		//combine local path to newly created tempWorkspace, gets rid of "." in path name
 		fullPath = path + tempWorkspace[strings.Index(tempWorkspace, ".")+1:]
-		os.Setenv("BUILDER_DIR_PATH", path)
+		os.Setenv("builder_DIR_PATH", path)
 	}
 
 	//install dependencies/build, if yaml build type exists install accordingly
-	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
-	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+	buildTool := strings.ToLower(os.Getenv("builder_BUILD_TOOL"))
+	buildCmd := os.Getenv("builder_BUILD_COMMAND")
 
 	var cmd *exec.Cmd
 	if buildCmd != "" {
@@ -64,8 +64,8 @@ func Npm() {
 		//default
 		cmd = exec.Command("npm", "install")
 		cmd.Dir = fullPath // or whatever directory it's in
-		os.Setenv("BUILDER_BUILD_TOOL", "npm")
-		os.Setenv("BUILDER_BUILD_COMMAND", "npm install")
+		os.Setenv("builder_BUILD_TOOL", "npm")
+		os.Setenv("builder_BUILD_COMMAND", "npm install")
 	}
 
 	//run cmd, check for err, log cmd
@@ -80,11 +80,11 @@ func Npm() {
 		log.Fatal(err)
 	}
 
-	yaml.CreateBuilderYaml(fullPath)
+	yaml.CreatebuilderYaml(fullPath)
 
 	//sets path for metadata, and addFiles (covers when wrkspace dir env doesn't exist)
 	var addPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
+	if os.Getenv("builder_COMMAND") == "true" {
 		path, _ := os.Getwd()
 		addPath = path + "/"
 	} else {
@@ -95,7 +95,7 @@ func Npm() {
 
 	//sets path for zip creation
 	var dirPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
+	if os.Getenv("builder_COMMAND") == "true" {
 		path, _ := os.Getwd()
 		dirPath = strings.Replace(path, "\\temp", "", 1)
 	} else {
@@ -125,10 +125,10 @@ func Npm() {
 	}
 
 	packageNpmArtifact(fullPath)
-	// artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	// artifactPath := os.Getenv("builder_OUTPUT_PATH")
 	// fmt.Print(artifactPath)
 	// if artifactPath != "" {
-	// 	artifactZip := os.Getenv("BUILDER_ARTIFACT_STAMP")
+	// 	artifactZip := os.Getenv("builder_ARTIFACT_STAMP")
 	// 	fmt.Print(artifactZip)
 	// 	exec.Command("cp", "-a", artifactZip+".zip", artifactPath).Run()
 	// }
@@ -137,7 +137,7 @@ func Npm() {
 
 func packageNpmArtifact(fullPath string) {
 	artifact.ArtifactDir()
-	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	artifactDir := os.Getenv("builder_ARTIFACT_DIR")
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
 	//copy artifact, then remove artifact in workspace
@@ -155,8 +155,8 @@ func packageNpmArtifact(fullPath string) {
 	// artifactName := artifact.NameArtifact(fullPath, extName)
 
 	// send artifact to user specified path
-	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
-	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	artifactStamp := os.Getenv("builder_ARTIFACT_STAMP")
+	outputPath := os.Getenv("builder_OUTPUT_PATH")
 	if outputPath != "" {
 		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
 	}

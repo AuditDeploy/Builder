@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"fmt"
 	"log"
 	"os"
@@ -12,17 +12,17 @@ import (
 func CloneRepo() {
 
 	//clone repo with url from args
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+	hiddenDir := os.Getenv("builder_HIDDEN_DIR")
 
 	//if builder cmd, copy current dir to hidden instead of clone
-	if os.Getenv("BUILDER_COMMAND") == "true" {
+	if os.Getenv("builder_COMMAND") == "true" {
 		//pwd
 		path, err := os.Getwd()
 		if err != nil {
 			log.Println(err)
 		}
 		fmt.Println(path)
-		hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+		hiddenDir := os.Getenv("builder_HIDDEN_DIR")
 		exec.Command("cp", "-a", path+"/.", hiddenDir).Run()
 	} else {
 		repo := GetRepoURL()

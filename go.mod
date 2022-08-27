@@ -1,4 +1,4 @@
-module Builder
+module builder
 
 go 1.15
 

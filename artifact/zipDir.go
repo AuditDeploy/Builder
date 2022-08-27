@@ -10,8 +10,8 @@ import (
 
 //Npm creates zip from files passed in as arg
 func ZipArtifactDir() {
-	// parentDir := os.Getenv("BUILDER_PARENT_DIR")
-	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	// parentDir := os.Getenv("builder_PARENT_DIR")
+	artifactDir := os.Getenv("builder_ARTIFACT_DIR")
 
 	artifactZip := artifactDir+".zip"
 

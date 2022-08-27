@@ -5,12 +5,12 @@ import (
 	"strings"
 )
 
-//ConfigDerive checks "BUILDER_PROJECT_TYPE" env var and returns string arr based on type
+//ConfigDerive checks "builder_PROJECT_TYPE" env var and returns string arr based on type
 func ConfigDerive() []string {
 
 	//make type lowercase
-	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
-	buildFile := os.Getenv("BUILDER_BUILD_FILE")
+	configType := strings.ToLower(os.Getenv("builder_PROJECT_TYPE"))
+	buildFile := os.Getenv("builder_BUILD_FILE")
 
 	var files []string
 	if (configType == "go") {

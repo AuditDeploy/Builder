@@ -13,77 +13,77 @@ func ConfigEnvs(byi interface{}) {
 
 	//check for dir path
 	if val, ok := bldyml["projectpath"]; ok {
-		_, present := os.LookupEnv("BUILDER_DIR_PATH")
+		_, present := os.LookupEnv("builder_DIR_PATH")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_DIR_PATH", valStr)
+			os.Setenv("builder_DIR_PATH", valStr)
 		}
 	} else {
-		os.Setenv("BUILDER_DIR_PATH", "")
+		os.Setenv("builder_DIR_PATH", "")
 	}
 
 	//check for project type
 	if val, ok := bldyml["projecttype"]; ok {
-		_, present := os.LookupEnv("BUILDER_PROJECT_TYPE")
+		_, present := os.LookupEnv("builder_PROJECT_TYPE")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_PROJECT_TYPE", valStr)
+			os.Setenv("builder_PROJECT_TYPE", valStr)
 		}
 	} else {
-		os.Setenv("BUILDER_PROJECT_TYPE", "")
+		os.Setenv("builder_PROJECT_TYPE", "")
 	}
 
 	//check for build type
 	if val, ok := bldyml["buildtool"]; ok {
-		_, present := os.LookupEnv("BUILDER_BUILD_TOOL")
+		_, present := os.LookupEnv("builder_BUILD_TOOL")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_BUILD_TOOL", valStr)
+			os.Setenv("builder_BUILD_TOOL", valStr)
 		}
 	}
 
 	//check for build file
 	if val, ok := bldyml["buildfile"]; ok {
-		_, present := os.LookupEnv("BUILDER_BUILD_FILE")
+		_, present := os.LookupEnv("builder_BUILD_FILE")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_BUILD_FILE", valStr)
+			os.Setenv("builder_BUILD_FILE", valStr)
 		}
 	} else {
-		os.Setenv("BUILDER_BUILD_FILE", "")
+		os.Setenv("builder_BUILD_FILE", "")
 	}
 
 	//check for build file
 	if val, ok := bldyml["buildcmd"]; ok {
-		_, present := os.LookupEnv("BUILDER_BUILD_COMMAND")
+		_, present := os.LookupEnv("builder_BUILD_COMMAND")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_BUILD_COMMAND", valStr)
+			os.Setenv("builder_BUILD_COMMAND", valStr)
 		}
 	}
 
 	//check for build type
 	if val, ok := bldyml["outputpath"]; ok {
-		_, present := os.LookupEnv("BUILDER_OUTPUT_PATH")
+		_, present := os.LookupEnv("builder_OUTPUT_PATH")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_OUTPUT_PATH", valStr)
+			os.Setenv("builder_OUTPUT_PATH", valStr)
 		}
 	}
 
 	//check for docker cmd
 	if val, ok := bldyml["dockercmd"]; ok {
-		_, present := os.LookupEnv("BUILDER_DOCKER_CMD")
+		_, present := os.LookupEnv("builder_DOCKER_CMD")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_DOCKER_CMD", valStr)
+			os.Setenv("builder_DOCKER_CMD", valStr)
 		}
 	}
 

@@ -13,7 +13,7 @@ func Help() {
 	for _, v := range cArgs {
 		if v == "--help" || v == "-h" {
 			fmt.Println(`
-		   🔨 BUILDER 🔨
+		   🔨 builder 🔨
 													
 	       #%&&&%  ,&&            
 	    ##. #&&&&&&&&& &&&&&      
@@ -39,7 +39,7 @@ func Help() {
 
 			Flags
 
-* '--help' or '-h': provide info for Builder
+* '--help' or '-h': provide info for builder
 * '--output' or '-o': user defined output path for artifact
 * '--name' or '-n': user defined project name
 * '--yes' or '-y': bypass prompts
@@ -57,7 +57,7 @@ func Help() {
 * buildfile: provide file name needed to install dep/build project
   - Can be any user specified file. (myCoolProject.go, package.json etc)
 * buildcmd: provide full command to build/compile project
-  - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
+  - ("npm install --silent", "mvn -o package", anything not provided by the builder as a default)
 * outputpath: provide path for artifact to be sent
   - ("/Users/Name/Artifacts", etc)
 * globallogs: specify path to global logs

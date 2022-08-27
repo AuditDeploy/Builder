@@ -6,7 +6,7 @@ import (
 )
 
 func MakeHidden() {
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+	hiddenDir := os.Getenv("builder_HIDDEN_DIR")
 
 	//make hiddenDir hidden
 	exec.Command("attrib", hiddenDir, "-h").Run()

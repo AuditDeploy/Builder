@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"time"
 
-	"Builder/logger"
-	"Builder/utils"
+	"builder/logger"
+	"builder/utils"
 
 	"github.com/manifoldco/promptui"
 )
@@ -22,10 +22,10 @@ func MakeDirs() {
 	currentTime := time.Now().Unix()
 
 	//check for projectPath env from builder.yaml
-	configPath := os.Getenv("BUILDER_DIR_PATH")
+	configPath := os.Getenv("builder_DIR_PATH")
 
 	unixTime := strconv.FormatInt(currentTime, 10)
-	os.Setenv("BUILDER_TIMESTAMP", unixTime)
+	os.Setenv("builder_TIMESTAMP", unixTime)
 
 	var path string
 	if configPath != "" {
@@ -73,19 +73,19 @@ func MakeParentDir(path string) (bool, error) {
 				}
 
 			} else {
-				//logger.ErrorLogger.Println("Please create a directory for the Builder")
-				log.Fatal("Please create a directory for the Builder")
+				//logger.ErrorLogger.Println("Please create a directory for the builder")
+				log.Fatal("Please create a directory for the builder")
 				return true, err
 			}
 		}
 	}
 
 	//check workspace env exists, if not, create it
-	val, present := os.LookupEnv("BUILDER_PARENT_DIR")
+	val, present := os.LookupEnv("builder_PARENT_DIR")
 	if !present {
-		os.Setenv("BUILDER_PARENT_DIR", path)
+		os.Setenv("builder_PARENT_DIR", path)
 	} else {
-		fmt.Println("BUILDER_PARENT_DIR", val)
+		fmt.Println("builder_PARENT_DIR", val)
 	}
 
 	return true, err

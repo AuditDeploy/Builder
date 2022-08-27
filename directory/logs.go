@@ -1,7 +1,7 @@
 package directory
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"fmt"
 	"log"
 	"os"
@@ -28,11 +28,11 @@ func logDir(path string) (bool, error) {
 	}
 
 	//check workspace env exists, if not, create it
-	val, present := os.LookupEnv("BUILDER_LOGS_DIR")
+	val, present := os.LookupEnv("builder_LOGS_DIR")
 	if !present {
-		os.Setenv("BUILDER_LOGS_DIR", path)
+		os.Setenv("builder_LOGS_DIR", path)
 	} else {
-		fmt.Println("BUILDER_LOGS_DIR", val)
+		fmt.Println("builder_LOGS_DIR", val)
 	}
 	return true, err
 }

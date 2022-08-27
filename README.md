@@ -1,4 +1,4 @@
-# Builder
+# builder
 
 > A build tool with transparent logs and metadata tied to each build.
 
@@ -18,11 +18,11 @@ IF you know your project has a specific buildFile name or you would like to use 
 
 Important to note: at this time, if you create your own builder.yaml and initialize a project with config, you should include all of the builder parameters (even if they are empty) in order for the `builder` command to work properly. This will be address in the next version.
 
-## Builder CLI Exec Commands & Flags
+## builder CLI Exec Commands & Flags
 
 ### Commands:
 
-Builder is great at guessing what to do with most repos it's given, for the other case, you need to initialize your project by placing a user defined builder.yaml in your repo and running the `config` command.
+builder is great at guessing what to do with most repos it's given, for the other case, you need to initialize your project by placing a user defined builder.yaml in your repo and running the `config` command.
 
 - `builder init`: auto default build a project (creates packaged artifact) with metadata and logs, creates default builder.yaml
   - only necessary argument is a github repo url
@@ -34,13 +34,13 @@ Builder is great at guessing what to do with most repos it's given, for the othe
 
 ### Flags:
 
-- '--help' or '-h': provide info for Builder
+- '--help' or '-h': provide info for builder
 - '--output' or '-o': user defined output path for artifact
 - '--name' or '-n': user defined project name
 - '--yes' or '-y': bypass prompts
 - '--branch' or '-b': specify repo branch
 
-## Builder Compatibility
+## builder Compatibility
 
 ### Languages/Frameworks with default build/install commands:
 
@@ -66,7 +66,7 @@ You must have the language or package manager previously installed in order to b
 
 To use other buildtools, buildcommands, or custome buildfiles you must create builder.yaml and run `config`.
 
-## Builder.yaml Parameters
+## builder.yaml Parameters
 
 If you are specifying a buildfile, buildtool, or buildcmd within the builder.yaml, you MUST include the projectType.
 
@@ -81,32 +81,32 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - buildfile: provide file name needed to install dep/build project
   - Can be any user specified file. (myCoolProject.go, package.json etc)
 - buildcmd: provide full command to build/compile project
-  - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
+  - ("npm install --silent", "mvn -o package", anything not provided by the builder as a default)
 - outputpath: provide path for artifact to be sent
   - ("/Users/Name/Artifacts", etc)
 - globallogs: specify path to global logs
   - ("var/logs/global-logs/logs.txt")
 - dockercmd: specify docker command, if building a container
   - ("docker build -t my-project:1.3 .")
-## Builder ENV Vars
+## builder ENV Vars
 
 ### Native env vars:
 
-- "BUILDER_PARENT_DIR": parent dir path
-- "BUILDER_HIDDEN_DIR": hidden dir path
-- "BUILDER_LOGS_DIR": logs dir path
-- "BUILDER_COMMAND": bool if builder cmd is running
+- "builder_PARENT_DIR": parent dir path
+- "builder_HIDDEN_DIR": hidden dir path
+- "builder_LOGS_DIR": logs dir path
+- "builder_COMMAND": bool if builder cmd is running
 
 ### Envs set by builder.config:
 
-- "BUILDER_DIR_PATH": user defined parent dir path for specific build
-- "BUILDER_PROJECT_TYPE": user defined project type (go, java, etc)
-- "BUILDER_BUILD_TOOL": user defined build tool (maven, gradle, npm, yarn, etc)
-- "BUILDER_BUILD_FILE": user defined build file (myCoolProject.go)
-- "BUILDER_BUILD_COMMAND": user defined build commmand (yarn install)
-- "BUILDER_OUTPUT_PATH": user defined output path for artifact
+- "builder_DIR_PATH": user defined parent dir path for specific build
+- "builder_PROJECT_TYPE": user defined project type (go, java, etc)
+- "builder_BUILD_TOOL": user defined build tool (maven, gradle, npm, yarn, etc)
+- "builder_BUILD_FILE": user defined build file (myCoolProject.go)
+- "builder_BUILD_COMMAND": user defined build commmand (yarn install)
+- "builder_OUTPUT_PATH": user defined output path for artifact
 
-## Builder Funcionalty Layout
+## builder Funcionalty Layout
 
 ### main.go:
 
@@ -122,28 +122,28 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - if no repo, exit
 - if repo exists, check to ls-remote to see if it's a real git repo
 - check for '--output or -o' flag (artifact/output path)
-  - set 'BUILDER_OUTPUT_PATH' (either "" or user defined path)
+  - set 'builder_OUTPUT_PATH' (either "" or user defined path)
 
 #### 2. MakeDirs:
 
 - call GetName (checks for '-n' flag, assigns dir name to name var)
-- create 'configPath'var based on 'BUILDER_PATH_DIR' env var (established in a builder.yaml)
+- create 'configPath'var based on 'builder_PATH_DIR' env var (established in a builder.yaml)
 - create 'path' var either locally or with configPath + name + timestamp
 - call MakeParentDir:
   - check if path already exists
   - check for '-y' flag to bypassPrompt
   - make entire parentDir path
-  - set 'BUILDER_PARENT_DIR' env var
+  - set 'builder_PARENT_DIR' env var
 - call MakeHiddenDir:
   - create hiddenPath var (parentDir + './hidden')
   - check if path already exists
   - make entire hiddenDir path
-  - set 'BUILDER_HIDDEN_DIR' env var
+  - set 'builder_HIDDEN_DIR' env var
 - call MakeLogDir:
   - create logPath var (parentDir + '/logs')
   - check if path already exists
   - make entire logDir path
-  - set 'BUILDER_LOGS_DIR' env var
+  - set 'builder_LOGS_DIR' env var
   - call CreateLogs:
     - grab parentDir to create logs.txt name
     - create logs.txt in logs dir
@@ -153,20 +153,20 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - create workPath var (parentDir + '/workspace')
   - check if path already exists
   - make entire wokspaceDir path
-  - set 'BUILDER_WORKSPACE_DIR' env var
+  - set 'builder_WORKSPACE_DIR' env var
 
 #### 3. CloneRepo:
 
 - call GetRepoURL:
   - check for repo after 'init' or 'config'
   - return repo string
-- check "BUILDER_HIDDEN_DIR', if "", clone into tempRepo dir (used for 'config')
+- check "builder_HIDDEN_DIR', if "", clone into tempRepo dir (used for 'config')
 - clone repo into hiddenDir
 
 #### 4. ProjectType:
 
-- check "BUILDER_PROJECT_TYPE", if exists call ConfigDerive:
-  - check "BUILDER_BUILD_FILE", if exists, return user specified build file/files
+- check "builder_PROJECT_TYPE", if exists call ConfigDerive:
+  - check "builder_BUILD_FILE", if exists, return user specified build file/files
   - checks env var, returns []string containing languages default build file/files
 - set files []string to builder.yaml val or default
 - cycle through hidden dir to find the project type
@@ -174,24 +174,24 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - GO -->
   - copy contents of hidden into workspace dir
   - compile.Go:
-    - check "BUILDER_BUILD_TOOL" if exists, run that build tool, else run default
+    - check "builder_BUILD_TOOL" if exists, run that build tool, else run default
     - run 'go build' (default) in workspace path
-    - if "BUILDER_OUTPUT_PATH" exists, copy artifact to that path
+    - if "builder_OUTPUT_PATH" exists, copy artifact to that path
 - JAVA -->
   - copy contents of hidden into workspace dir
   - compile.Java:
-    - check "BUILDER_BUILD_TOOL" if exists, run that build tool, else run default
+    - check "builder_BUILD_TOOL" if exists, run that build tool, else run default
     - run 'mvn clean install' (default) in workspace path
-    - if "BUILDER_OUTPUT_PATH" exists, copy artifact to that path
+    - if "builder_OUTPUT_PATH" exists, copy artifact to that path
 - NPM -->
   - compile.Npm:
     - create temp directory inside workspace dir
     - copy hidden dir contents (repo) into temp dir
-    - check "BUILDER_BUILD_TOOL" if exists, run that build tool, else run default
+    - check "builder_BUILD_TOOL" if exists, run that build tool, else run default
     - run 'npm install' (default) in temp dir path
     - create temp.zip dir
     - recursively add files from temp dir to temp.zip
-    - if "BUILDER_OUTPUT_PATH" exists, copy artifact (zip file in this case) to that path
+    - if "builder_OUTPUT_PATH" exists, copy artifact (zip file in this case) to that path
 
 #### 5. Metadata:
 
@@ -222,7 +222,7 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - if no repo, exit
 - if repo exists, check to ls-remote to see if it's a real git repo
 - check for '--output or -o' flag (artifact/output path)
-  - set 'BUILDER_OUTPUT_PATH' (either "" or user defined path)
+  - set 'builder_OUTPUT_PATH' (either "" or user defined path)
 
 #### 2. CloneRepo:
 
@@ -231,7 +231,7 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - call GetRepoURL:
   - check for repo after 'init' or 'config'
   - return repo string
-- check "BUILDER_HIDDEN_DIR', if "", clone into tempRepo dir (used for 'config')
+- check "builder_HIDDEN_DIR', if "", clone into tempRepo dir (used for 'config')
 - clone repo into hiddenDir
 
 #### 3. YamlParser:
@@ -241,10 +241,10 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - unpack the yaml file into the map int{}
 - pass the map int{} into ConfigEvens:
   - check for specific keys in map and create env vars based on value
-  - check "projectType" and create 'BUILDER_PROJECT_TYPE' env var
-  - check "buildTool" and create 'BUILDER_BUILD_TOOL' env var
-  - check "buildFile" and create 'BUILDER_BUILD_FILE' env var
-  - check "path" (this is parent dir path) and create 'BUILDER_DIR_PATH' env var
+  - check "projectType" and create 'builder_PROJECT_TYPE' env var
+  - check "buildTool" and create 'builder_BUILD_TOOL' env var
+  - check "buildFile" and create 'builder_BUILD_FILE' env var
+  - check "path" (this is parent dir path) and create 'builder_DIR_PATH' env var
 - delete tempRepo dir
 
 #### 4. Run same functionality as 'init'

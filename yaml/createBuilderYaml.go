@@ -1,14 +1,14 @@
 package yaml
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v2"
 )
 
-type BuilderYaml struct {
+type builderYaml struct {
 	ProjectPath string
 	ProjectType string
 	BuildTool   string
@@ -17,16 +17,16 @@ type BuilderYaml struct {
 	OutputPath  string
 }
 
-func CreateBuilderYaml(fullPath string) {
+func CreatebuilderYaml(fullPath string) {
 
-	projectPath := os.Getenv("BUILDER_DIR_PATH")
-	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
-	buildTool := os.Getenv("BUILDER_BUILD_TOOL")
-	buildFile := os.Getenv("BUILDER_BUILD_FILE")
-	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
-	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	projectPath := os.Getenv("builder_DIR_PATH")
+	projectType := os.Getenv("builder_PROJECT_TYPE")
+	buildTool := os.Getenv("builder_BUILD_TOOL")
+	buildFile := os.Getenv("builder_BUILD_FILE")
+	buildCmd := os.Getenv("builder_BUILD_COMMAND")
+	outputPath := os.Getenv("builder_OUTPUT_PATH")
 
-	builderData := BuilderYaml{
+	builderData := builderYaml{
 		ProjectPath: projectPath,
 		ProjectType: projectType,
 		BuildTool:   buildTool,
@@ -44,7 +44,7 @@ func CreateBuilderYaml(fullPath string) {
 	}
 }
 
-func OutputData(fullPath string, allData *BuilderYaml) {
+func OutputData(fullPath string, allData *builderYaml) {
 	yamlData, _ := yaml.Marshal(allData)
 	err := ioutil.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
 

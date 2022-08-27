@@ -29,8 +29,8 @@ func GlobalLogs() {
 	file.Close()
 
 	//copy log over to global logs
-	logsDir := os.Getenv("BUILDER_LOGS_DIR")
-	parentDir := os.Getenv("BUILDER_PARENT_DIR")
+	logsDir := os.Getenv("builder_LOGS_DIR")
+	parentDir := os.Getenv("builder_PARENT_DIR")
 
 	fileName := parentDir[strings.LastIndex(parentDir, "/")+1:]
 

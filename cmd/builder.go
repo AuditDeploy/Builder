@@ -1,18 +1,18 @@
 package cmd
 
 import (
-	"Builder/derive"
-	"Builder/directory"
-	"Builder/logger"
-	"Builder/utils"
-	"Builder/yaml"
+	"builder/derive"
+	"builder/directory"
+	"builder/logger"
+	"builder/utils"
+	"builder/yaml"
 	"log"
 	"os"
 	"os/exec"
 )
 
 func Builder() {
-	os.Setenv("BUILDER_COMMAND", "true")
+	os.Setenv("builder_COMMAND", "true")
 	path, _ := os.Getwd()
 
 	//checks if yaml file exists in path
@@ -23,7 +23,7 @@ func Builder() {
 		yaml.YamlParser(path + "/" + "builder.yaml")
 
 		//append logs
-		//logger.CreateLogs(os.Getenv("BUILDER_LOGS_DIR"))
+		//logger.CreateLogs(os.Getenv("builder_LOGS_DIR"))
 		directory.MakeDirs()
 		logger.InfoLogger.Println("Directories successfully created.")
 

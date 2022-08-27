@@ -1,9 +1,9 @@
 package derive
 
 import (
-	"Builder/compile"
-	"Builder/logger"
-	"Builder/utils"
+	"builder/compile"
+	"builder/logger"
+	"builder/utils"
 	"fmt"
 	"log"
 	"os"
@@ -18,7 +18,7 @@ import (
 func ProjectType() {
 
 	//check for user defined project type from builder.yaml to define string array files
-	configType := strings.ToLower(os.Getenv("BUILDER_PROJECT_TYPE"))
+	configType := strings.ToLower(os.Getenv("builder_PROJECT_TYPE"))
 
 	var files []string
 	//projectType exists in builder.yaml
@@ -83,11 +83,11 @@ func ProjectType() {
 //derive projects by Extensions
 func deriveProjectByExtension() {
 	var dirPathExtToFound string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
+	if os.Getenv("builder_COMMAND") == "true" {
 		path, _ := os.Getwd()
 		dirPathExtToFound = path
 	} else {
-		dirPathExtToFound = os.Getenv("BUILDER_HIDDEN_DIR")
+		dirPathExtToFound = os.Getenv("builder_HIDDEN_DIR")
 	}
 	extensions := []string{".csproj", ".sln"}
 
@@ -100,7 +100,7 @@ func deriveProjectByExtension() {
 			case ".csproj":
 				filePath := strings.Replace(findPath(fileName), ".hidden", "workspace", 1)
 
-				if os.Getenv("BUILDER_COMMAND") != "true" {
+				if os.Getenv("builder_COMMAND") != "true" {
 					utils.CopyDir()
 				}
 				logger.InfoLogger.Println("C# project detected, Ext .csproj")
@@ -121,11 +121,11 @@ func deriveProjectByExtension() {
 				//if there's more than 5 projects in solution(repo), user will be asked to use builder config instead
 				if len(listOfProjectsArray) > 5 {
 					logger.InfoLogger.Println("C# project detected, Ext .sln. More than 5 projects in solution not supported")
-					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml")
+					log.Fatal("There is more than 5 projects in this solution, please use builder Config and specify the path of your file you wish to compile in the builder.yml")
 				} else {
 					// < 5 projects in solution(repo), user will be prompt to choose a project path.
 					pathToCompileFrom := selectPathToCompileFrom(listOfProjectsArray)
-					workspace := os.Getenv("BUILDER_WORKSPACE_DIR")
+					workspace := os.Getenv("builder_WORKSPACE_DIR")
 					pathToCompileFrom = workspace + "/" + pathToCompileFrom
 
 					utils.CopyDir()
@@ -143,11 +143,11 @@ func deriveProjectByExtension() {
 func findPath(file string) string {
 
 	var dirPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
+	if os.Getenv("builder_COMMAND") == "true" {
 		currentDir, _ := os.Getwd()
 		dirPath = currentDir
 	} else {
-		dirPath = os.Getenv("BUILDER_HIDDEN_DIR")
+		dirPath = os.Getenv("builder_HIDDEN_DIR")
 	}
 
 	// if f.Name is == to file passed in "coolProject.go", filePath becomes the path that file exists in
@@ -163,7 +163,7 @@ func findPath(file string) string {
 		log.Fatal(err)
 	}
 
-	configPath := os.Getenv("BUILDER_DIR_PATH")
+	configPath := os.Getenv("builder_DIR_PATH")
 	//if user defined path in builder.yaml, filePath has fullPath included, if not, run it locally
 	if configPath != "" {
 		return filePath

@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"Builder/derive"
-	"Builder/directory"
-	"Builder/logger"
-	"Builder/utils"
+	"builder/derive"
+	"builder/directory"
+	"builder/logger"
+	"builder/utils"
 )
 
 func Init() {

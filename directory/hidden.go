@@ -1,7 +1,7 @@
 package directory
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"fmt"
 	"log"
 	"os"
@@ -27,11 +27,11 @@ func hiddenDir(path string) (bool, error) {
 	}
 
 	//check workspace env exists, if not, create it
-	val, present := os.LookupEnv("BUILDER_HIDDEN_DIR")
+	val, present := os.LookupEnv("builder_HIDDEN_DIR")
 	if !present {
-		os.Setenv("BUILDER_HIDDEN_DIR", path)
+		os.Setenv("builder_HIDDEN_DIR", path)
 	} else {
-		fmt.Println("BUILDER_HIDDEN_DIR", val)
+		fmt.Println("builder_HIDDEN_DIR", val)
 	}
 	return true, err
 }

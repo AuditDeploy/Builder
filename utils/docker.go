@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Builder/logger"
+	"builder/logger"
 	"bytes"
 	"fmt"
 	"log"
@@ -18,12 +18,12 @@ func Docker() {
 	if dockerFlag {
 		//DETERMINE CMD
 		var cmd *exec.Cmd
-		dockerCmd := os.Getenv("BUILDER_DOCKER_CMD")
+		dockerCmd := os.Getenv("builder_DOCKER_CMD")
 		//if dockerCmd doesn't exist use default
 		if dockerCmd == "" {
 			name := GetName()
 			imageName := fmt.Sprintf("builder/%s", name)
-			unixTime := os.Getenv("BUILDER_TIMESTAMP")
+			unixTime := os.Getenv("builder_TIMESTAMP")
 			cmd = exec.Command("docker", "build", ".", "-t", imageName+"-"+unixTime)
 		} else {
 			//else use defined dockerCmd
@@ -35,8 +35,8 @@ func Docker() {
 		//determine projectType to top level Dockerfile path
 		compType := []string{"go", "c#", "java"}
 		nonCompType := []string{"node", "npm", "python", "ruby"}
-		workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
-		projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+		workspaceDir := os.Getenv("builder_WORKSPACE_DIR")
+		projectType := os.Getenv("builder_PROJECT_TYPE")
 		if contains(compType, projectType) {
 			cmd.Dir = workspaceDir
 		} else if contains(nonCompType, projectType) {

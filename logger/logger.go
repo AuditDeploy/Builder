@@ -13,10 +13,10 @@ var (
 )
 
 func CreateLogs(filePath string) {
-	logsDir := os.Getenv("BUILDER_LOGS_DIR")
+	logsDir := os.Getenv("builder_LOGS_DIR")
 
 	//points back to already created log.txt if using 'builder' cmd
-	// if os.Getenv("BUILDER_COMMAND") == "true" {
+	// if os.Getenv("builder_COMMAND") == "true" {
 	// 	path, _ := os.Getwd()
 	// 	fmt.Println(path)
 
