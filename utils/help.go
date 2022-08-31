@@ -71,6 +71,10 @@ func Help() {
   - ("var/logs/global-logs/logs.txt")
 * dockerCmd: specify docker command, if building a container
   - ("docker build -t my-project:1.3 .")
+* repoBranch: specify repo branch name
+  - (“feature/“new-branch”)
+* bypassPrompts: bypass prompts
+  - (true)
 			`)
 		os.Exit(0)
 	}

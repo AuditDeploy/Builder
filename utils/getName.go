@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -46,7 +45,6 @@ func GetName() string {
 		}
 		os.Setenv("BUILDER_DIR_NAME", name)
 	}
-	fmt.Print("DIRNAME: ", name+"\n")
 	return name
 }
 
