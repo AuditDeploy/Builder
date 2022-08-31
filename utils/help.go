@@ -53,6 +53,7 @@ func Help() {
 
 
 		builder.yaml params
+		
 * projectName: provide name for project
   - ("helloworld", etc)
 * projectPath: provide path for project to be built
