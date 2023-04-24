@@ -13,11 +13,11 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
-//MakeDirs does...
+// MakeDirs does...
 func MakeDirs() {
 	//handles -n flag
 	name := utils.GetName()
-
+	fmt.Println("making directories")
 	//add Unix timestamp to dir name
 	currentTime := time.Now().Unix()
 
@@ -33,7 +33,9 @@ func MakeDirs() {
 		path = configPath + "/" + name + "_" + unixTime
 	} else {
 		// local path, used for 'init' cmd/default
-		path = "./" + name + "_" + unixTime
+		//path = "./" + name + "_" + unixTime
+		//testing hidden dir name
+		path = name + "_" + unixTime
 	}
 
 	MakeParentDir(path)

@@ -12,12 +12,14 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 )
 
-//Npm creates zip from files passed in as arg
+// Npm creates zip from files passed in as arg
 func Npm() {
 	//Set default project type env for builder.yaml creation
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
@@ -27,12 +29,21 @@ func Npm() {
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
-	tempWorkspace := workspaceDir + "/temp/"
+	//tempWorkspace := workspaceDir + "/temp/"
+	tempWorkspace := filepath.Join(workspaceDir, "temp")
 	//make temp dir
 	os.Mkdir(tempWorkspace, 0755)
 
+	// get current working directory
+	path, _ := os.Getwd()
 	//add hidden dir contents to temp dir, install dependencies
-	exec.Command("cp", "-a", hiddenDir+"/.", tempWorkspace).Run()
+	//exec.Command("cp", "-a", path+hiddenDir+"/.", tempWorkspace).Run()
+	if runtime.GOOS == "windows" {
+		logger.InfoLogger.Println("this is windows")
+		exec.Command("cmd", "/C", "xcopy", filepath.Join(path, hiddenDir), filepath.Join(path, tempWorkspace), "/e").Run()
+	} else {
+		exec.Command("cp", "-a", filepath.Join(path, hiddenDir), filepath.Join(path, tempWorkspace)).Run()
+	}
 
 	//define dir path for command to run
 	var fullPath string
@@ -43,7 +54,11 @@ func Npm() {
 	} else {
 		path, _ := os.Getwd()
 		//combine local path to newly created tempWorkspace, gets rid of "." in path name
-		fullPath = path + tempWorkspace[strings.Index(tempWorkspace, ".")+1:]
+		//fullPath = path + tempWorkspace[strings.Index(tempWorkspace, ".")+1:]
+		fullPath = filepath.Join(path, tempWorkspace)
+
+		//testing changing default path to hidden folder
+		//fullPath = hiddenDir + "\\.hidden"
 		os.Setenv("BUILDER_DIR_PATH", path)
 	}
 
@@ -62,6 +77,9 @@ func Npm() {
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else {
 		//default
+		if !(runtime.GOOS == "windows") {
+			fullPath = filepath.Join(fullPath, ".hidden")
+		}
 		cmd = exec.Command("npm", "install")
 		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_TOOL", "npm")
@@ -69,7 +87,6 @@ func Npm() {
 	}
 
 	//run cmd, check for err, log cmd
-	logger.InfoLogger.Println(cmd)
 	err := cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
@@ -141,16 +158,29 @@ func packageNpmArtifact(fullPath string) {
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
 	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
-	exec.Command("rm", fullPath+"/"+extName).Run()
+	currentDirectory, _ := os.Getwd()
+	if runtime.GOOS == "windows" {
+		exec.Command("cmd", "/C", "xcopy", filepath.Join(fullPath, extName), filepath.Join(currentDirectory, artifactDir), "/e").Run()
+		exec.Command("cmd", "/C", "del", filepath.Join(fullPath, extName)).Run()
+	} else {
+		//exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
+		//exec.Command("rm", fullPath+"/"+extName).Run()
+		exec.Command("cp", "-a", filepath.Join(fullPath, extName), filepath.Join(currentDirectory, artifactDir)).Run()
+		exec.Command("rm", filepath.Join(fullPath, extName)).Run()
+	}
 
 	//create metadata, then copy contents to zip dir
 	utils.Metadata(artifactDir)
 	artifact.ZipArtifactDir()
 
 	//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
-	exec.Command("cp", "-a", artifactDir+".zip", artifactDir).Run()
-	exec.Command("rm", artifactDir+".zip").Run()
+	if runtime.GOOS == "windows" {
+		exec.Command("cmd", "/C", "xcopy", artifactDir+".zip", artifactDir, "/e").Run()
+		exec.Command("cmd", "/C", "del", artifactDir+".zip").Run()
+	} else {
+		exec.Command("cp", "-a", artifactDir+".zip", artifactDir).Run()
+		exec.Command("rm", artifactDir+".zip").Run()
+	}
 
 	// artifactName := artifact.NameArtifact(fullPath, extName)
 
@@ -158,11 +188,15 @@ func packageNpmArtifact(fullPath string) {
 	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	if outputPath != "" {
-		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
+		if runtime.GOOS == "windows" {
+			exec.Command("cmd", "/C", "xcopy", filepath.Join(artifactDir, artifactStamp+".zip"), outputPath, "/e").Run()
+		} else {
+			exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
+		}
 	}
 }
 
-//recursively add files
+// recursively add files
 func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
 	// Open the Directory
 	files, err := ioutil.ReadDir(basePath)
@@ -170,9 +204,13 @@ func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
 		fmt.Println(err)
 	}
 
+	//get current working directory
+	currentDir, _ := os.Getwd()
+
 	for _, file := range files {
 		if !file.IsDir() {
-			dat, err := ioutil.ReadFile(basePath + file.Name())
+			//dat, err := ioutil.ReadFile(basePath + file.Name())
+			dat, err := ioutil.ReadFile(filepath.Join(currentDir, basePath, file.Name()))
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -188,8 +226,10 @@ func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
 			}
 		} else if file.IsDir() {
 			// Recurse
-			newBase := basePath + file.Name() + "/"
-			addNpmFiles(w, newBase, baseInZip+file.Name()+"/")
+			//newBase := basePath + file.Name() + "/"
+			newBase := filepath.Join(basePath, file.Name())
+			//addNpmFiles(w, newBase, baseInZip+file.Name()+"/")
+			addNpmFiles(w, newBase, baseInZip+file.Name())
 		}
 	}
 }

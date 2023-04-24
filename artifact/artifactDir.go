@@ -21,11 +21,14 @@ func ArtifactDir() {
 	dirPath = os.Getenv("BUILDER_PARENT_DIR")
 	// }
 
+	//get current working directory
+	//currentDir, _ := os.Getwd()
+
 	currentTime := time.Now().Unix()
 	artifactStamp := "artifact_" + strconv.FormatInt(currentTime, 10)
 	os.Setenv("BUILDER_ARTIFACT_STAMP", artifactStamp)
 	artifactDir := dirPath + "/" + artifactStamp
-
+	//artifactDir := filepath.Join(currentDir, dirPath, artifactStamp)
 	err := os.Mkdir(artifactDir, 0755)
 	//should return nil once directory is made, if not, throw err
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
 )
 
 func workSpaceDir(path string) (bool, error) {
@@ -36,10 +37,20 @@ func workSpaceDir(path string) (bool, error) {
 	return true, err
 }
 
-//MakeWorkspaceDir does...
+// MakeWorkspaceDir does...
 func MakeWorkspaceDir(path string) {
 
-	workPath := path + "/workspace"
+	//workPath := path + "/workspace"
+	//testing create workspace dir
+	var pathSeperator = "/"
+
+	if runtime.GOOS == "windows" {
+		pathSeperator = "\\"
+	}
+	/* currentDirectory, _ := os.Getwd()
+	logger.InfoLogger.Println(filepath.Join(currentDirectory, path, "workspace"))
+	workPath := filepath.Join(currentDirectory, path, "workspace") */
+	workPath := path + pathSeperator + "workspace"
 
 	workSpaceDir(workPath)
 
