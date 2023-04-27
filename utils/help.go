@@ -5,14 +5,20 @@ import (
 	"os"
 )
 
-//CheckArgs is...
+//Help is application info
 func Help() {
 	cArgs := os.Args[1:]
+	var helpExists bool
 
-	//check for help flag
 	for _, v := range cArgs {
 		if v == "--help" || v == "-h" {
-			fmt.Println(`
+			helpExists = true
+		}
+	}
+
+	//check for help flag or builder cmd to print info
+	if (os.Getenv("BUILDER_COMMAND") == "true") || helpExists {
+		fmt.Println(`
 		   🔨 BUILDER 🔨
 													
 	       #%&&&%  ,&&            
@@ -47,25 +53,30 @@ func Help() {
 
 
 		builder.yaml params
-
-* projectpath: provide path for project to be built
+		
+* projectName: provide name for project
+  - ("helloworld", etc)
+* projectPath: provide path for project to be built
   - ("/Users/Name/Projects", etc)
-* projecttype: provide language/framework being used
+* projectType: provide language/framework being used
   - (Node, Java, Go, Ruby, Python, C#, Ruby)
-* buildtool: provide tool used to install dependencies/build project
+* buildTool: provide tool used to install dependencies/build project
   - (maven, npm, bundler, pipenv, etc)
-* buildfile: provide file name needed to install dep/build project
+* buildFile: provide file name needed to install dep/build project
   - Can be any user specified file. (myCoolProject.go, package.json etc)
-* buildcmd: provide full command to build/compile project
+* buildCmd: provide full command to build/compile project
   - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
-* outputpath: provide path for artifact to be sent
+* outputPath: provide path for artifact to be sent
   - ("/Users/Name/Artifacts", etc)
-* globallogs: specify path to global logs
+* globalLogs: specify path to global logs
   - ("var/logs/global-logs/logs.txt")
-* dockercmd: specify docker command, if building a container
+* dockerCmd: specify docker command, if building a container
   - ("docker build -t my-project:1.3 .")
+* repoBranch: specify repo branch name
+  - (“feature/“new-branch”)
+* bypassPrompts: bypass prompts
+  - (true)
 			`)
-			os.Exit(0)
-		}
+		os.Exit(0)
 	}
 }

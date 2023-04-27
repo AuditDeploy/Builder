@@ -6,6 +6,13 @@ The only build tool that allows you to pass in a repo and build your project, wh
 
 ## Get Started
 
+Once you pull the project down, you need to create an executable and place it in your the correct path. 
+
+To create a binary run `go build -o builder`
+Then move builder to a path of your choosing, e.g. `mv builder /usr/local/bin`
+
+## About
+
 Run `builder init [repo url]` on a project (must be a compatible language). This creates a new project with a hidden, logs, workspace, and artifact dir.
 
 For compatible compiled languages (C#, Golang, Java) a builder.yaml file gets created (see below for more info) in the workspace dir. For interpreted languages (Javascript, Python, Ruby) it's created in the temp dir.
@@ -88,6 +95,11 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - ("var/logs/global-logs/logs.txt")
 - dockercmd: specify docker command, if building a container
   - ("docker build -t my-project:1.3 .")
+- repoBranch: specify repo branch name
+  - (“feature/“new-branch”)
+- bypassPrompts: bypass prompts
+  - (true)
+
 ## Builder ENV Vars
 
 ### Native env vars:
