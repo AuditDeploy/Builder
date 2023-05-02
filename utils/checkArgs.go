@@ -48,7 +48,7 @@ func CheckArgs() {
 	//check for arg flags
 	builderFlags := os.Args[1:]
 	for _, element := range builderFlags {
-		if element == "--hidden" {
+		if element == "--hidden" || element == "-H" {
 			os.Setenv("HIDDEN_DIR_ENABLED", "true")
 		}
 	}
