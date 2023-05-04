@@ -108,6 +108,10 @@ func bypassPrompt() bool {
 
 	yesFlag := false
 
+	val := os.Getenv("BYPASS_PROMPTS")
+	if val == "true" {
+		yesFlag = true
+	}
 	for _, val := range args {
 		if val == "--yes" || val == "-y" {
 			yesFlag = true

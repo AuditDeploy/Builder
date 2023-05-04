@@ -1,7 +1,9 @@
 package utils
 
 import (
+	"fmt"
 	"log"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -14,11 +16,13 @@ func WriteConfigFile(filename string, configType string, configPath string, sett
 	v.SetConfigType(configType)
 	v.AddConfigPath(configPath)
 
+	fmt.Println("settings: ", *settings)
+
 	for key, value := range *settings {
 		v.Set(key, value)
 	}
 
-	err := v.WriteConfig()
+	err := v.WriteConfigAs(filepath.Join(configPath, filename))
 
 	if err != nil {
 		log.Fatal("Error writing config file ", err)

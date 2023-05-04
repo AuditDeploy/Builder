@@ -134,11 +134,17 @@ func BranchNameExists(branches []string) (bool, string) {
 	_, clonedBranchName := CloneBranch()
 
 	for _, branch := range branches {
-		if branch[strings.LastIndex(branch, "/")+1:] == clonedBranchName {
+		nameSlice := strings.Split(branch, "/")
+		sliceLen := len(nameSlice)
+		if branch[strings.LastIndex(branch, "/")+1:] == clonedBranchName || (sliceLen > 2 && (nameSlice[sliceLen-2]+"/"+nameSlice[sliceLen-1] == clonedBranchName)) {
 			branchExists = true
 			branchNameAndHash = branch
 		}
 	}
-
 	return branchExists, branchNameAndHash
 }
+
+//split name and hash by '/'
+// get last two indexs
+//add them together with '/'
+//return that string and check for it

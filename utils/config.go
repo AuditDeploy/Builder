@@ -129,7 +129,8 @@ func InitConfig() {
 	configDir := filepath.Join(currentDir, "configs")
 
 	if _, err := os.Stat(configDir); errors.Is(err, os.ErrNotExist) {
-		log.Fatal(configDir + " does not exist")
+		// configDir dosen't exist return from function
+		return
 	}
 
 	files, err := os.ReadDir(configDir)

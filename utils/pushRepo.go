@@ -52,7 +52,7 @@ func PushRepo() {
 	localPath := filepath.Join(currentDirectory, "configs")
 	tmpPath := filepath.Join("tmp", "foo")
 	filename, v := CreateConfigFile(name+"_builder", configType)
-	builderFile := filepath.Join(tmpPath, name+"_builder"+configType)
+	builderFile := filepath.Join(tmpPath, name+"_builder."+configType)
 	var allSettings map[string]interface{}
 
 	// if v == nil; file already exists; get config from configuration slice created in main
@@ -75,15 +75,16 @@ func PushRepo() {
 			allSettings = Cfg.ReadConfigFile(name+"_builder.json", configType, tmpPath, v)
 		}
 	} else {
+		fmt.Println("Inside else")
 		// if v != nil; local builder json file dosen't exist
 		_, err := os.Stat(builderFile)
 
-		// builder json file exists in cloned repo read from repo builder json file
-		if !(os.IsNotExist(err)) {
-			allSettings = Cfg.ReadConfigFile(name+"_builder.json", configType, tmpPath, v)
-		} else {
-			// builder json file dosen't exist in repo read from local builder json file just created
+		// builder json file dosen't exist in repo read from local builder json file just created
+		if os.IsNotExist(err) {
 			allSettings = Cfg.ReadConfigFile(name+"_builder.json", configType, localPath, v)
+		} else {
+			// builder json file exists in cloned repo read from repo builder json file
+			allSettings = Cfg.ReadConfigFile(name+"_builder.json", configType, tmpPath, v)
 		}
 	}
 

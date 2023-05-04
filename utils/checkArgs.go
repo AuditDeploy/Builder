@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 //CheckArgs is...
@@ -41,6 +43,43 @@ func CheckArgs() {
 					fmt.Println("BUILDER_OUTPUT_PATH", val)
 					fmt.Println("Output Path already present")
 				}
+			}
+		}
+
+		if strings.Contains(v, "--auto-push=") {
+			command := strings.Split(v, "=")[1]
+			configType := "json"
+			currentDirectory, _ := os.Getwd()
+			configDirectory := filepath.Join(currentDirectory, "configs")
+
+			var Cfg Config
+
+			name := GetRepoName(repo)
+			filename, v := CreateConfigFile(name+"_config", configType)
+
+			// if v == nil; file already exists; get config from configuration slice created in main
+			if v == nil {
+				cfgs := RetrieveConfis()
+
+				for _, c := range cfgs {
+					if c.ConfigFileUsed() == filename {
+						v = c
+					}
+				}
+			}
+
+			allSettings := Cfg.ReadConfigFile(name+"_config.json", configType, configDirectory, v)
+
+			val, ok := allSettings["autopush"]
+
+			if (!ok || val == "0") && command == "true" {
+				allSettings["autopush"] = true
+				WriteConfigFile(name+"_config.json", configType, configDirectory, &allSettings, v)
+				fmt.Println("Successfully updated configuration")
+			} else if (!ok || val == "1") && command == "false" {
+				allSettings["autopush"] = false
+				WriteConfigFile(name+"_config.json", configType, configDirectory, &allSettings, v)
+				fmt.Println("Successfully updated configuration")
 			}
 		}
 	}
