@@ -1,0 +1,8 @@
+/demo/
+/dist/
+
+# Built binaries.
+/builder
+/builder.exe
+
+/scripts/builder-*
