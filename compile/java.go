@@ -10,10 +10,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
-//Java does ...
+// Java does ...
 func Java(filePath string) {
 	//Set default project type env for builder.yaml creation
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
@@ -82,6 +83,14 @@ func Java(filePath string) {
 	logger.InfoLogger.Println("Java project compiled successfully.")
 }
 func packageJavaArtifact(fullPath string) {
+	archiveExt := ""
+
+	if runtime.GOOS == "windows" {
+		archiveExt = ".zip"
+	} else {
+		archiveExt = ".tar.gz"
+	}
+
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
@@ -95,8 +104,8 @@ func packageJavaArtifact(fullPath string) {
 	artifact.ZipArtifactDir()
 
 	//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
-	exec.Command("cp", "-a", artifactDir+".zip", artifactDir).Run()
-	exec.Command("rm", artifactDir+".zip").Run()
+	exec.Command("cp", "-a", artifactDir+archiveExt, artifactDir).Run()
+	exec.Command("rm", artifactDir+archiveExt).Run()
 
 	// artifactName := artifact.NameArtifact(fullPath, extName)
 
@@ -104,6 +113,6 @@ func packageJavaArtifact(fullPath string) {
 	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	if outputPath != "" {
-		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
+		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, outputPath).Run()
 	}
 }

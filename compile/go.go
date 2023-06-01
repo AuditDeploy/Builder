@@ -13,10 +13,11 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 
-//Go creates exe from file passed in as arg
+// Go creates exe from file passed in as arg
 func Go(filePath string) {
 
 	//Set default project type env for builder.yaml creation
@@ -64,9 +65,9 @@ func Go(filePath string) {
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else {
 		//default
-		cmd = exec.Command("go", "build", buildFile)
+		cmd = exec.Command("go", "build", "-o", strings.TrimSuffix(utils.GetName(), ".git"))
 		cmd.Dir = fullPath // or whatever directory it's in
-		os.Setenv("BUILDER_BUILD_COMMAND", "go build "+buildFile)
+		os.Setenv("BUILDER_BUILD_COMMAND", "go build -o "+strings.TrimSuffix(utils.GetName(), ".git"))
 	}
 
 	//run cmd, check for err, log cmd
@@ -88,10 +89,21 @@ func Go(filePath string) {
 }
 
 func packageGoArtifact(fullPath string) {
+	archiveExt := ""
+	artifactExt := ""
+
+	if runtime.GOOS == "windows" {
+		archiveExt = ".zip"
+		artifactExt = ".exe"
+	} else {
+		archiveExt = ".tar.gz"
+		artifactExt = "executable"
+	}
+
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
-	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
+	_, extName := artifact.ExtExistsFunction(fullPath, artifactExt)
 	//copy artifact, then remove artifact in workspace
 	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
 	exec.Command("rm", fullPath+"/"+extName).Run()
@@ -101,8 +113,8 @@ func packageGoArtifact(fullPath string) {
 	artifact.ZipArtifactDir()
 
 	//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
-	exec.Command("cp", "-a", artifactDir+".zip", artifactDir).Run()
-	exec.Command("rm", artifactDir+".zip").Run()
+	exec.Command("cp", "-a", artifactDir+archiveExt, artifactDir).Run()
+	exec.Command("rm", artifactDir+archiveExt).Run()
 
 	// artifactName := artifact.NameArtifact(fullPath, extName)
 
@@ -110,6 +122,6 @@ func packageGoArtifact(fullPath string) {
 	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	if outputPath != "" {
-		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+".zip", outputPath).Run()
+		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, outputPath).Run()
 	}
 }
