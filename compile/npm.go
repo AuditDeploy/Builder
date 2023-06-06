@@ -155,19 +155,28 @@ func packageNpmArtifact(fullPath string) {
 
 	//create metadata, then copy contents to zip dir
 	utils.Metadata(artifactDir)
-	artifact.ZipArtifactDir()
 
-	//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
-	exec.Command("cp", "-a", artifactDir+archiveExt, artifactDir).Run()
-	exec.Command("rm", artifactDir+archiveExt).Run()
+	if os.Getenv("ARTIFACT_ZIP_ENABLED") == "true" {
+		//zip artifact
+		artifact.ZipArtifactDir()
 
-	// artifactName := artifact.NameArtifact(fullPath, extName)
+		//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
+		exec.Command("cp", "-a", artifactDir+archiveExt, artifactDir).Run()
+		exec.Command("rm", artifactDir+archiveExt).Run()
 
-	// send artifact to user specified path
-	artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
-	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
-	if outputPath != "" {
-		exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, outputPath).Run()
+		// artifactName := artifact.NameArtifact(fullPath, extName)
+
+		// send artifact to user specified path or send to parent directory
+		artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
+		outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+		if outputPath != "" {
+			exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, outputPath).Run()
+		} else {
+			exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, os.Getenv("BUILDER_PARENT_DIR")).Run()
+		}
+
+		//remove artifact directory
+		exec.Command("rm", "-r", artifactDir).Run()
 	}
 }
 
