@@ -10,7 +10,6 @@ import (
 
 // find file with extension and return file name
 func ExtExistsFunction(dirPath string, ext string) (bool, string) {
-	fmt.Println(dirPath)
 	found := false
 	d, err := os.Open(dirPath)
 	if err != nil {
