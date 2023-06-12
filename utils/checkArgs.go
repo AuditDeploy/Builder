@@ -7,7 +7,7 @@ import (
 	"os/exec"
 )
 
-//CheckArgs is...
+// CheckArgs is...
 func CheckArgs() {
 	//Repo
 	repo := GetRepoURL()
@@ -42,6 +42,9 @@ func CheckArgs() {
 					fmt.Println("Output Path already present")
 				}
 			}
+		}
+		if v == "--hidden" || v == "-H" {
+			os.Setenv("HIDDEN_DIR_ENABLED", "true")
 		}
 	}
 }
