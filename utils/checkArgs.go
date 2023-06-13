@@ -43,7 +43,7 @@ func CheckArgs() {
 				}
 			}
 		}
-		if v == "--zip" || v == "-z" {
+		if v == "--compress" || v == "-z" || v == "-C" {
 			os.Setenv("ARTIFACT_ZIP_ENABLED", "true")
 		}
 	}
