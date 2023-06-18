@@ -2,8 +2,10 @@ package directory
 
 import (
 	"Builder/utils/log"
+	"Builder/utils"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func hiddenDir(path string) (bool, error) {
@@ -37,7 +39,13 @@ func hiddenDir(path string) (bool, error) {
 // MakeHiddenDir does...
 func MakeHiddenDir(path string) {
 
-	hiddenPath := path + "/.hidden"
-	hiddenDir(hiddenPath)
-
+	if os.Getenv("HIDDEN_DIR_ENABLED") == "true" {
+		hiddenPath := path + "/.hidden"
+		hiddenDir(hiddenPath)
+	} else {
+		repo := utils.GetRepoURL()
+		repoName := strings.TrimSuffix(repo[strings.LastIndex(repo, "/"):], ".git")
+		visiblePath := path + "/" + repoName
+		hiddenDir(visiblePath)
+	}
 }
