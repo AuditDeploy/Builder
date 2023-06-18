@@ -1,7 +1,7 @@
 package yaml
 
 import (
-	"Builder/logger"
+	"Builder/utils/log"
 	"io/ioutil"
 	"os"
 
@@ -52,10 +52,10 @@ func CreateBuilderYaml(fullPath string) {
 
 	_, err := os.Stat(fullPath + "/builder.yaml")
 	if err == nil {
-		logger.WarningLogger.Println("builder.yaml already exists")
+		log.Warn("builder.yaml already exists ⛔️")
 	} else {
 		OutputData(fullPath, &builderData)
-		logger.WarningLogger.Println("Default builder.yaml created")
+		log.Info("builder.yaml created ✅")
 	}
 }
 
@@ -64,7 +64,6 @@ func OutputData(fullPath string, allData *BuilderYaml) {
 	err := ioutil.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
 
 	if err != nil {
-		logger.ErrorLogger.Println("builder.yaml creation unsuccessful.")
-		panic(err)
+		log.Fatal("builder.yaml creation failed ⛔️")
 	}
 }

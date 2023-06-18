@@ -1,16 +1,15 @@
 package utils
 
 import (
-	"Builder/logger"
+	"Builder/utils/log"
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-//Docker creates image from dockerfile and pushes to dockerhub
+// Docker creates image from dockerfile and pushes to dockerhub
 func Docker() {
 	dockerFlag := CheckDockerFlag()
 
@@ -46,28 +45,27 @@ func Docker() {
 		}
 
 		//RUN DOCKER BUILD
-		logger.InfoLogger.Println(cmd)
+		log.Info("running command", cmd)
 		err := cmd.Run()
 		if err != nil {
 			var outb, errb bytes.Buffer
 			cmd.Stdout = &outb
 			cmd.Stderr = &errb
-			logger.ErrorLogger.Println("Docker build failed.")
 			fmt.Println("out:", outb.String(), "err:", errb.String())
-			log.Fatal(err)
+			log.Fatal("docker build failed", err)
 		}
 
 		//RUN DOCKER PUSH
 	}
 }
 
-//CheckDockerFlag for docker flag
+// CheckDockerFlag for docker flag
 func CheckDockerFlag() bool {
 	var exists bool
 	cArgs := os.Args[1:]
 	for _, v := range cArgs {
 		if v == "--docker" || v == "-d" {
-			fmt.Println("Building Docker Image... 🐳")
+			log.Info("Building docker image 🐳")
 			exists = true
 		} else {
 			exists = false
@@ -84,15 +82,3 @@ func contains(s []string, str string) bool {
 	}
 	return false
 }
-
-/****
-TODO:
-- check project type to determine cmd path***
-- allow user pass creds on cmd line (probably don't want it to live in builder.yaml)
-	- if not present, run anyway with whatever log in on users machine
-- allow user to input command in yaml (split string by spaces)***
-	- if not present, run default with name of project
-
-THEN:
-- Push to dockerhub with credentials
-****/

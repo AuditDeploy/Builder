@@ -3,6 +3,7 @@ package main
 import (
 	"Builder/cmd"
 	"Builder/utils"
+	"Builder/utils/log"
 	"fmt"
 	"os"
 )
@@ -22,5 +23,7 @@ func main() {
 	} else {
 		cmd.Builder()
 	}
+
+	log.Info("Build Complete 🔨")
 	fmt.Println("Build Complete 🔨")
 }

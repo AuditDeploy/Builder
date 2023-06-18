@@ -2,14 +2,13 @@ package compile
 
 import (
 	"Builder/artifact"
-	"Builder/logger"
 	"Builder/utils"
+	"Builder/utils/log"
 	"Builder/yaml"
 	"archive/zip"
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"strconv"
@@ -17,7 +16,7 @@ import (
 	"time"
 )
 
-//Npm creates zip from files passed in as arg
+// Npm creates zip from files passed in as arg
 func Npm() {
 	//Set default project type env for builder.yaml creation
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
@@ -69,15 +68,14 @@ func Npm() {
 	}
 
 	//run cmd, check for err, log cmd
-	logger.InfoLogger.Println(cmd)
+	log.Info("run command", cmd)
 	err := cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
 		cmd.Stderr = &errb
-		logger.ErrorLogger.Println("Node project failed to compile.")
 		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal(err)
+		log.Fatal("node-npm failed to build", err)
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
@@ -107,7 +105,7 @@ func Npm() {
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("node-npm failed to get arfiact", err)
 	}
 
 	defer outFile.Close()
@@ -120,8 +118,7 @@ func Npm() {
 
 	err = w.Close()
 	if err != nil {
-		logger.ErrorLogger.Println("Npm project failed to compile.")
-		log.Fatal(err)
+		log.Fatal("node-npm project failed to compile", err)
 	}
 
 	packageNpmArtifact(fullPath)
@@ -132,7 +129,7 @@ func Npm() {
 	// 	fmt.Print(artifactZip)
 	// 	exec.Command("cp", "-a", artifactZip+".zip", artifactPath).Run()
 	// }
-	logger.InfoLogger.Println("Npm project compiled successfully.")
+	log.Info("node-npm project compiled successfully")
 }
 
 func packageNpmArtifact(fullPath string) {
@@ -162,7 +159,7 @@ func packageNpmArtifact(fullPath string) {
 	}
 }
 
-//recursively add files
+// recursively add files
 func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
 	// Open the Directory
 	files, err := ioutil.ReadDir(basePath)

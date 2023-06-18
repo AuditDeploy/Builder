@@ -1,26 +1,26 @@
 package artifact
 
 import (
+	"Builder/utils/log"
 	"archive/zip"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 )
 
-//Npm creates zip from files passed in as arg
+// Npm creates zip from files passed in as arg
 func ZipArtifactDir() {
 	// parentDir := os.Getenv("BUILDER_PARENT_DIR")
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 
-	artifactZip := artifactDir+".zip"
+	artifactZip := artifactDir + ".zip"
 
 	// CreateZip temp dir.
 	outFile, err := os.Create(artifactZip)
 	if err != nil {
-		 log.Fatal(err)
+		log.Fatal("failed to create artifact directory", err)
 	}
-	
+
 	defer outFile.Close()
 
 	// Create a new zip archive.
@@ -31,38 +31,38 @@ func ZipArtifactDir() {
 
 	err = w.Close()
 	if err != nil {
-		 log.Fatal(err)
+		log.Fatal("failed to create artifact", err)
 	}
 }
 
-//recursively add files
+// recursively add files
 func addFiles(w *zip.Writer, basePath, baseInZip string) {
 	// Open the Directory
 	files, err := ioutil.ReadDir(basePath)
 	if err != nil {
-			fmt.Println(err)
+		fmt.Println(err)
 	}
 
 	for _, file := range files {
-			if !file.IsDir() {
-					dat, err := ioutil.ReadFile(basePath + file.Name())
-					if err != nil {
-							fmt.Println(err)
-					}
-
-					// Add some files to the archive.
-					f, err := w.Create(baseInZip + file.Name())
-					if err != nil {
-							fmt.Println(err)
-					}
-					_, err = f.Write(dat)
-					if err != nil {
-							fmt.Println(err)
-					}
-			} else if file.IsDir() {
-					// Recurse
-					newBase := basePath + file.Name() + "/"
-					addFiles(w, newBase, baseInZip  + file.Name() + "/")
+		if !file.IsDir() {
+			dat, err := ioutil.ReadFile(basePath + file.Name())
+			if err != nil {
+				fmt.Println(err)
 			}
+
+			// Add some files to the archive.
+			f, err := w.Create(baseInZip + file.Name())
+			if err != nil {
+				fmt.Println(err)
+			}
+			_, err = f.Write(dat)
+			if err != nil {
+				fmt.Println(err)
+			}
+		} else if file.IsDir() {
+			// Recurse
+			newBase := basePath + file.Name() + "/"
+			addFiles(w, newBase, baseInZip+file.Name()+"/")
+		}
 	}
 }

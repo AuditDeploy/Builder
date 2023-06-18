@@ -2,12 +2,11 @@ package compile
 
 import (
 	"Builder/artifact"
-	"Builder/logger"
 	"Builder/utils"
+	"Builder/utils/log"
 	"Builder/yaml"
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -62,15 +61,14 @@ func CSharp(filePath string) {
 	}
 
 	//run cmd, check for err, log cmd
-	logger.InfoLogger.Println(cmd)
+	log.Info("running command", cmd)
 	err := cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
 		cmd.Stderr = &errb
-		logger.ErrorLogger.Println("C# project failed to compile.")
 		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal(err)
+		log.Fatal("csharp project failed to compile", err)
 	}
 
 	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
@@ -79,7 +77,7 @@ func CSharp(filePath string) {
 
 	packageCSharpArtifact(fullPath)
 
-	logger.InfoLogger.Println("C# project compiled successfully.")
+	log.Info("csharp project compiled successfully.")
 }
 
 func packageCSharpArtifact(fullPath string) {

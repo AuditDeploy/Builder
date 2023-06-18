@@ -1,10 +1,9 @@
 package utils
 
 import (
-	"Builder/logger"
+	"Builder/utils/log"
 	"encoding/json"
 	"io/ioutil"
-	"log"
 	"net"
 	"os"
 	"os/exec"
@@ -41,7 +40,7 @@ func Metadata(path string) {
 
 }
 
-//AllMetaData holds the stuct of all the arguments
+// AllMetaData holds the stuct of all the arguments
 type AllMetaData struct {
 	UserName      string
 	HomeDir       string
@@ -52,7 +51,7 @@ type AllMetaData struct {
 	BranchHash    string
 }
 
-//GetUserData return username and userdir
+// GetUserData return username and userdir
 func GetUserData() *user.User {
 	user, err := user.Current()
 	if err != nil {
@@ -68,7 +67,7 @@ func GetUserData() *user.User {
 func GetIPAdress() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("could not connect to outbound ip", err)
 	}
 	defer conn.Close()
 
@@ -77,7 +76,7 @@ func GetIPAdress() net.IP {
 	return localAddr.IP
 }
 
-//OutputJSONall  outputs allMetaData struct in JSON format
+// OutputJSONall  outputs allMetaData struct in JSON format
 func OutputMetadata(path string, allData *AllMetaData) {
 	yamlData, _ := yaml.Marshal(allData)
 	jsonData, _ := json.Marshal(allData)
@@ -86,17 +85,15 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	err2 := ioutil.WriteFile(path+"/metadata.yaml", yamlData, 0666)
 
 	if err != nil {
-		logger.ErrorLogger.Println("JSON Metadata creation unsuccessful.")
-		panic(err)
+		log.Fatal("JSON Metadata creation unsuccessful.")
 	}
 
 	if err2 != nil {
-		logger.ErrorLogger.Println("YAML Metadata creation unsuccessful.")
-		panic(err2)
+		log.Fatal("YAML Metadata creation unsuccessful.")
 	}
 }
 
-//GitHas gets the latest git commit id in a repo
+// GitHas gets the latest git commit id in a repo
 func GitHashAndName() ([]string, string, string, string) {
 	//Get repoURL
 	repo := GetRepoURL()
@@ -143,8 +140,3 @@ func BranchNameExists(branches []string) (bool, string) {
 	}
 	return branchExists, branchNameAndHash
 }
-
-//split name and hash by '/'
-// get last two indexs
-//add them together with '/'
-//return that string and check for it

@@ -2,18 +2,17 @@ package compile
 
 import (
 	"Builder/artifact"
-	"Builder/logger"
 	"Builder/utils"
+	"Builder/utils/log"
 	"Builder/yaml"
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-//Java does ...
+// Java does ...
 func Java(filePath string) {
 	//Set default project type env for builder.yaml creation
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
@@ -63,15 +62,14 @@ func Java(filePath string) {
 	}
 
 	//run cmd, check for err, log cmd
-	logger.InfoLogger.Println(cmd)
+	log.Info("run command", cmd)
 	err := cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
 		cmd.Stderr = &errb
-		logger.ErrorLogger.Println("Java project failed to compile.")
 		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal(err)
+		log.Fatal("JAVA failed to compile", err)
 	}
 
 	//creates default builder.yaml if it doesn't exist
@@ -79,7 +77,7 @@ func Java(filePath string) {
 
 	packageJavaArtifact(fullPath + "/target")
 
-	logger.InfoLogger.Println("Java project compiled successfully.")
+	log.Info("Java project compiled successfully.")
 }
 func packageJavaArtifact(fullPath string) {
 	artifact.ArtifactDir()

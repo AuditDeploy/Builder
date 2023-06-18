@@ -1,14 +1,13 @@
 package utils
 
 import (
-	"Builder/logger"
+	"Builder/utils/log"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 )
 
-//CloneRepo grabs url and clones the repo/copies current dir
+// CloneRepo grabs url and clones the repo/copies current dir
 func CloneRepo() {
 
 	//clone repo with url from args
@@ -19,7 +18,7 @@ func CloneRepo() {
 		//pwd
 		path, err := os.Getwd()
 		if err != nil {
-			log.Println(err)
+			log.Error("failed to get repository", err)
 		}
 		fmt.Println(path)
 		exec.Command("cp", "-a", path+"/.", hiddenDir).Run()
@@ -41,14 +40,14 @@ func CloneRepo() {
 				if branchExists {
 					cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
 					cmd.Run()
-					logger.InfoLogger.Println(cmd)
+					log.Info("git clone", cmd)
 				} else {
 					log.Fatal("Branch does not exists")
 				}
 			} else {
 				cmd := exec.Command("git", "clone", repo, hiddenDir)
 				cmd.Run()
-				logger.InfoLogger.Println(cmd)
+				log.Info("git clone", cmd)
 			}
 		}
 	}
@@ -81,7 +80,6 @@ func CloneBranch() (bool, string) {
 		for i, v := range args {
 			if v == "-b" || v == "--branch" {
 				if len(args) <= i+1 {
-					logger.ErrorLogger.Println("No Branch Name Provided")
 					log.Fatal("No Branch Name Provided")
 
 				} else {

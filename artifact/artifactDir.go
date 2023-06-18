@@ -1,8 +1,8 @@
 package artifact
 
 import (
+	"Builder/utils/log"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"time"
@@ -31,7 +31,7 @@ func ArtifactDir() {
 	err := os.Mkdir(artifactDir, 0755)
 	//should return nil once directory is made, if not, throw err
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to make artifact directory", err)
 	}
 
 	//check workspace env exists, if not, create it

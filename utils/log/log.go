@@ -2,23 +2,34 @@ package log
 
 import (
 	"os"
+	"path/filepath"
+	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 func init() {
-	atom := zap.NewAtomicLevelAt(zapcore.DebugLevel)
+	defaultLogLevel := zapcore.Level(logLevel)
 
-	encoderCfg := zap.NewProductionEncoderConfig()
-	encoderCfg.TimeKey = "timestamp"
-	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	layout := "01-02-2006"
 
-	logger := zap.New(zapcore.NewCore(
-		zapcore.NewJSONEncoder(encoderCfg),
-		zapcore.Lock(os.Stdout),
-		atom,
-	))
+	config := zap.NewProductionEncoderConfig()
+	config.TimeKey = "timestamp"
+	config.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	globalPath, _ := os.LookupEnv("GLOBAL_LOGS_PATH")
+
+	t := time.Now()
+	logfile, _ := os.OpenFile(filepath.Join(globalPath, t.Format(layout), ".json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	writer := zapcore.AddSync(logfile)
+	fileEncoder := zapcore.NewJSONEncoder(config)
+	core := zapcore.NewTee(
+		zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
+	)
+
+	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 
 	zap.ReplaceGlobals(logger)
 }
@@ -72,6 +83,7 @@ func Fatal(msg string, args ...interface{}) {
 }
 
 func SetLevel(level Level) {
+	level = level
 }
 
 type Level int
