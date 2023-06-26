@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"log"
+	"Builder/utils/log"
 	"os"
 	"strings"
 )
 
-//GetName does ...
+// GetName does ...
 func GetName() string {
 	var name string
 	args := os.Args[1:]
@@ -34,7 +34,7 @@ func GetName() string {
 			//use current dir name if no --name flag and using builder cmd
 			path, err := os.Getwd()
 			if err != nil {
-				log.Println(err)
+				log.Error("error getting builder command directory", err)
 			}
 			name = path[strings.LastIndex(path, "/")+1:]
 

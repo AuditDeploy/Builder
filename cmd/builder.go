@@ -3,8 +3,8 @@ package cmd
 import (
 	"Builder/derive"
 	"Builder/directory"
-	"Builder/logger"
 	"Builder/utils"
+	"Builder/utils/log"
 	"Builder/yaml"
 	"os"
 	"os/exec"
@@ -24,30 +24,26 @@ func Builder() {
 		//append logs
 		//logger.CreateLogs(os.Getenv("BUILDER_LOGS_DIR"))
 		directory.MakeDirs()
-		logger.InfoLogger.Println("Directories successfully created.")
+		log.Info("Directories successfully created.")
 
 		// clone repo into hidden
 		utils.CloneRepo()
-		logger.InfoLogger.Println("Repo cloned successfully.")
+		log.Info("Repo cloned successfully.")
 
 		//creates a new artifact
 		derive.ProjectType()
 
 		//Get build metadata (deprecated, func moved inside compiler)
-		logger.InfoLogger.Println("Metadata created successfully.")
+		log.Info("Metadata created successfully.")
 
 		//Check for Dockerfile, then build image
 		utils.Docker()
 
 		//makes hidden dir read-only
 		utils.MakeHidden()
-		logger.InfoLogger.Println("Hidden Dir is now read-only.")
+		log.Info("Hidden Dir is now read-only.")
 
-		//creates global logs dir
-		logger.GlobalLogs()
-		// delete temp dir
 	} else {
 		utils.Help()
-		//log.Fatal("bulder.yaml file not found. cd into it's location.")
 	}
 }

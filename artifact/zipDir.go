@@ -1,12 +1,12 @@
 package artifact
 
 import (
+	"Builder/utils/log"
 	"archive/tar"
 	"archive/zip"
 	"compress/gzip"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"runtime"
 )
@@ -22,7 +22,7 @@ func ZipArtifactDir() {
 		// CreateZip temp dir.
 		outFile, err := os.Create(artifactZip)
 		if err != nil {
-			log.Fatal(err)
+      log.Fatal("failed to create artifact directory", err)
 		}
 
 		defer outFile.Close()
@@ -34,8 +34,8 @@ func ZipArtifactDir() {
 		addFilesZip(w, artifactDir+"/", "")
 
 		err = w.Close()
-		if err != nil {
-			log.Fatal(err)
+		if err != nil {			
+      log.Fatal("failed to create artifact directory", err)
 		}
 	} else {
 
@@ -43,7 +43,7 @@ func ZipArtifactDir() {
 
 		outFile, err := os.Create(artifactTar)
 		if err != nil {
-			log.Fatal(err)
+       log.Fatal("failed to create artifact directory", err)
 		}
 
 		defer outFile.Close()
@@ -58,17 +58,15 @@ func ZipArtifactDir() {
 
 		err = tw.Close()
 		if err != nil {
-			log.Fatal(err)
+       log.Fatal("failed to create artifact", err)
 		}
 	}
 
 }
 
+
 // recursively add files
-func addFilesZip(w *zip.Writer, basePath, baseInZip string) {
-	// Open the Directory
-	files, err := ioutil.ReadDir(basePath)
-	if err != nil {
+func addFiles(w *zip.Writer, basePath, baseInZip string) {
 		fmt.Println(err)
 	}
 
@@ -81,12 +79,12 @@ func addFilesZip(w *zip.Writer, basePath, baseInZip string) {
 
 			// Add some files to the archive.
 			f, err := w.Create(baseInZip + file.Name())
-			if err != nil {
-				fmt.Println(err)
+			if err != nil {	
+        log.Error("failed to create zip", err)
 			}
 			_, err = f.Write(dat)
 			if err != nil {
-				fmt.Println(err)
+        log.Error("failed to add files to zip", err)
 			}
 		} else if file.IsDir() {
 			// Recurse

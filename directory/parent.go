@@ -2,18 +2,17 @@ package directory
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"time"
 
-	"Builder/logger"
 	"Builder/utils"
+	"Builder/utils/log"
 
 	"github.com/manifoldco/promptui"
 )
 
-//MakeDirs does...
+// MakeDirs does...
 func MakeDirs() {
 	//handles -n flag
 	name := utils.GetName()
@@ -39,7 +38,6 @@ func MakeDirs() {
 	MakeParentDir(path)
 
 	MakeHiddenDir(path)
-	MakeLogDir(path)
 	MakeWorkspaceDir(path)
 }
 
@@ -49,7 +47,7 @@ func MakeParentDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
-		logger.WarningLogger.Println("Path already exists")
+		log.Info("Path already exists")
 	}
 
 	// should return true if file doesn't exist
@@ -59,7 +57,7 @@ func MakeParentDir(path string) (bool, error) {
 			errDir := os.MkdirAll(path, 0755)
 			//should return nil once directory is made, if not, throw err
 			if errDir != nil {
-				log.Fatal(err)
+				log.Fatal("failed to create directory", path, err)
 			}
 		} else {
 			//prompt user if they'd like dir to be created
@@ -69,7 +67,7 @@ func MakeParentDir(path string) (bool, error) {
 				errDir := os.MkdirAll(path, 0755)
 				//should return nil once directory is made, if not, throw err
 				if errDir != nil {
-					log.Fatal(err)
+					log.Fatal("failed to create directory", path, err)
 				}
 
 			} else {
@@ -98,7 +96,7 @@ func yesNo() bool {
 	}
 	_, result, err := prompt.Run()
 	if err != nil {
-		log.Fatalf("Prompt failed %v\n", err)
+		log.Fatal("Prompt failed %v\n", err)
 	}
 	return result == "Yes"
 }

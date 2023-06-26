@@ -2,14 +2,13 @@ package compile
 
 import (
 	"Builder/artifact"
-	"Builder/logger"
 	"Builder/utils"
+	"Builder/utils/log"
 	"Builder/yaml"
 	"archive/zip"
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -71,15 +70,14 @@ func Python() {
 		os.Setenv("BUILDER_BUILD_COMMAND", "pip3 install -r requirements.txt -t "+fullPath+"/requirements")
 	}
 	//run cmd, check for err, log cmd
-	logger.InfoLogger.Println(cmd)
+	log.Info("run command", cmd)
 	err := cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
 		cmd.Stderr = &errb
-		logger.ErrorLogger.Println("Python project failed to compile.")
 		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal(err)
+		log.Fatal("Python project failed to compile.", err)
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
@@ -109,7 +107,7 @@ func Python() {
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Python failed to get artifact", err)
 	}
 
 	defer outFile.Close()
@@ -122,8 +120,7 @@ func Python() {
 
 	err = w.Close()
 	if err != nil {
-		logger.ErrorLogger.Println("Python project failed to compile.")
-		log.Fatal(err)
+		log.Fatal("Python project failed to compile", err)
 	}
 	packagePythonArtifact(fullPath)
 
@@ -131,7 +128,7 @@ func Python() {
 	// if artifactPath != "" {
 	// 	exec.Command("cp", "-a", workspaceDir+"/temp.zip", artifactPath).Run()
 	// }
-	logger.InfoLogger.Println("Python project compiled successfully.")
+	log.Info("Python project compiled successfully.")
 }
 
 func packagePythonArtifact(fullPath string) {

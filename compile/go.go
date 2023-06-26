@@ -5,12 +5,11 @@ package compile
 
 import (
 	"Builder/artifact"
-	"Builder/logger"
 	"Builder/utils"
+	"Builder/utils/log"
 	"Builder/yaml"
 	"bytes"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -71,21 +70,20 @@ func Go(filePath string) {
 	}
 
 	//run cmd, check for err, log cmd
-	logger.InfoLogger.Println(cmd)
+	log.Info("run command", cmd)
 	err := cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
 		cmd.Stderr = &errb
-		logger.ErrorLogger.Println("Go project failed to compile.")
 		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal(err)
+		log.Fatal("GO project failed to build", err)
 	}
 	yaml.CreateBuilderYaml(fullPath)
 
 	packageGoArtifact(fullPath)
 
-	logger.InfoLogger.Println("Go project compiled successfully.")
+	log.Info("Go project built successfully.")
 }
 
 func packageGoArtifact(fullPath string) {

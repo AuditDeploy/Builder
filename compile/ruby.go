@@ -2,14 +2,13 @@ package compile
 
 import (
 	"Builder/artifact"
-	"Builder/logger"
 	"Builder/utils"
+	"Builder/utils/log"
 	"Builder/yaml"
 	"archive/zip"
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"runtime"
@@ -70,15 +69,14 @@ func Ruby() {
 		os.Setenv("BUILDER_BUILD_COMMAND", "bundle install --path vendor/bundle")
 	}
 	//run cmd, check for err, log cmd
-	logger.InfoLogger.Println(cmd)
+	log.Info("run command", cmd)
 	err := cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
 		cmd.Stderr = &errb
-		logger.ErrorLogger.Println("Ruby project failed to compile.")
 		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal(err)
+		log.Fatal("Ruby project failed to compile.", err)
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
@@ -108,7 +106,7 @@ func Ruby() {
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Ruby failed to get artifact", err)
 	}
 
 	defer outFile.Close()
@@ -121,8 +119,7 @@ func Ruby() {
 
 	err = w.Close()
 	if err != nil {
-		logger.ErrorLogger.Println("Ruby project failed to compile.")
-		log.Fatal(err)
+		log.Fatal("Ruby project failed to compile.", err)
 	}
 	packageRubyArtifact(fullPath)
 
@@ -130,7 +127,7 @@ func Ruby() {
 	// if artifactPath != "" {
 	// 	exec.Command("cp", "-a", workspaceDir+"/temp.zip", artifactPath).Run()
 	// }
-	logger.InfoLogger.Println("Ruby project compiled successfully.")
+	log.Info("Ruby project compiled successfully.")
 }
 
 func packageRubyArtifact(fullPath string) {

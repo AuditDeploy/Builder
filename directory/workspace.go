@@ -1,9 +1,8 @@
 package directory
 
 import (
-	"Builder/logger"
+	"Builder/utils/log"
 	"fmt"
-	"log"
 	"os"
 )
 
@@ -13,7 +12,7 @@ func workSpaceDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
-		logger.WarningLogger.Println("Path already exists")
+		log.Error("Path already exists")
 	}
 
 	// should return true if file doesn't exist
@@ -22,7 +21,7 @@ func workSpaceDir(path string) (bool, error) {
 		errDir := os.Mkdir(path, 0755)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
-			log.Fatal(err)
+			log.Fatal("failed to make directory", path, err)
 		}
 	}
 
@@ -36,7 +35,7 @@ func workSpaceDir(path string) (bool, error) {
 	return true, err
 }
 
-//MakeWorkspaceDir does...
+// MakeWorkspaceDir does...
 func MakeWorkspaceDir(path string) {
 
 	workPath := path + "/workspace"
