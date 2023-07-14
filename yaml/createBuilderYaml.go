@@ -15,6 +15,8 @@ type BuilderYaml struct {
 	BuildTool     string
 	BuildFile     string
 	BuildCmd      string
+	ConfigCmd     string
+	ArtifactList  string
 	OutputPath    string
 	GlobalLogs    string
 	DockerCmd     string
@@ -30,6 +32,8 @@ func CreateBuilderYaml(fullPath string) {
 	buildTool := os.Getenv("BUILDER_BUILD_TOOL")
 	buildFile := os.Getenv("BUILDER_BUILD_FILE")
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+	configCmd := os.Getenv("BUILDER_CONFIG_COMMAND")
+	artifactList := os.Getenv("BUILDER_ARTIFACT_LIST")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	globalLogs := os.Getenv("GLOBAL_LOGS_PATH")
 	dockerCmd := os.Getenv("BUILDER_DOCKER_CMD")
@@ -43,6 +47,8 @@ func CreateBuilderYaml(fullPath string) {
 		BuildTool:     buildTool,
 		BuildFile:     buildFile,
 		BuildCmd:      buildCmd,
+		ConfigCmd:     configCmd,
+		ArtifactList:  artifactList,
 		OutputPath:    outputPath,
 		GlobalLogs:    globalLogs,
 		DockerCmd:     dockerCmd,

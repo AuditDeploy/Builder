@@ -55,6 +55,8 @@ func ConfigEnvs(byi interface{}) {
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILDER_BUILD_TOOL", valStr)
 		}
+	} else {
+		os.Setenv("BUILDER_BUILD_TOOL", "")
 	}
 
 	//check for build file
@@ -77,9 +79,35 @@ func ConfigEnvs(byi interface{}) {
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILDER_BUILD_COMMAND", valStr)
 		}
+	} else {
+		os.Setenv("BUILDER_BUILD_COMMAND", "")
 	}
 
-	//check for build type
+	//check for config cmd
+	if val, ok := bldyml["configCmd"]; ok {
+		_, present := os.LookupEnv("BUILDER_CONFIG_COMMAND")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("BUILDER_CONFIG_COMMAND", valStr)
+		}
+	} else {
+		os.Setenv("BUILDER_CONFIG_COMMAND", "")
+	}
+
+	//check for artifact list
+	if val, ok := bldyml["artifactList"]; ok {
+		_, present := os.LookupEnv("BUILDER_ARTIFACT_LIST")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("BUILDER_ARTIFACT_LIST", valStr)
+		}
+	} else {
+		os.Setenv("BUILDER_ARTIFACT_LIST", "")
+	}
+
+	//check for output path
 	if val, ok := bldyml["outputPath"]; ok {
 		_, present := os.LookupEnv("BUILDER_OUTPUT_PATH")
 		if !present {
@@ -127,5 +155,7 @@ func ConfigEnvs(byi interface{}) {
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("REPO_BRANCH", valStr)
 		}
+	} else {
+		os.Setenv("REPO_BRANCH", "")
 	}
 }

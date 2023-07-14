@@ -46,7 +46,7 @@ func C(filePath string) {
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 
 	var cmd *exec.Cmd
-	
+
 	if configCmd != "" {
 		//user specified cmd
 		configCmdArray := strings.Fields(configCmd)
@@ -81,7 +81,7 @@ func C(filePath string) {
 	} else {
 		//default
 		cmd = exec.Command("make")
-		cmd.Dir = fullPath // or whatever directory it's in
+		cmd.Dir = fullPath   // or whatever directory it's in
 		if buildTool == "" { // If buildTool hasn't been set yet, set it
 			os.Setenv("BUILDER_BUILD_TOOL", "Make")
 		}
@@ -90,7 +90,7 @@ func C(filePath string) {
 
 	//run build cmd, check for err, log build cmd
 	log.Info("run command", cmd)
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
@@ -130,24 +130,27 @@ func packageCArtifact(fullPath string) {
 			exec.Command("rm", artifact).Run()
 		}
 
-	} else { 
+	} else {
+		var artifactExt string
+		buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 		//Determine artifact extension
-		switch buildTool := buildTool; buildTool {
-			case "Make-rpm":
-				artifactExt := "*.rpm"
-			case "Make-deb":
-				artifactExt := "*.deb"
-			case "Make-tar":
-				artifactExt := "*.tar.gz"
-			case "Make-lib":
-				archiveExt := "*.lib"
-			case "Make-dll":
-				archiveExt := "*.dll"
-			default:
-				artifactExt := "*.exe"
+		switch buildTool {
+		case "Make-rpm":
+			artifactExt = "*.rpm"
+		case "Make-deb":
+			artifactExt = "*.deb"
+		case "Make-tar":
+			artifactExt = "*.tar.gz"
+		case "Make-lib":
+			archiveExt = "*.lib"
+		case "Make-dll":
+			archiveExt = "*.dll"
+		default:
+			artifactExt = "*.exe"
 		}
 
 		//find artifact(s) by extension
+		// WalkMatch function defined in compile/c#.go
 		artifactArray, _ := WalkMatch(fullPath, artifactExt)
 
 		//copy artifact(s), then remove artifact(s) from workspace
@@ -182,26 +185,4 @@ func packageCArtifact(fullPath string) {
 		//remove artifact directory
 		exec.Command("rm", "-r", artifactDir).Run()
 	}
-}
-
-func WalkMatch(root, pattern string) ([]string, error) {
-	var matches []string
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if info.IsDir() {
-			return nil
-		}
-		if matched, err := filepath.Match(pattern, filepath.Base(path)); err != nil {
-			return err
-		} else if matched {
-			matches = append(matches, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return matches, nil
 }
