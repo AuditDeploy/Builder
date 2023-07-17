@@ -26,7 +26,7 @@ func ProjectType() {
 		files = utils.ConfigDerive()
 	} else {
 		//default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt"}
+		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt", "Makefile.am"}
 	}
 
 	//look for those files inside hidden dir
@@ -37,7 +37,7 @@ func ProjectType() {
 		//double check it exists
 		fileExists, err := fileExistsInDir(filePath)
 		if err != nil {
-			log.Fatal("No Go, Npm, Ruby, Python or Java File Exists", err)
+			log.Fatal("No Go, Npm, Ruby, Python, C/C++ or Java File Exists", err)
 		}
 		//if file exists and filePath isn't empty, run conditional to find correct compiler
 		if fileExists && filePath != "" && filePath != "./" {
@@ -71,6 +71,15 @@ func ProjectType() {
 				//executes python compiler
 				log.Info("Python project detected")
 				compile.Python()
+				return
+			} else if file == "Makefile.am" || configType == "c" {
+				//executes c compiler
+				finalPath := createFinalPath(filePath, file)
+
+				utils.CopyDir()
+				log.Info("C/C++ project detected")
+
+				compile.C(finalPath)
 				return
 			}
 		}
