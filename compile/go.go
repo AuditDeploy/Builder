@@ -14,7 +14,11 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"go.uber.org/zap"
 )
+
+var locallogger *zap.Logger
 
 // Go creates exe from file passed in as arg
 func Go(filePath string) {
@@ -24,6 +28,10 @@ func Go(filePath string) {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "go")
 	}
+
+	//Set up local logger
+        localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+        locallogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -71,7 +79,16 @@ func Go(filePath string) {
 
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
-	err := cmd.Run()
+	out, err := cmd.Output()
+
+        locallogger.Info("log from package compile from go.go")
+	
+	//Log output to local log
+        stdOut := string(out[:])
+        if stdOut != "" {
+                locallogger.Info(stdOut)
+        }
+
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb

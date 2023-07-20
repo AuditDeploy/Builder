@@ -9,30 +9,39 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func init() {
-	defaultLogLevel := zapcore.Level(logLevel)
+var logger *zap.Logger
 
-	layout := "01-02-2006"
+func NewLogger(logFileName string, path string) *zap.Logger {
+        defaultLogLevel := zapcore.Level(logLevel)
 
-	config := zap.NewProductionEncoderConfig()
-	config.TimeKey = "timestamp"
-	config.EncodeTime = zapcore.ISO8601TimeEncoder
+        config := zap.NewProductionEncoderConfig()
+        config.TimeKey = "timestamp"
+        config.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	globalPath, _ := os.LookupEnv("GLOBAL_LOGS_PATH")
+        logfile, _ := os.OpenFile(filepath.Join(path, logFileName + ".json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
-	t := time.Now()
-	logfile, _ := os.OpenFile(filepath.Join(globalPath, t.Format(layout), ".json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+        writer := zapcore.AddSync(logfile)
+        fileEncoder := zapcore.NewJSONEncoder(config)
+        core := zapcore.NewTee(
+                zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
+        )
 
-	writer := zapcore.AddSync(logfile)
-	fileEncoder := zapcore.NewJSONEncoder(config)
-	core := zapcore.NewTee(
-		zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
-	)
+        logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 
-	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
-
-	zap.ReplaceGlobals(logger)
+    return logger
 }
+
+func init() {
+        layout := "01-02-2006"
+        t := time.Now()
+
+        globalPath, _ := os.LookupEnv("GLOBAL_LOGS_PATH")
+
+        logger = NewLogger(t.Format(layout), globalPath)
+
+        zap.ReplaceGlobals(logger)
+}
+
 
 func Debug(msg string, args ...interface{}) {
 	if logLevel <= DEBUG {
