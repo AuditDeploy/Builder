@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+var locallogger *zap.Logger
+
 // Npm creates zip from files passed in as arg
 func Npm() {
 	//Set default project type env for builder.yaml creation
@@ -24,6 +26,10 @@ func Npm() {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "node")
 	}
+
+	//Set up local logger
+        localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+        locallogger = log.NewLogger("logs", localPath)
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -70,14 +76,19 @@ func Npm() {
 
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("node-npm failed to build", err)
-	}
+	out, err := cmd.Output()
+
+        //Log output to local log
+        stdOut := string(out[:])
+        if stdOut != "" {
+                locallogger.Info(stdOut)
+        }
+
+        if err != nil {
+                var outb, errb bytes.Buffer
+                locallogger.Error(errb.String())
+                log.Fatal("node-npm project failed to build", err)
+        }
 
 	yaml.CreateBuilderYaml(fullPath)
 
@@ -106,7 +117,7 @@ func Npm() {
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
 	if err != nil {
-		log.Fatal("node-npm failed to get arfiact", err)
+		log.Fatal("node-npm failed to get artifact", err)
 	}
 
 	defer outFile.Close()

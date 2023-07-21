@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+var locallogger *zap.Logger
+
 // Java does ...
 func Java(filePath string) {
 	//Set default project type env for builder.yaml creation
@@ -20,6 +22,10 @@ func Java(filePath string) {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "java")
 	}
+
+	//Set up local logger
+        localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+        locallogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -64,14 +70,19 @@ func Java(filePath string) {
 
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("JAVA failed to compile", err)
-	}
+	out, err := cmd.Output()
+
+        //Log output to local log
+        stdOut := string(out[:])
+        if stdOut != "" {
+                locallogger.Info(stdOut)
+        }
+
+        if err != nil {
+                var outb, errb bytes.Buffer
+                locallogger.Error(errb.String())
+                log.Fatal("JAVA project failed to build", err)
+        }
 
 	//creates default builder.yaml if it doesn't exist
 	yaml.CreateBuilderYaml(fullPath)

@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+var locallogger *zap.Logger
+
 // Ruby creates zip from files passed in as arg
 func Ruby() {
 	//Set default project type env for builder.yaml creation
@@ -24,6 +26,10 @@ func Ruby() {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "ruby")
 	}
+
+	//Set up local logger
+        localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+        locallogger = log.NewLogger("logs", localPath)
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -70,14 +76,19 @@ func Ruby() {
 	}
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("Ruby project failed to compile.", err)
-	}
+	out, err := cmd.Output()
+
+        //Log output to local log
+        stdOut := string(out[:])
+        if stdOut != "" {
+                locallogger.Info(stdOut)
+        }
+
+        if err != nil {
+                var outb, errb bytes.Buffer
+                locallogger.Error(errb.String())
+                log.Fatal("Ruby project failed to build", err)
+        }
 
 	yaml.CreateBuilderYaml(fullPath)
 

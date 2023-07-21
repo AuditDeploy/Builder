@@ -80,8 +80,6 @@ func Go(filePath string) {
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
 	out, err := cmd.Output()
-
-        locallogger.Info("log from package compile from go.go")
 	
 	//Log output to local log
         stdOut := string(out[:])
@@ -91,9 +89,7 @@ func Go(filePath string) {
 
 	if err != nil {
 		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
+		locallogger.Error(errb.String())
 		log.Fatal("GO project failed to build", err)
 	}
 	yaml.CreateBuilderYaml(fullPath)

@@ -17,6 +17,8 @@ import (
 	"time"
 )
 
+var locallogger *zap.Logger
+
 // Python creates zip from files passed in as arg
 func Python() {
 	//Set default project type env for builder.yaml creation
@@ -24,6 +26,10 @@ func Python() {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "python")
 	}
+
+	//Set up local logger
+        localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+        locallogger = log.NewLogger("logs", localPath)
 
 	//copies contents of .hidden to workspace
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
@@ -71,14 +77,19 @@ func Python() {
 	}
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("Python project failed to compile.", err)
-	}
+	out, err := cmd.Output()
+
+        //Log output to local log
+        stdOut := string(out[:])
+        if stdOut != "" {
+                locallogger.Info(stdOut)
+        }
+
+        if err != nil {
+                var outb, errb bytes.Buffer
+                locallogger.Error(errb.String())
+                log.Fatal("Python project failed to build", err)
+        }
 
 	yaml.CreateBuilderYaml(fullPath)
 
