@@ -39,6 +39,8 @@ func MakeDirs() {
 
 	MakeHiddenDir(path)
 	MakeWorkspaceDir(path)
+
+	MakeLogsDir(path)
 }
 
 func MakeParentDir(path string) (bool, error) {

@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+var locallogger *zap.Logger
+
 func CSharp(filePath string) {
 	fmt.Println("C# filePath: " + filePath)
 	//Set default project type env for builder.yaml creation
@@ -21,6 +23,10 @@ func CSharp(filePath string) {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "c#")
 	}
+
+	//Set up local logger
+        localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+        locallogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -63,14 +69,19 @@ func CSharp(filePath string) {
 
 	//run cmd, check for err, log cmd
 	log.Info("running command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("csharp project failed to compile", err)
-	}
+	out, err := cmd.Output()
+
+        //Log output to local log
+        stdOut := string(out[:])
+        if stdOut != "" {
+                locallogger.Info(stdOut)
+        }
+
+        if err != nil {
+                var outb, errb bytes.Buffer
+                locallogger.Error(errb.String())
+                log.Fatal("csharp project failed to build", err)
+        }
 
 	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
 
