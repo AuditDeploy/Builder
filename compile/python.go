@@ -17,8 +17,6 @@ import (
 	"time"
 )
 
-var locallogger *zap.Logger
-
 // Python creates zip from files passed in as arg
 func Python() {
 	//Set default project type env for builder.yaml creation
@@ -86,7 +84,7 @@ func Python() {
         }
 
         if err != nil {
-                var outb, errb bytes.Buffer
+                var _, errb bytes.Buffer
                 locallogger.Error(errb.String())
                 log.Fatal("Python project failed to build", err)
         }

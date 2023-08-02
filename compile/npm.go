@@ -17,8 +17,6 @@ import (
 	"time"
 )
 
-var locallogger *zap.Logger
-
 // Npm creates zip from files passed in as arg
 func Npm() {
 	//Set default project type env for builder.yaml creation
@@ -85,7 +83,7 @@ func Npm() {
         }
 
         if err != nil {
-                var outb, errb bytes.Buffer
+                var _, errb bytes.Buffer
                 locallogger.Error(errb.String())
                 log.Fatal("node-npm project failed to build", err)
         }

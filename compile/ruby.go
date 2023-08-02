@@ -17,8 +17,6 @@ import (
 	"time"
 )
 
-var locallogger *zap.Logger
-
 // Ruby creates zip from files passed in as arg
 func Ruby() {
 	//Set default project type env for builder.yaml creation
@@ -85,7 +83,7 @@ func Ruby() {
         }
 
         if err != nil {
-                var outb, errb bytes.Buffer
+                var _, errb bytes.Buffer
                 locallogger.Error(errb.String())
                 log.Fatal("Ruby project failed to build", err)
         }
