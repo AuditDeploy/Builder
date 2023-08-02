@@ -14,8 +14,6 @@ import (
 	"strings"
 )
 
-var locallogger *zap.Logger
-
 func CSharp(filePath string) {
 	fmt.Println("C# filePath: " + filePath)
 	//Set default project type env for builder.yaml creation
@@ -78,7 +76,7 @@ func CSharp(filePath string) {
         }
 
         if err != nil {
-                var outb, errb bytes.Buffer
+                var _, errb bytes.Buffer
                 locallogger.Error(errb.String())
                 log.Fatal("csharp project failed to build", err)
         }

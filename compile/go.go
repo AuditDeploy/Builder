@@ -9,7 +9,6 @@ import (
 	"Builder/utils/log"
 	"Builder/yaml"
 	"bytes"
-	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -88,7 +87,7 @@ func Go(filePath string) {
         }
 
 	if err != nil {
-		var outb, errb bytes.Buffer
+		var _, errb bytes.Buffer
 		locallogger.Error(errb.String())
 		log.Fatal("GO project failed to build", err)
 	}

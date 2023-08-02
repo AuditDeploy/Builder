@@ -13,8 +13,6 @@ import (
 	"strings"
 )
 
-var locallogger *zap.Logger
-
 // Java does ...
 func Java(filePath string) {
 	//Set default project type env for builder.yaml creation
@@ -79,7 +77,7 @@ func Java(filePath string) {
         }
 
         if err != nil {
-                var outb, errb bytes.Buffer
+                var _, errb bytes.Buffer
                 locallogger.Error(errb.String())
                 log.Fatal("JAVA project failed to build", err)
         }
