@@ -17,6 +17,8 @@ func main() {
 			cmd.Init()
 		} else if builderCommand == "config" {
 			cmd.Config()
+		} else if builderCommand == "gui" {
+			cmd.Gui()
 		} else {
 			cmd.Builder()
 		}
