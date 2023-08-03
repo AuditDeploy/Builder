@@ -19,6 +19,7 @@ body {
   td {
     background-color: #2F2F2F;
     height: 43px;
+    padding: 0 10px 0 10px;
     margin-bottom: 2px;
     text-align: center;
     color: lightgray;
@@ -42,6 +43,9 @@ body {
     height: 40px;
     margin: 0;
     padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
   #searchBarContainer {

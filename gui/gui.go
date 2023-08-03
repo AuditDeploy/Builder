@@ -2,6 +2,7 @@ package gui
 
 import (
 	_ "embed"
+	"encoding/base64"
 	"encoding/json"
 	"log"
 	"net/url"
@@ -15,7 +16,7 @@ import (
 // Embed html code for gui
 //
 //go:embed gui_index.html
-var htmlContents []byte
+var IndexHtmlContents []byte
 
 // Embed js code for gui
 //
@@ -27,6 +28,11 @@ var jsContents []byte
 //go:embed gui.css
 var cssContents []byte
 
+// Embed logo for gui
+//
+//go:embed logo.png
+var logo []byte
+
 type Build struct {
 	Time        time.Time
 	User        string
@@ -37,6 +43,7 @@ type Build struct {
 
 func Gui() {
 
+	// Create function to encode json to html table
 	jsonToHTML := func() string {
 		// Read in builds JSON data
 		homeDir, err := os.UserHomeDir()
@@ -57,7 +64,7 @@ func Gui() {
 		// Create HTML table
 		text := ""
 		for build := range builds {
-			text += "</tr>"
+			text += "</tr onclick='goToDetailsPage()'>"
 
 			text += "<td>" + builds[build].Time.String() + "</td>"
 			text += "<td>" + builds[build].User + "</td>"
@@ -71,11 +78,17 @@ func Gui() {
 		return text
 	}
 
+	getImage := func() string {
+		image := base64.StdEncoding.EncodeToString(logo)
+
+		return image
+	}
+
 	// Combine html, css, and js files for gui
 	cssRegex := regexp.MustCompile(`cssgoeshere`)
 	jsRegex := regexp.MustCompile(`jsgoeshere`)
 
-	finalHTMLContent := cssRegex.ReplaceAllString(string(htmlContents), string(cssContents))
+	finalHTMLContent := cssRegex.ReplaceAllString(string(IndexHtmlContents), string(cssContents))
 	finalHTMLContent = jsRegex.ReplaceAllString(finalHTMLContent, string(jsContents))
 
 	// Create UI with basic HTML passed via data URI
@@ -87,6 +100,7 @@ func Gui() {
 	defer ui.Close()
 
 	ui.Bind("jsonToHTML", jsonToHTML)
+	ui.Bind("getImage", getImage)
 
 	ui.Load("data:text/html," + url.PathEscape(finalHTMLContent))
 

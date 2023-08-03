@@ -48,10 +48,10 @@ const render = async () => {
     buildsTable.innerHTML = await jsonToHTML();
 };
 
-
-function onPageLoad() {
+async function onPageLoad() {
     // Load and display Builder logo
-    document.getElementById("logo").src = "logo.png";
+    let image = await getImage();
+    document.getElementById("logo").src = "data:image/png;base64," + image;
 
     render();
 }
