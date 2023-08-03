@@ -1,0 +1,86 @@
+body {
+    background-color: #1E1E1E;
+    padding: 0;
+    margin: 0;
+  }
+  
+  table {
+    border-collapse: collapse;
+  }
+  
+  th {
+    background-color: black;
+    height: 30px;
+    color: lightgray;
+    font-weight: normal;
+    font-family: Arial, sans-serif;
+  }
+  
+  td {
+    background-color: #2F2F2F;
+    height: 43px;
+    margin-bottom: 2px;
+    text-align: center;
+    color: lightgray;
+    font-family: Arial, sans-serif;
+    border-bottom: 4px solid #1E1E1E;
+  }
+  
+  td:nth-child(4) {
+    color: #F16522;
+  }
+  
+  #container {
+    height: inherit;
+    width: inherit;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #header {
+    background-color: black;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+  }
+  
+  #searchBarContainer {
+    text-align: center;
+    position: relative;
+  }
+  
+  #searchBar {
+    display: inline-block;
+    background-color: #36373A;
+    width: 90%;
+    margin-top: 15px;
+    padding: 5px 5px 5px 25px;
+    border: 0px #36373A solid;
+    border-radius: 15px;
+    color: lightgray;
+  }
+  
+  #searchBar:focus {
+    outline: none;
+  }
+  
+  #clearIcon {
+    all: unset;
+    cursor: pointer;
+    color: lightgray;
+    font-family: Arial, sans-serif;
+    position: absolute;
+    right: 5%;
+    top: 48%;
+  }
+  
+  #buildsListContainer {
+    position: relative;
+    width: 92.5%;
+    margin-top: 15px;
+    margin-left: 3.8%;
+  }
+  
+  #buildsListTable {
+    width: 100%;
+  }

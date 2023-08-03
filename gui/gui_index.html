@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Builder</title>
+        <style>
+            cssgoeshere
+        </style>
+    </head>
+<body onload="onPageLoad()">
+  <div id="container">
+    <div id="header">
+        <img src="logo.png" alt="Builder Logo" id="logo" width="200.4" height="57.8">
+    </div>
+    <div id="searchBarContainer">
+      <input 
+        type="text" 
+        id="searchBar" 
+        name="searchBar"
+        placeholder="Find..."
+        oninput="search()"
+      >
+      <button 
+        type="button" 
+        class="input-group-addon" 
+        id="clearIcon"
+        onclick="clearSearch()"
+      >
+        X
+      </button>
+    </div>
+    <div id="buildsListContainer">
+      <table id="buildsListTable">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>User</th>
+            <th>Artifact</th>
+            <th>Project</th>
+            <th>Hash</th>
+          </tr>
+         </thead>
+         <tbody id="buildsListTableBody">
+            <tr></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+    <script>
+        jsgoeshere
+    </script>
+</body>
+</html>
