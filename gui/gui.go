@@ -3,7 +3,6 @@ package gui
 import (
 	_ "embed"
 	"encoding/base64"
-	"encoding/json"
 	"log"
 	"net/url"
 	"os"
@@ -39,13 +38,14 @@ type Build struct {
 	Artifact    string
 	ProjectName string
 	GitHash     string
+	BuildHash   string
 }
 
 func Gui() {
 
-	// Create function to encode json to html table
-	jsonToHTML := func() string {
-		// Read in builds JSON data
+	// Read in json data
+	getBuildsJSON := func() string {
+		// Read in builds JSON data from .builder/ in user home dir
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
 			log.Fatal(err)
@@ -55,27 +55,8 @@ func Gui() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		var builds []Build
-		error := json.Unmarshal(buildsJSON, &builds)
-		if error != nil {
-			log.Fatal(error)
-		}
 
-		// Create HTML table
-		text := ""
-		for build := range builds {
-			text += "</tr onclick='goToDetailsPage()'>"
-
-			text += "<td>" + builds[build].Time.String() + "</td>"
-			text += "<td>" + builds[build].User + "</td>"
-			text += "<td>" + builds[build].Artifact + "</td>"
-			text += "<td>" + builds[build].ProjectName + "</td>"
-			text += "<td>" + builds[build].GitHash + "</td>"
-
-			text += "</tr>"
-		}
-
-		return text
+		return string(buildsJSON)
 	}
 
 	getImage := func() string {
@@ -99,7 +80,7 @@ func Gui() {
 	}
 	defer ui.Close()
 
-	ui.Bind("jsonToHTML", jsonToHTML)
+	ui.Bind("getBuildsJSON", getBuildsJSON)
 	ui.Bind("getImage", getImage)
 
 	ui.Load("data:text/html," + url.PathEscape(finalHTMLContent))
