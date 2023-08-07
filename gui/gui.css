@@ -26,6 +26,18 @@ table {
     align-items: center;
 }
 
+#headerBackBtn {
+    position: absolute;
+    left: 3.8%;
+    color: white;
+    font-size: 30px;
+
+    cursor: pointer;
+
+    display: none;
+    visibility: hidden;
+}
+
 #searchBarContainer {
     text-align: center;
     position: relative;

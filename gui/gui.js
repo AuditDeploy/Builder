@@ -74,16 +74,35 @@ const renderBuildsList = async () => {
     buildsTable.innerHTML = createBuildsListTable(buildsJSON);
 };
 
+function displayHomePage() {
+    let detailspage = document.getElementById("detailspage");
+    let backBtn = document.getElementById("headerBackBtn");
+    let homepage = document.getElementById("homepage");
+    
+    detailspage.style.display = "none";
+    detailspage.style.visibility = "hidden";
+
+    backBtn.style.display = "none";
+    backBtn.style.visibility = "hidden";
+    
+    homepage.style.display = "block";
+    homepage.style.visibility = "visible";
+
+    renderBuildsList();
+}
+
 async function onPageLoad() {
     // Load and display Builder logo
     let image = await getImage();
     document.getElementById("logo").src = "data:image/png;base64," + image;
 
     // Display homepage only
-    document.getElementById("homepage").style.display="block";
-	document.getElementById("homepage").style.visbility="visible";
+    document.getElementById("homepage").style.display = "block";
+	document.getElementById("homepage").style.visibility = "visible";
     document.getElementById("detailspage").style.display = "none";
     document.getElementById("detailspage").style.visibility = "hidden";
+    document.getElementById("headerBackBtn").style.display = "none";
+    document.getElementById("headerBackBtn").style.visibility = "hidden";
 
     // Render data
     renderBuildsList();
@@ -93,10 +112,15 @@ async function onPageLoad() {
 
 function displayDetailsPage(buildHash) {
     let detailspage = document.getElementById("detailspage");
+    let backBtn = document.getElementById("headerBackBtn");
     let homepage = document.getElementById("homepage");
     
     detailspage.style.display = "block";
     detailspage.style.visibility = "visible";
+
+    backBtn.style.display = "inline";
+    backBtn.style.visibility = "visible";
+    backBtn.innerText = "<";
     
     homepage.style.display = "none";
     homepage.style.visibility = "hidden";
