@@ -69,7 +69,7 @@ function createBuildsListTable(buildsJSON) {
     return text
 }
 
-const render = async () => {
+const renderBuildsList = async () => {
     let buildsJSON = await getBuildsJSON();
     buildsTable.innerHTML = createBuildsListTable(buildsJSON);
 };
@@ -86,7 +86,7 @@ async function onPageLoad() {
     document.getElementById("detailspage").style.visibility = "hidden";
 
     // Render data
-    render();
+    renderBuildsList();
 }
 
 // Details page functions
@@ -133,4 +133,40 @@ async function displayDetailsData(buildHash) {
     
     // Display artifact(s) location
     document.getElementById("artifactsLocation").innerHTML = build.artifactLocation;
+
+    // Get logs
+    let path = build.artifactLocation;
+    path = path.substring(0, path.lastIndexOf('/')) + '/logs/logs.json';
+    displayLogs(path);
+}
+
+async function displayLogs(path) {
+    let logsJSON = await getLogsJSON(path);
+	var buildLogs = JSON.parse(logsJSON);
+  
+    let text = ""
+    for (let log in buildLogs) {
+        text += "<tr><td>"  	
+        
+        // Time
+        text += "<span class='logTime'>" + stringToUTC(buildLogs[log].timestamp) + "</span>";
+        
+        // Type
+        if (buildLogs[log].level == 'info'){
+            text += "<span class='logTypeInfo'>" + buildLogs[log].level + "</span>";
+        } else if(buildLogs[log].level == 'warn'){
+            text += "<span class='logTypeWarn'>" + buildLogs[log].level + "</span>";
+        } else {
+            text += "<span class='logTypeError'>" + buildLogs[log].level + "</span>";
+        }
+        
+        // Caller
+        text += "<span class='logCaller'>" + buildLogs[log].caller + ":" + "</span>";
+        
+        // Message
+        text += "<span class='logMessage'>" + buildLogs[log].msg + "</span>";
+        
+        text += "</td></tr>"
+    }
+    document.getElementById("logsTable").innerHTML = text;
 }

@@ -3,6 +3,7 @@ package gui
 import (
 	_ "embed"
 	"encoding/base64"
+	"fmt"
 	"log"
 	"net/url"
 	"os"
@@ -59,6 +60,16 @@ func Gui() {
 		return string(buildsJSON)
 	}
 
+	getLogsJSON := func(path string) string {
+		logsJSON, err := os.ReadFile(path)
+		if err != nil {
+			fmt.Println(err)
+			log.Fatal(err)
+		}
+
+		return string(logsJSON)
+	}
+
 	getImage := func() string {
 		image := base64.StdEncoding.EncodeToString(logo)
 
@@ -81,6 +92,7 @@ func Gui() {
 	defer ui.Close()
 
 	ui.Bind("getBuildsJSON", getBuildsJSON)
+	ui.Bind("getLogsJSON", getLogsJSON)
 	ui.Bind("getImage", getImage)
 
 	ui.Load("data:text/html," + url.PathEscape(finalHTMLContent))
