@@ -83,8 +83,11 @@ func Gui() {
 	finalHTMLContent := cssRegex.ReplaceAllString(string(IndexHtmlContents), string(cssContents))
 	finalHTMLContent = jsRegex.ReplaceAllString(finalHTMLContent, string(jsContents))
 
+	// Custom arguments for chrome popup
+	args := []string{"--remote-allow-origins=*"}
+
 	// Create UI with basic HTML passed via data URI
-	ui, err := lorca.New("", "", 1200, 1000, "--remote-allow-origins=*")
+	ui, err := lorca.New("", "", 1200, 1000, args...)
 
 	if err != nil {
 		log.Fatal(err)
