@@ -173,15 +173,15 @@ async function displayLogs(path) {
         text += "<tr><td>"  	
         
         // Time
-        text += "<span class='logTime'>" + stringToUTC(buildLogs[log].timestamp) + "</span>";
+        text += "<span class='logTime'>" + new Date(buildLogs[log].timestamp).toLocaleString().replaceAll(',','') + "</span>";
         
         // Type
         if (buildLogs[log].level == 'info'){
-            text += "<span class='logTypeInfo'>" + buildLogs[log].level + "</span>";
+            text += "<span class='logTypeInfo'>" + buildLogs[log].level.toUpperCase() + "</span>";
         } else if(buildLogs[log].level == 'warn'){
-            text += "<span class='logTypeWarn'>" + buildLogs[log].level + "</span>";
+            text += "<span class='logTypeWarn'>" + buildLogs[log].level.toUpperCase() + "</span>";
         } else {
-            text += "<span class='logTypeError'>" + buildLogs[log].level + "</span>";
+            text += "<span class='logTypeError'>" + buildLogs[log].level.toUpperCase() + "</span>";
         }
         
         // Caller
