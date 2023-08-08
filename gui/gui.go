@@ -1,13 +1,14 @@
 package gui
 
 import (
+	"bufio"
 	_ "embed"
 	"encoding/base64"
-	"fmt"
 	"log"
 	"net/url"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/zserge/lorca"
@@ -61,13 +62,24 @@ func Gui() {
 	}
 
 	getLogsJSON := func(path string) string {
-		logsJSON, err := os.ReadFile(path)
+		logsFile, err := os.Open(path)
 		if err != nil {
-			fmt.Println(err)
 			log.Fatal(err)
 		}
+		defer logsFile.Close()
 
-		return string(logsJSON)
+		var lines []string
+		scanner := bufio.NewScanner(logsFile)
+		for scanner.Scan() {
+			lines = append(lines, scanner.Text())
+		}
+
+		// Re-format zap logger output to valid JSON
+		asString := strings.Join(lines, ",")
+
+		jsonString := "[" + asString + "]"
+
+		return jsonString
 	}
 
 	getImage := func() string {
