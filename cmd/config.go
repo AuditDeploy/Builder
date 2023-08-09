@@ -33,6 +33,9 @@ func Config() {
 	// utils.Metadata()
 	log.Info("Metadata created successfully.")
 
+	// Store build metadata to hidden builder dir
+	utils.StoreBuildMetadataLocally()
+
 	//Check for Dockerfile, then build image
 	utils.Docker()
 
