@@ -28,7 +28,11 @@ func Metadata(path string, startTime string, endTime string) {
 	if os.Getenv("BUILDER_OUTPUT_PATH") != "" {
 		artifactLocation = os.Getenv("BUILDER_OUTPUT_PATH")
 	} else {
-		artifactLocation = os.Getenv("BUILDER_ARTIFACT_DIR")
+		builderPath, _ := os.Getwd()
+		artifactRelativePath := os.Getenv("BUILDER_ARTIFACT_DIR")
+		artifactDir := artifactRelativePath[1:]
+
+		artifactLocation = builderPath + artifactDir
 	}
 
 	ip := GetIPAdress().String()
