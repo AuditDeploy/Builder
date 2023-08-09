@@ -2,6 +2,7 @@ package utils
 
 import (
 	"Builder/utils/log"
+
 	"encoding/json"
 	"io/ioutil"
 	"net"
@@ -15,6 +16,7 @@ import (
 
 func Metadata(path string, startTime string, endTime string) {
 	//Metedata
+	projectName := GetName()
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
 	homeDir := GetUserData().HomeDir
@@ -24,8 +26,9 @@ func Metadata(path string, startTime string, endTime string) {
 		_, masterGitHash, branchHash, branchName = GitHashAndName()
 	}
 
-	//Contains a collection of fileds with user's metadata
+	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
+		ProjectName:   projectName,
 		UserName:      userName,
 		HomeDir:       homeDir,
 		IP:            ip,
@@ -41,6 +44,7 @@ func Metadata(path string, startTime string, endTime string) {
 
 // AllMetaData holds the stuct of all the arguments
 type AllMetaData struct {
+	ProjectName   string
 	UserName      string
 	HomeDir       string
 	IP            string
