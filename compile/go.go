@@ -14,6 +14,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
 
 // Go creates exe from file passed in as arg
@@ -69,9 +70,15 @@ func Go(filePath string) {
 		os.Setenv("BUILDER_BUILD_COMMAND", "go build -o "+strings.TrimSuffix(utils.GetName(), ".git"))
 	}
 
-	//run cmd, check for err, log cmd
+	// get start time, run cmd, get end time, check for err, log cmd
 	log.Info("run command", cmd)
+
+	startTime := time.Now().Format(time.RFC850)
+
 	err := cmd.Run()
+
+	endTime := time.Now().Format(time.RFC850)
+
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
@@ -81,12 +88,12 @@ func Go(filePath string) {
 	}
 	yaml.CreateBuilderYaml(fullPath)
 
-	packageGoArtifact(fullPath)
+	packageGoArtifact(fullPath, startTime, endTime)
 
 	log.Info("Go project built successfully.")
 }
 
-func packageGoArtifact(fullPath string) {
+func packageGoArtifact(fullPath string, startTime string, endTime string) {
 	archiveExt := ""
 	artifactExt := ""
 
@@ -98,7 +105,7 @@ func packageGoArtifact(fullPath string) {
 		artifactExt = "executable"
 	}
 
-	artifact.ArtifactDir()
+	artifact.ArtifactDir(endTime)
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, artifactExt)
@@ -107,7 +114,7 @@ func packageGoArtifact(fullPath string) {
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata
-	utils.Metadata(artifactDir)
+	utils.Metadata(artifactDir, startTime, endTime)
 
 	if os.Getenv("ARTIFACT_ZIP_ENABLED") == "true" {
 		//zip artifact

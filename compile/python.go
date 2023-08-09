@@ -71,7 +71,13 @@ func Python() {
 	}
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
+
+	startTime := time.Now().Format(time.RFC850)
+
 	err := cmd.Run()
+
+	endTime := time.Now().Format(time.RFC850)
+
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
@@ -91,7 +97,7 @@ func Python() {
 		addPath = tempWorkspace
 	}
 
-	utils.Metadata(addPath)
+	utils.Metadata(addPath, startTime, endTime)
 
 	//sets path for zip creation
 	var dirPath string
@@ -103,9 +109,10 @@ func Python() {
 	}
 
 	// CreateZip artifact dir with timestamp
-	currentTime := time.Now().Unix()
+	parsedEndTime, _ := time.Parse(time.RFC850, endTime)
+	completionTime := parsedEndTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
+	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(completionTime, 10) + ".zip")
 	if err != nil {
 		log.Fatal("Python failed to get artifact", err)
 	}
@@ -122,7 +129,7 @@ func Python() {
 	if err != nil {
 		log.Fatal("Python project failed to compile", err)
 	}
-	packagePythonArtifact(fullPath)
+	packagePythonArtifact(fullPath, startTime, endTime)
 
 	// artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	// if artifactPath != "" {
@@ -131,7 +138,7 @@ func Python() {
 	log.Info("Python project compiled successfully.")
 }
 
-func packagePythonArtifact(fullPath string) {
+func packagePythonArtifact(fullPath string, startTime string, endTime string) {
 	archiveExt := ""
 
 	if runtime.GOOS == "windows" {
@@ -140,7 +147,7 @@ func packagePythonArtifact(fullPath string) {
 		archiveExt = ".tar.gz"
 	}
 
-	artifact.ArtifactDir()
+	artifact.ArtifactDir(endTime)
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
@@ -149,7 +156,7 @@ func packagePythonArtifact(fullPath string) {
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
-	utils.Metadata(artifactDir)
+	utils.Metadata(artifactDir, startTime, endTime)
 
 	if os.Getenv("ARTIFACT_ZIP_ENABLED") == "true" {
 		//zip artifact

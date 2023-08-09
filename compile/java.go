@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 )
 
 // Java does ...
@@ -64,7 +65,13 @@ func Java(filePath string) {
 
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
+
+	startTime := time.Now().Format(time.RFC850)
+
 	err := cmd.Run()
+
+	endTime := time.Now().Format(time.RFC850)
+
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
@@ -76,11 +83,11 @@ func Java(filePath string) {
 	//creates default builder.yaml if it doesn't exist
 	yaml.CreateBuilderYaml(fullPath)
 
-	packageJavaArtifact(fullPath + "/target")
+	packageJavaArtifact(fullPath+"/target", startTime, endTime)
 
 	log.Info("Java project compiled successfully.")
 }
-func packageJavaArtifact(fullPath string) {
+func packageJavaArtifact(fullPath string, startTime string, endTime string) {
 	archiveExt := ""
 
 	if runtime.GOOS == "windows" {
@@ -89,7 +96,7 @@ func packageJavaArtifact(fullPath string) {
 		archiveExt = ".tar.gz"
 	}
 
-	artifact.ArtifactDir()
+	artifact.ArtifactDir(endTime)
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".jar")
@@ -98,7 +105,7 @@ func packageJavaArtifact(fullPath string) {
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
-	utils.Metadata(artifactDir)
+	utils.Metadata(artifactDir, startTime, endTime)
 
 	if os.Getenv("ARTIFACT_ZIP_ENABLED") == "true" {
 		//zip artifact

@@ -9,14 +9,12 @@ import (
 	"os/exec"
 	"os/user"
 	"strings"
-	"time"
 
 	"gopkg.in/yaml.v2"
 )
 
-func Metadata(path string) {
+func Metadata(path string, startTime string, endTime string) {
 	//Metedata
-	timestamp := time.Now().Format(time.RFC850)
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
 	homeDir := GetUserData().HomeDir
@@ -31,7 +29,8 @@ func Metadata(path string) {
 		UserName:      userName,
 		HomeDir:       homeDir,
 		IP:            ip,
-		Timestamp:     timestamp,
+		StartTime:     startTime,
+		EndTime:       endTime,
 		MasterGitHash: masterGitHash,
 		BranchName:    branchName,
 		BranchHash:    branchHash}
@@ -45,7 +44,8 @@ type AllMetaData struct {
 	UserName      string
 	HomeDir       string
 	IP            string
-	Timestamp     string
+	StartTime     string
+	EndTime       string
 	MasterGitHash string
 	BranchName    string
 	BranchHash    string

@@ -70,7 +70,13 @@ func Ruby() {
 	}
 	//run cmd, check for err, log cmd
 	log.Info("run command", cmd)
+
+	startTime := time.Now().Format(time.RFC850)
+
 	err := cmd.Run()
+
+	endTime := time.Now().Format(time.RFC850)
+
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
@@ -90,7 +96,7 @@ func Ruby() {
 		addPath = tempWorkspace
 	}
 
-	utils.Metadata(addPath)
+	utils.Metadata(addPath, startTime, endTime)
 
 	//sets path for zip creation
 	var dirPath string
@@ -102,9 +108,10 @@ func Ruby() {
 	}
 
 	//CreateZip artifact dir with timestamp
-	currentTime := time.Now().Unix()
+	parsedEndTime, _ := time.Parse(time.RFC850, endTime)
+	completionTime := parsedEndTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
+	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(completionTime, 10) + ".zip")
 	if err != nil {
 		log.Fatal("Ruby failed to get artifact", err)
 	}
@@ -121,7 +128,7 @@ func Ruby() {
 	if err != nil {
 		log.Fatal("Ruby project failed to compile.", err)
 	}
-	packageRubyArtifact(fullPath)
+	packageRubyArtifact(fullPath, startTime, endTime)
 
 	// artifactPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	// if artifactPath != "" {
@@ -130,7 +137,7 @@ func Ruby() {
 	log.Info("Ruby project compiled successfully.")
 }
 
-func packageRubyArtifact(fullPath string) {
+func packageRubyArtifact(fullPath string, startTime string, endTime string) {
 	archiveExt := ""
 
 	if runtime.GOOS == "windows" {
@@ -139,7 +146,7 @@ func packageRubyArtifact(fullPath string) {
 		archiveExt = ".tar.gz"
 	}
 
-	artifact.ArtifactDir()
+	artifact.ArtifactDir(endTime)
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
@@ -148,7 +155,7 @@ func packageRubyArtifact(fullPath string) {
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
-	utils.Metadata(artifactDir)
+	utils.Metadata(artifactDir, startTime, endTime)
 
 	if os.Getenv("ARTIFACT_ZIP_ENABLED") == "true" {
 		//zip artifact
