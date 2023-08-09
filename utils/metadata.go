@@ -24,7 +24,12 @@ func Metadata(path string, startTime string, endTime string) {
 	projectType := caser.String(os.Getenv("BUILDER_PROJECT_TYPE"))
 
 	artifactName := os.Getenv("BUILDER_ARTIFACT_STAMP")
-	artifactLocation := os.Getenv("BUILDER_OUTPUT_PATH")
+	var artifactLocation string
+	if os.Getenv("BUILDER_OUTPUT_PATH") != "" {
+		artifactLocation = os.Getenv("BUILDER_OUTPUT_PATH")
+	} else {
+		artifactLocation = os.Getenv("BUILDER_PARENT_DIR")
+	}
 
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
