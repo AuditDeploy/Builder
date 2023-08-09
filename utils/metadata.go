@@ -23,6 +23,9 @@ func Metadata(path string, startTime string, endTime string) {
 	caser := cases.Title(language.English)
 	projectType := caser.String(os.Getenv("BUILDER_PROJECT_TYPE"))
 
+	artifactName := os.Getenv("BUILDER_ARTIFACT_STAMP")
+	artifactLocation := os.Getenv("BUILDER_OUTPUT_PATH")
+
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
 	homeDir := GetUserData().HomeDir
@@ -34,16 +37,18 @@ func Metadata(path string, startTime string, endTime string) {
 
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
-		ProjectName:   projectName,
-		ProjectType:   projectType,
-		UserName:      userName,
-		HomeDir:       homeDir,
-		IP:            ip,
-		StartTime:     startTime,
-		EndTime:       endTime,
-		MasterGitHash: masterGitHash,
-		BranchName:    branchName,
-		BranchHash:    branchHash}
+		ProjectName:      projectName,
+		ProjectType:      projectType,
+		ArtifactName:     artifactName,
+		ArtifactLocation: artifactLocation,
+		UserName:         userName,
+		HomeDir:          homeDir,
+		IP:               ip,
+		StartTime:        startTime,
+		EndTime:          endTime,
+		MasterGitHash:    masterGitHash,
+		BranchName:       branchName,
+		BranchHash:       branchHash}
 
 	OutputMetadata(path, &userMetaData)
 
@@ -51,16 +56,18 @@ func Metadata(path string, startTime string, endTime string) {
 
 // AllMetaData holds the stuct of all the arguments
 type AllMetaData struct {
-	ProjectName   string
-	ProjectType   string
-	UserName      string
-	HomeDir       string
-	IP            string
-	StartTime     string
-	EndTime       string
-	MasterGitHash string
-	BranchName    string
-	BranchHash    string
+	ProjectName      string
+	ProjectType      string
+	ArtifactName     string
+	ArtifactLocation string
+	UserName         string
+	HomeDir          string
+	IP               string
+	StartTime        string
+	EndTime          string
+	MasterGitHash    string
+	BranchName       string
+	BranchHash       string
 }
 
 // GetUserData return username and userdir
