@@ -11,13 +11,18 @@ import (
 	"os/user"
 	"strings"
 
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
 )
 
 func Metadata(path string, startTime string, endTime string) {
 	//Metedata
 	projectName := GetName()
-	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+
+	caser := cases.Title(language.English)
+	projectType := caser.String(os.Getenv("BUILDER_PROJECT_TYPE"))
+
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
 	homeDir := GetUserData().HomeDir
