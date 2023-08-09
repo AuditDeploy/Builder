@@ -2,7 +2,6 @@ package utils
 
 import (
 	"Builder/utils/log"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -145,16 +144,16 @@ func BranchNameExists(branches []string) (bool, string) {
 
 func StoreBuildMetadataLocally() {
 	// Read in build JSON data from build artifact directory
-	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	//artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 
-	metadataJSON, err := os.ReadFile(artifactDir + "/metadata.json")
-	if err != nil {
-		var _, errb bytes.Buffer
-		log.Fatal("Cannot find metadata.json file", errb)
-	}
+	// metadataJSON, err := os.ReadFile(artifactDir + "/metadata.json")
+	// if err != nil {
+	// 	var _, errb bytes.Buffer
+	// 	log.Fatal("Cannot find metadata.json file", errb)
+	// }
 
 	// Check if .builder folder exists, if not, create it
-	user, err := user.Current()
+	user, _ := user.Current()
 	homeDir := user.HomeDir
 	if _, err := os.Stat(homeDir + "/.builder"); os.IsNotExist(err) {
 		fmt.Println(err)
