@@ -2,8 +2,8 @@ package utils
 
 import (
 	"Builder/utils/log"
+	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
@@ -144,20 +144,41 @@ func BranchNameExists(branches []string) (bool, string) {
 
 func StoreBuildMetadataLocally() {
 	// Read in build JSON data from build artifact directory
-	//artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 
-	// metadataJSON, err := os.ReadFile(artifactDir + "/metadata.json")
-	// if err != nil {
-	// 	var _, errb bytes.Buffer
-	// 	log.Fatal("Cannot find metadata.json file", errb)
-	// }
+	metadataJSON, err := os.ReadFile(artifactDir + "/metadata.json")
+	if err != nil {
+		var _, errb bytes.Buffer
+		log.Fatal("Cannot find metadata.json file", errb)
+	}
 
 	// Check if .builder folder exists, if not, create it
 	user, _ := user.Current()
 	homeDir := user.HomeDir
-	if _, err := os.Stat(homeDir + "/.builder"); os.IsNotExist(err) {
-		fmt.Println(err)
+
+	textToAppend := string(metadataJSON) + ",\n"
+
+	buildsFile, err := os.OpenFile(homeDir+"/.builder", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		log.Fatal("", err)
 	}
+	if _, err := buildsFile.Write([]byte(textToAppend)); err != nil {
+		log.Fatal("", err)
+	}
+	if err := buildsFile.Close(); err != nil {
+		log.Fatal("", err)
+	}
+
+	// if _, err := os.Stat(homeDir + "/.builder"); os.IsNotExist(err) {
+	// 	if err != nil {
+	// 		err := ioutil.WriteFile(homeDir + "/.builder"+"/builds.json", metadataJSON, 0666)
+	// 		if err != nil {
+	// 			log.Fatal("Builds JSON creation unsuccessful.")
+	// 		}
+	// 	} else {
+
+	// 	}
+	// }
 
 	// Open builds.json file stored in user's hidden builder dir
 }
