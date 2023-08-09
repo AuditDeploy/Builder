@@ -158,7 +158,7 @@ func StoreBuildMetadataLocally() {
 
 	textToAppend := string(metadataJSON) + ",\n"
 
-	buildsFile, err := os.OpenFile(homeDir+"/.builder", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	buildsFile, err := os.OpenFile(homeDir+"/.builder/builds.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Fatal("", err)
 	}
