@@ -108,10 +108,10 @@ func Npm() {
 	}
 
 	// CreateZip artifact dir with timestamp
-	parsedEndTime, _ := time.Parse(time.RFC850, endTime)
-	completionTime := parsedEndTime.Unix()
+	parsedStartTime, _ := time.Parse(time.RFC850, startTime)
+	timeBuildStarted := parsedStartTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(completionTime, 10) + ".zip")
+	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
 	if err != nil {
 		log.Fatal("node-npm failed to get arfiact", err)
 	}

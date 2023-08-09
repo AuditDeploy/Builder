@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func ArtifactDir(endTime string) {
+func ArtifactDir(startTime string) {
 	var dirPath string
 	// if os.Getenv("BUILDER_COMMAND") == "true" {
 	// 	path, _ := os.Getwd()
@@ -23,9 +23,9 @@ func ArtifactDir(endTime string) {
 	dirName := os.Getenv("BUILDER_DIR_NAME")
 	// }
 
-	parsedEndTime, _ := time.Parse(time.RFC850, endTime)
-	completionTime := parsedEndTime.Unix()
-	artifactStamp := dirName + "_artifact_" + strconv.FormatInt(completionTime, 10)
+	parsedStartTime, _ := time.Parse(time.RFC850, startTime)
+	timeBuildStarted := parsedStartTime.Unix()
+	artifactStamp := dirName + "_artifact_" + strconv.FormatInt(timeBuildStarted, 10)
 	os.Setenv("BUILDER_ARTIFACT_STAMP", artifactStamp)
 	artifactDir := dirPath + "/" + artifactStamp
 

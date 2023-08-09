@@ -9,17 +9,17 @@ import (
 )
 
 // rename artifact with Unix timestamp
-func NameArtifact(fullPath string, extName string, endTime string) string {
+func NameArtifact(fullPath string, extName string, startTime string) string {
 	//seperate extName by last ".", return that ext (jar, exe, etc)
 	newExtName := extName[strings.LastIndex(extName, ".")+1:]
 
 	//trim off ".jar", ".exe", etc to add timestamp
 	res := strings.Split(extName, "."+newExtName)
-	parsedEndTime, _ := time.Parse(time.RFC850, endTime)
-	completionTime := parsedEndTime.Unix()
+	parsedStartTime, _ := time.Parse(time.RFC850, startTime)
+	timeBuildStarted := parsedStartTime.Unix()
 
 	//join it all back together
-	artifactName := res[0] + "_" + strconv.FormatInt(completionTime, 10) + "." + newExtName
+	artifactName := res[0] + "_" + strconv.FormatInt(timeBuildStarted, 10) + "." + newExtName
 
 	err := os.Rename(fullPath+extName, fullPath+artifactName)
 
