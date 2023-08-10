@@ -2,7 +2,6 @@ package directory
 
 import (
 	"Builder/utils/log"
-	"fmt"
 	"os"
 	"os/user"
 )
@@ -12,7 +11,6 @@ func BuilderDir(path string) (bool, error) {
 	_, err := os.Stat(path)
 
 	if err == nil {
-		fmt.Println(".builder dir already exists")
 		log.Error(".builder dir already exists")
 	}
 

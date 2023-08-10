@@ -4,7 +4,6 @@ import (
 	"Builder/utils/log"
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
@@ -39,8 +38,6 @@ func Metadata(path string) {
 		BranchHash:    branchHash}
 
 	OutputMetadata(path, &userMetaData)
-
-	StoreBuildMetadataLocally()
 }
 
 // AllMetaData holds the stuct of all the arguments
@@ -159,8 +156,6 @@ func StoreBuildMetadataLocally() {
 	homeDir := user.HomeDir
 
 	textToAppend := string(metadataJSON) + ",\n"
-
-	fmt.Println(textToAppend)
 
 	buildsFile, err := os.OpenFile(homeDir+"/.builder/builds.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
