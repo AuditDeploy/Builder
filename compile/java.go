@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -79,6 +80,9 @@ func Java(filePath string) {
 		fmt.Println("out:", outb.String(), "err:", errb.String())
 		log.Fatal("JAVA failed to compile", err)
 	}
+
+	// Update parent dir name to include start time
+	directory.UpdateParentDirName()
 
 	//creates default builder.yaml if it doesn't exist
 	yaml.CreateBuilderYaml(fullPath)

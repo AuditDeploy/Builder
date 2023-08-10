@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -84,6 +85,9 @@ func Npm() {
 		fmt.Println("out:", outb.String(), "err:", errb.String())
 		log.Fatal("node-npm failed to build", err)
 	}
+
+	// Update parent dir name to include start time
+	directory.UpdateParentDirName()
 
 	yaml.CreateBuilderYaml(fullPath)
 

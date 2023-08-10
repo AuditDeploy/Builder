@@ -5,6 +5,7 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -86,6 +87,10 @@ func Go(filePath string) {
 		fmt.Println("out:", outb.String(), "err:", errb.String())
 		log.Fatal("GO project failed to build", err)
 	}
+
+	// Update parent dir name to include start time
+	directory.UpdateParentDirName()
+
 	yaml.CreateBuilderYaml(fullPath)
 
 	packageGoArtifact(fullPath)
