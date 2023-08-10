@@ -166,7 +166,7 @@ func packagePythonArtifact(fullPath string) {
 		exec.Command("cp", "-a", artifactDir+archiveExt, artifactDir).Run()
 		exec.Command("rm", artifactDir+archiveExt).Run()
 
-		// artifactName := artifact.NameArtifact(fullPath, extName, endTime)
+		// artifactName := artifact.NameArtifact(fullPath, extName)
 
 		// send artifact to user specified path or send to parent directory
 		artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
