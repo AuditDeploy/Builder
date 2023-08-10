@@ -3,8 +3,6 @@ package directory
 import (
 	"fmt"
 	"os"
-	"strconv"
-	"time"
 
 	"Builder/utils"
 	"Builder/utils/log"
@@ -17,22 +15,16 @@ func MakeDirs() {
 	//handles -n flag
 	name := utils.GetName()
 
-	//add Unix timestamp to dir name
-	currentTime := time.Now().Unix()
-
 	//check for projectPath env from builder.yaml
 	configPath := os.Getenv("BUILDER_DIR_PATH")
-
-	unixTime := strconv.FormatInt(currentTime, 10)
-	os.Setenv("BUILDER_TIMESTAMP", unixTime)
 
 	var path string
 	if configPath != "" {
 		// used for 'config' cmd, set by builder.yaml
-		path = configPath + "/" + name + "_" + unixTime
+		path = configPath + "/" + name + "_START"
 	} else {
 		// local path, used for 'init' cmd/default
-		path = "./" + name + "_" + unixTime
+		path = "./" + name + "_START"
 	}
 
 	MakeParentDir(path)
@@ -87,6 +79,14 @@ func MakeParentDir(path string) (bool, error) {
 	}
 
 	return true, err
+}
+
+func UpdateParentDirName() {
+	oldName, _ := os.LookupEnv("BUILDER_PARENT_DIR")
+	startTime, _ := os.LookupEnv("BUILD_START_TIME")
+	newName := oldName[:5] + startTime
+
+	fmt.Println("new Name will be: ", newName)
 }
 
 func yesNo() bool {

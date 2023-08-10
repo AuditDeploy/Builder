@@ -62,7 +62,6 @@ func Metadata(path string) {
 		BranchHash:       branchHash}
 
 	OutputMetadata(path, &userMetaData)
-
 }
 
 // AllMetaData holds the stuct of all the arguments
