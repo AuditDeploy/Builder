@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -78,6 +79,9 @@ func CSharp(filePath string) {
 		fmt.Println("out:", outb.String(), "err:", errb.String())
 		log.Fatal("csharp project failed to compile", err)
 	}
+
+	// Update parent dir name to include start time
+	directory.UpdateParentDirName()
 
 	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
 

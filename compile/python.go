@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -85,6 +86,9 @@ func Python() {
 		fmt.Println("out:", outb.String(), "err:", errb.String())
 		log.Fatal("Python project failed to compile.", err)
 	}
+
+	// Update parent dir name to include start time
+	directory.UpdateParentDirName()
 
 	yaml.CreateBuilderYaml(fullPath)
 
