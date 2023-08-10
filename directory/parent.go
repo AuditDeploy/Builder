@@ -91,14 +91,15 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 
 	path := os.Getenv("BUILDER_DIR_PATH")
 
-	err := os.Rename(path+"/"+oldName, path+"/"+newName)
+	err := os.Rename(path+"/"+oldName[2:], path+"/"+newName[2:])
 	if err != nil {
 		log.Fatal("could not rename parent dir")
 	}
 
-	newPath := strings.Replace(pathWithWrongParentName, oldName, newName, 1)
+	os.Setenv("BUILDER_PARENT_DIR", newName)
 
-	fmt.Println(newPath)
+	// Return new path with new parent directory name
+	newPath := strings.Replace(pathWithWrongParentName, oldName[2:], newName[2:], 1)
 
 	return newPath
 }
