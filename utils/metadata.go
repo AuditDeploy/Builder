@@ -39,6 +39,7 @@ func Metadata(path string) {
 
 	OutputMetadata(path, &userMetaData)
 
+	StoreBuildMetadataLocally()
 }
 
 // AllMetaData holds the stuct of all the arguments
@@ -160,13 +161,13 @@ func StoreBuildMetadataLocally() {
 
 	buildsFile, err := os.OpenFile(homeDir+"/.builder/builds.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
-		log.Fatal("", err)
+		log.Fatal("Could not create builds.json file", err)
 	}
 	if _, err := buildsFile.Write([]byte(textToAppend)); err != nil {
-		log.Fatal("", err)
+		log.Fatal("Could not write to builds.json file", err)
 	}
 	if err := buildsFile.Close(); err != nil {
-		log.Fatal("", err)
+		log.Fatal("Could not close builds.json file", err)
 	}
 
 	// if _, err := os.Stat(homeDir + "/.builder"); os.IsNotExist(err) {
