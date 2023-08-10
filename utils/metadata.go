@@ -4,6 +4,7 @@ import (
 	"Builder/utils/log"
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net"
 	"os"
@@ -153,11 +154,13 @@ func StoreBuildMetadataLocally() {
 		log.Fatal("Cannot find metadata.json file", errb)
 	}
 
-	// Check if .builder folder exists, if not, create it
+	// Check if builds.json exists and append to it, if not, create it
 	user, _ := user.Current()
 	homeDir := user.HomeDir
 
 	textToAppend := string(metadataJSON) + ",\n"
+
+	fmt.Println(textToAppend)
 
 	buildsFile, err := os.OpenFile(homeDir+"/.builder/builds.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
@@ -169,17 +172,4 @@ func StoreBuildMetadataLocally() {
 	if err := buildsFile.Close(); err != nil {
 		log.Fatal("Could not close builds.json file", err)
 	}
-
-	// if _, err := os.Stat(homeDir + "/.builder"); os.IsNotExist(err) {
-	// 	if err != nil {
-	// 		err := ioutil.WriteFile(homeDir + "/.builder"+"/builds.json", metadataJSON, 0666)
-	// 		if err != nil {
-	// 			log.Fatal("Builds JSON creation unsuccessful.")
-	// 		}
-	// 	} else {
-
-	// 	}
-	// }
-
-	// Open builds.json file stored in user's hidden builder dir
 }
