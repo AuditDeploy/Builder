@@ -16,7 +16,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func Metadata(path string, startTime string, endTime string) {
+func Metadata(path string) {
 	//Metedata
 	projectName := GetName()
 
@@ -38,6 +38,8 @@ func Metadata(path string, startTime string, endTime string) {
 	ip := GetIPAdress().String()
 	userName := GetUserData().Username
 	homeDir := GetUserData().HomeDir
+	startTime := os.Getenv("BUILD_START_TIME")
+	endTime := os.Getenv("BUILD_END_TIME")
 
 	var masterGitHash, branchHash, branchName string
 	if os.Getenv("BUILDER_COMMAND") != "true" {

@@ -96,7 +96,7 @@ func Npm() {
 		addPath = tempWorkspace
 	}
 
-	utils.Metadata(addPath, startTime, endTime)
+	utils.Metadata(addPath)
 
 	//sets path for zip creation
 	var dirPath string
@@ -108,7 +108,7 @@ func Npm() {
 	}
 
 	// CreateZip artifact dir with timestamp
-	parsedStartTime, _ := time.Parse(time.RFC850, startTime)
+	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
 	timeBuildStarted := parsedStartTime.Unix()
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
@@ -149,7 +149,7 @@ func packageNpmArtifact(fullPath string, startTime string, endTime string) {
 		archiveExt = ".tar.gz"
 	}
 
-	artifact.ArtifactDir(endTime)
+	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
@@ -158,7 +158,7 @@ func packageNpmArtifact(fullPath string, startTime string, endTime string) {
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
-	utils.Metadata(artifactDir, startTime, endTime)
+	utils.Metadata(artifactDir)
 
 	if os.Getenv("ARTIFACT_ZIP_ENABLED") == "true" {
 		//zip artifact

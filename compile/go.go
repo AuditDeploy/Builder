@@ -73,11 +73,11 @@ func Go(filePath string) {
 	// get start time, run cmd, get end time, check for err, log cmd
 	log.Info("run command", cmd)
 
-	startTime := time.Now().Format(time.RFC850)
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
 
 	err := cmd.Run()
 
-	endTime := time.Now().Format(time.RFC850)
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
 
 	if err != nil {
 		var outb, errb bytes.Buffer
@@ -88,12 +88,12 @@ func Go(filePath string) {
 	}
 	yaml.CreateBuilderYaml(fullPath)
 
-	packageGoArtifact(fullPath, startTime, endTime)
+	packageGoArtifact(fullPath)
 
 	log.Info("Go project built successfully.")
 }
 
-func packageGoArtifact(fullPath string, startTime string, endTime string) {
+func packageGoArtifact(fullPath string) {
 	archiveExt := ""
 	artifactExt := ""
 
@@ -105,7 +105,7 @@ func packageGoArtifact(fullPath string, startTime string, endTime string) {
 		artifactExt = "executable"
 	}
 
-	artifact.ArtifactDir(endTime)
+	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, artifactExt)
@@ -114,7 +114,7 @@ func packageGoArtifact(fullPath string, startTime string, endTime string) {
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata
-	utils.Metadata(artifactDir, startTime, endTime)
+	utils.Metadata(artifactDir)
 
 	if os.Getenv("ARTIFACT_ZIP_ENABLED") == "true" {
 		//zip artifact

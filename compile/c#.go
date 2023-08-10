@@ -65,11 +65,11 @@ func CSharp(filePath string) {
 	//run cmd, check for err, log cmd
 	log.Info("running command", cmd)
 
-	startTime := time.Now().Format(time.RFC850)
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
 
 	err := cmd.Run()
 
-	endTime := time.Now().Format(time.RFC850)
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
 
 	if err != nil {
 		var outb, errb bytes.Buffer
@@ -83,12 +83,12 @@ func CSharp(filePath string) {
 
 	yaml.CreateBuilderYaml(fullPath)
 
-	packageCSharpArtifact(fullPath, startTime, endTime)
+	packageCSharpArtifact(fullPath)
 
 	log.Info("csharp project compiled successfully.")
 }
 
-func packageCSharpArtifact(fullPath string, startTime string, endTime string) {
+func packageCSharpArtifact(fullPath string) {
 	archiveExt := ""
 
 	if runtime.GOOS == "windows" {
@@ -97,7 +97,7 @@ func packageCSharpArtifact(fullPath string, startTime string, endTime string) {
 		archiveExt = ".tar.gz"
 	}
 
-	artifact.ArtifactDir(endTime)
+	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	artifactsArray, _ := WalkMatch(fullPath, "*.dll")
@@ -107,7 +107,7 @@ func packageCSharpArtifact(fullPath string, startTime string, endTime string) {
 	exec.Command("rm", artifactsArray[0]).Run()
 
 	//create metadata, then copy contents to zip dir
-	utils.Metadata(artifactDir, startTime, endTime)
+	utils.Metadata(artifactDir)
 
 	if os.Getenv("ARTIFACT_ZIP_ENABLED") == "true" {
 		artifact.ZipArtifactDir()
