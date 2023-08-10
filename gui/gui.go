@@ -58,7 +58,9 @@ func Gui() {
 			log.Fatal(err)
 		}
 
-		return string(buildsJSON)
+		json := "[" + string(buildsJSON) + "]"
+
+		return json
 	}
 
 	getLogsJSON := func(path string) string {
