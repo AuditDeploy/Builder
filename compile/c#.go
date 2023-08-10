@@ -80,10 +80,8 @@ func CSharp(filePath string) {
 		log.Fatal("csharp project failed to compile", err)
 	}
 
-	// Update parent dir name to include start time
-	directory.UpdateParentDirName()
-
-	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	yaml.CreateBuilderYaml(fullPath)
 

@@ -81,8 +81,8 @@ func Java(filePath string) {
 		log.Fatal("JAVA failed to compile", err)
 	}
 
-	// Update parent dir name to include start time
-	directory.UpdateParentDirName()
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	//creates default builder.yaml if it doesn't exist
 	yaml.CreateBuilderYaml(fullPath)

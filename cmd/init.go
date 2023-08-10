@@ -26,9 +26,6 @@ func Init() {
 	// utils.Metadata()
 	log.Info("Metadata created successfully.")
 
-	// Change parent dir of build to include build start time
-	directory.UpdateParentDirName()
-
 	// Check for Dockerfile, then build image
 	utils.Docker()
 

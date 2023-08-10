@@ -83,7 +83,7 @@ func MakeParentDir(path string) (bool, error) {
 	return true, err
 }
 
-func UpdateParentDirName() {
+func UpdateParentDirName(pathWithWrongParentName string) string {
 	oldName, _ := os.LookupEnv("BUILDER_PARENT_DIR")
 	startTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
 	unixTimestamp := startTime.Unix()
@@ -95,6 +95,10 @@ func UpdateParentDirName() {
 	if err != nil {
 		log.Fatal("could not rename parent dir")
 	}
+
+	newPath := strings.Replace(pathWithWrongParentName, oldName, newName, 1)
+
+	return newPath
 }
 
 func yesNo() bool {

@@ -86,8 +86,8 @@ func Npm() {
 		log.Fatal("node-npm failed to build", err)
 	}
 
-	// Update parent dir name to include start time
-	directory.UpdateParentDirName()
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	yaml.CreateBuilderYaml(fullPath)
 

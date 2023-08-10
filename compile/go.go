@@ -89,7 +89,7 @@ func Go(filePath string) {
 	}
 
 	// Update parent dir name to include start time
-	directory.UpdateParentDirName()
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	yaml.CreateBuilderYaml(fullPath)
 

@@ -87,8 +87,8 @@ func Python() {
 		log.Fatal("Python project failed to compile.", err)
 	}
 
-	// Update parent dir name to include start time
-	directory.UpdateParentDirName()
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	yaml.CreateBuilderYaml(fullPath)
 
