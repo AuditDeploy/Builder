@@ -3,6 +3,7 @@ package directory
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"Builder/utils"
@@ -86,7 +87,7 @@ func UpdateParentDirName() {
 	oldName, _ := os.LookupEnv("BUILDER_PARENT_DIR")
 	startTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
 	unixTimestamp := startTime.Unix()
-	newName := oldName[:4] + fmt.Sprint(unixTimestamp)
+	newName := strings.TrimSuffix(oldName, "START") + fmt.Sprint(unixTimestamp)
 
 	fmt.Println("new Name will be: ", newName)
 }
