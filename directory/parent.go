@@ -89,7 +89,12 @@ func UpdateParentDirName() {
 	unixTimestamp := startTime.Unix()
 	newName := strings.TrimSuffix(oldName, "START") + fmt.Sprint(unixTimestamp)
 
-	fmt.Println("new Name will be: ", newName)
+	path := os.Getenv("BUILDER_DIR_PATH")
+
+	err := os.Rename(path+"/"+oldName, path+"/"+newName)
+	if err != nil {
+		log.Fatal("could not rename parent dir")
+	}
 }
 
 func yesNo() bool {
