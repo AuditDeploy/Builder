@@ -95,6 +95,12 @@ func UpdateParentDirName() {
 	if err != nil {
 		log.Fatal("could not rename parent dir")
 	}
+
+	// Update artifact path
+	oldPath := os.Getenv("BUILDER_ARTIFACT_DIR")
+	newPath := strings.Replace(oldPath, oldName, newName, 1)
+
+	os.Setenv("BUILDER_ARTIFACT_DIR", newPath)
 }
 
 func yesNo() bool {
