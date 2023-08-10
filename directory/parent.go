@@ -98,6 +98,8 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 
 	newPath := strings.Replace(pathWithWrongParentName, oldName, newName, 1)
 
+	fmt.Println(newPath)
+
 	return newPath
 }
 
