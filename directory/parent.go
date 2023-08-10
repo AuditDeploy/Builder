@@ -3,6 +3,7 @@ package directory
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"Builder/utils"
 	"Builder/utils/log"
@@ -83,8 +84,9 @@ func MakeParentDir(path string) (bool, error) {
 
 func UpdateParentDirName() {
 	oldName, _ := os.LookupEnv("BUILDER_PARENT_DIR")
-	startTime, _ := os.LookupEnv("BUILD_START_TIME")
-	newName := oldName[:5] + startTime
+	startTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
+	unixTimestamp := startTime.Unix()
+	newName := oldName[:4] + string(unixTimestamp)
 
 	fmt.Println("new Name will be: ", newName)
 }
