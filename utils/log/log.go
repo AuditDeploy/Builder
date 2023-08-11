@@ -3,7 +3,6 @@ package log
 import (
 	"os"
 	"path/filepath"
-	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -32,14 +31,16 @@ func NewLogger(logFileName string, path string) *zap.Logger {
 }
 
 func init() {
-        layout := "01-02-2006"
-        t := time.Now()
+        args := os.Args[1:]
 
-        globalPath, _ := os.LookupEnv("GLOBAL_LOGS_PATH")
+	// If verbose flag given display Builder logs to console
+	for i := 0; i < len(args); i++ {
+		if args[i] == "-v" || args[i] == "--verbose" {
+        		logger, _ := zap.NewDevelopment()
 
-        logger = NewLogger(t.Format(layout), globalPath)
-
-        zap.ReplaceGlobals(logger)
+        		zap.ReplaceGlobals(logger)
+		}
+	}
 }
 
 
