@@ -8,8 +8,6 @@ import (
 
 	"Builder/utils"
 	"Builder/utils/log"
-
-	"github.com/manifoldco/promptui"
 )
 
 // MakeDirs does...
@@ -54,29 +52,10 @@ func MakeParentDir(path string) (bool, error) {
 
 	// should return true if file doesn't exist
 	if os.IsNotExist(err) {
-		//bypass Prompt msg
-		if bypassPrompt() {
-			errDir := os.MkdirAll(path, 0755)
-			//should return nil once directory is made, if not, throw err
-			if errDir != nil {
-				log.Fatal("failed to create directory", path, err)
-			}
-		} else {
-			//prompt user if they'd like dir to be created
-			mk := yesNo()
-
-			if mk {
-				errDir := os.MkdirAll(path, 0755)
-				//should return nil once directory is made, if not, throw err
-				if errDir != nil {
-					log.Fatal("failed to create directory", path, err)
-				}
-
-			} else {
-				//logger.ErrorLogger.Println("Please create a directory for the Builder")
-				log.Fatal("Please create a directory for the Builder")
-				return true, err
-			}
+		errDir := os.MkdirAll(path, 0755)
+		//should return nil once directory is made, if not, throw err
+		if errDir != nil {
+			log.Fatal("failed to create directory", path, err)
 		}
 	}
 
@@ -89,34 +68,4 @@ func MakeParentDir(path string) (bool, error) {
 	}
 
 	return true, err
-}
-
-func yesNo() bool {
-	prompt := promptui.Select{
-		Label: "Create A Directory? [Yes/No]",
-		Items: []string{"Yes", "No"},
-	}
-	_, result, err := prompt.Run()
-	if err != nil {
-		log.Fatal("Prompt failed %v\n", err)
-	}
-	return result == "Yes"
-}
-
-func bypassPrompt() bool {
-	args := os.Args[1:]
-
-	yesFlag := false
-
-	val := os.Getenv("BYPASS_PROMPTS")
-	if val == "true" {
-		yesFlag = true
-	}
-	for _, val := range args {
-		if val == "--yes" || val == "-y" {
-			yesFlag = true
-		}
-	}
-
-	return yesFlag
 }
