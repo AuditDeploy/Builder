@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"runtime"
 	"strings"
 	"time"
 
@@ -152,12 +153,26 @@ func StoreBuildMetadataLocally() {
 	}
 
 	// Check if builds.json exists and append to it, if not, create it
-	user, _ := user.Current()
-	homeDir := user.HomeDir
-
 	textToAppend := string(metadataJSON) + ",\n"
 
-	buildsFile, err := os.OpenFile(homeDir+"/.builder/builds.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	var pathToBuildsJSON string
+
+	if runtime.GOOS == "windows" {
+		appDataDir := os.Getenv("LOCALAPPDATA")
+		if appDataDir == "" {
+			appDataDir = os.Getenv("APPDATA")
+		}
+
+		pathToBuildsJSON = appDataDir + "/Builder/builds.json"
+	} else {
+		user, _ := user.Current()
+		homeDir := user.HomeDir
+
+		pathToBuildsJSON = homeDir + "/.builder/builds.json"
+	}
+
+	buildsFile, err := os.OpenFile(pathToBuildsJSON, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
 	if err != nil {
 		log.Fatal("Could not create builds.json file", err)
 	}

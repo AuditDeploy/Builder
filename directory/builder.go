@@ -4,6 +4,7 @@ import (
 	"Builder/utils/log"
 	"os"
 	"os/user"
+	"runtime"
 )
 
 func BuilderDir(path string) (bool, error) {
@@ -29,11 +30,21 @@ func BuilderDir(path string) (bool, error) {
 
 // MakeBuilderDir does...
 func MakeBuilderDir() {
-	user, _ := user.Current()
-	homeDir := user.HomeDir
+	if runtime.GOOS != "windows" {
+		user, _ := user.Current()
+		homeDir := user.HomeDir
 
-	builderPath := homeDir + "/.builder"
+		builderPath := homeDir + "/.builder"
 
-	BuilderDir(builderPath)
+		BuilderDir(builderPath)
+	} else {
+		appDataDir := os.Getenv("LOCALAPPDATA")
+		if appDataDir == "" {
+			appDataDir = os.Getenv("APPDATA")
+		}
 
+		builderPath := appDataDir + "/Builder"
+
+		BuilderDir(builderPath)
+	}
 }
