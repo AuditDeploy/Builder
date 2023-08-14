@@ -16,29 +16,36 @@ function clearSearch() {
 
 function search() {
     // Declare variables
-    var filter, table, tr, td, i, t;
-    filter = searchBar.value.toLowerCase();
+    var filters, table, tr, td, i, t;
+    filters = searchBar.value.toLowerCase().match(/\b(\w+)\b/g);
     table = document.getElementById("buildsListTable");
     tr = table.getElementsByTagName("tr");
 
-    // Loop through all table rows (excluding the header), and hide those who don't match the search query
-    for (i = 1; i < tr.length; i++) {
-        var filtered = false;
-        var tds = tr[i].getElementsByTagName("td");
-        for(t = 0; t < tds.length; t++) {
-            var td = tds[t];
-
-            if (td) {
-              if (td.innerHTML.toLowerCase().indexOf(filter) > -1) {
-                filtered = true;
-              }
-            }     
-        }
-        if(filtered === true) {
-            tr[i].style.display = '';
-        }
-        else {
-            tr[i].style.display = 'none';
+    // If filters are deleted repopulate table
+    if(searchBar.value == ""){
+        renderBuildsList()
+    } else {
+        // Loop through all table rows (excluding the header), and hide those who don't match the search query
+        for (index in filters) {
+            for (i = 1; i < tr.length; i++) {
+                var filtered = false;
+                var tds = tr[i].getElementsByTagName("td");
+                for(t = 0; t < tds.length; t++) {
+                    var td = tds[t];
+        
+                    if (td) {
+                    if (td.innerHTML.toLowerCase().indexOf(filters[index]) > -1) {
+                        filtered = true;
+                    }
+                    }     
+                }
+                if(filtered === true) {
+                    tr[i].style.display = '';
+                }
+                else {
+                    tr[i].style.display = 'none';
+                }
+            }
         }
     }
 }
