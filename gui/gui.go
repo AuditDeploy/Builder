@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
@@ -47,13 +48,25 @@ func Gui() {
 
 	// Read in json data
 	getBuildsJSON := func() string {
-		// Read in builds JSON data from .builder/ in user home dir
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			log.Fatal(err)
+		// Read in builds JSON data from application builder folder
+		var buildsPath string
+		if runtime.GOOS == "windows" {
+			appDataDir := os.Getenv("LOCALAPPDATA")
+			if appDataDir == "" {
+				appDataDir = os.Getenv("APPDATA")
+			}
+
+			buildsPath = appDataDir + "/Builder/builds.json"
+		} else {
+			homeDir, err := os.UserHomeDir()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			buildsPath = homeDir + "/.builder/builds.json"
 		}
 
-		buildsJSON, err := os.ReadFile(homeDir + "/.builder/builds.json")
+		buildsJSON, err := os.ReadFile(buildsPath)
 		if err != nil {
 			log.Fatal(err)
 		}
