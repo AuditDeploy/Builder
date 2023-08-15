@@ -7,8 +7,11 @@ import (
 	"time"
 
 	"Builder/utils"
-	"Builder/utils/log"
+
+	"go.uber.org/zap"
 )
+
+var BuilderLog = zap.S()
 
 // MakeDirs does...
 func MakeDirs() {
@@ -47,7 +50,7 @@ func MakeParentDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
-		log.Info("Path already exists")
+		BuilderLog.Info("Path already exists")
 	}
 
 	// should return true if file doesn't exist
@@ -55,7 +58,7 @@ func MakeParentDir(path string) (bool, error) {
 		errDir := os.MkdirAll(path, 0755)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
-			log.Fatal("failed to create directory", path, err)
+			BuilderLog.Fatalf("failed to create directory", path, err)
 		}
 	}
 

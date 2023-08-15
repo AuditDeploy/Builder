@@ -3,10 +3,13 @@ package main
 import (
 	"Builder/cmd"
 	"Builder/utils"
-	"Builder/utils/log"
 	"fmt"
 	"os"
+
+	"go.uber.org/zap"
 )
+
+var BuilderLog = zap.S()
 
 func main() {
 
@@ -24,6 +27,6 @@ func main() {
 		cmd.Builder()
 	}
 
-	log.Info("Build Complete 🔨")
+	BuilderLog.Info("Build Complete 🔨")
 	fmt.Println("Build Complete 🔨")
 }

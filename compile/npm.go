@@ -74,11 +74,11 @@ func Npm() {
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
 
 	stdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		log.Fatal(pipeErr.Error())
+		BuilderLog.Fatal(pipeErr.Error())
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -103,7 +103,7 @@ func Npm() {
 	}()
 
 	if err := cmd.Start(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	// Wait for all output to be processed
@@ -111,7 +111,7 @@ func Npm() {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
@@ -141,7 +141,7 @@ func Npm() {
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
 	if err != nil {
-		log.Fatal("node-npm failed to get artifact", err)
+		BuilderLog.Fatalf("node-npm failed to get artifact", err)
 	}
 
 	defer outFile.Close()
@@ -154,7 +154,7 @@ func Npm() {
 
 	err = w.Close()
 	if err != nil {
-		log.Fatal("node-npm project failed to compile", err)
+		BuilderLog.Fatalf("node-npm project failed to compile", err)
 	}
 
 	packageNpmArtifact(fullPath)
@@ -165,7 +165,7 @@ func Npm() {
 	// 	fmt.Print(artifactZip)
 	// 	exec.Command("cp", "-a", artifactZip+".zip", artifactPath).Run()
 	// }
-	log.Info("node-npm project compiled successfully")
+	BuilderLog.Info("node-npm project compiled successfully")
 }
 
 func packageNpmArtifact(fullPath string) {

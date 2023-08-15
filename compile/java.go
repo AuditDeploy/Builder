@@ -68,11 +68,11 @@ func Java(filePath string) {
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
 
 	stdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		log.Fatal(pipeErr.Error())
+		BuilderLog.Fatal(pipeErr.Error())
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -97,7 +97,7 @@ func Java(filePath string) {
 	}()
 
 	if err := cmd.Start(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	// Wait for all output to be processed
@@ -105,7 +105,7 @@ func Java(filePath string) {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	//creates default builder.yaml if it doesn't exist
@@ -113,7 +113,7 @@ func Java(filePath string) {
 
 	packageJavaArtifact(fullPath + "/target")
 
-	log.Info("Java project compiled successfully.")
+	BuilderLog.Info("Java project compiled successfully.")
 }
 func packageJavaArtifact(fullPath string) {
 	archiveExt := ""

@@ -75,11 +75,11 @@ func Ruby() {
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
 
 	stdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		log.Fatal(pipeErr.Error())
+		BuilderLog.Fatal(pipeErr.Error())
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -104,7 +104,7 @@ func Ruby() {
 	}()
 
 	if err := cmd.Start(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	// Wait for all output to be processed
@@ -112,7 +112,7 @@ func Ruby() {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
@@ -142,7 +142,7 @@ func Ruby() {
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
 	if err != nil {
-		log.Fatal("Ruby failed to get artifact", err)
+		BuilderLog.Fatalf("Ruby failed to get artifact", err)
 	}
 
 	defer outFile.Close()
@@ -155,7 +155,7 @@ func Ruby() {
 
 	err = w.Close()
 	if err != nil {
-		log.Fatal("Ruby project failed to compile.", err)
+		BuilderLog.Fatalf("Ruby project failed to compile.", err)
 	}
 	packageRubyArtifact(fullPath)
 
@@ -163,7 +163,7 @@ func Ruby() {
 	// if artifactPath != "" {
 	// 	exec.Command("cp", "-a", workspaceDir+"/temp.zip", artifactPath).Run()
 	// }
-	log.Info("Ruby project compiled successfully.")
+	BuilderLog.Info("Ruby project compiled successfully.")
 }
 
 func packageRubyArtifact(fullPath string) {

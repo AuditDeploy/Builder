@@ -1,7 +1,6 @@
 package yaml
 
 import (
-	"Builder/utils/log"
 	"io/ioutil"
 	"os"
 
@@ -24,13 +23,13 @@ func YamlParser(yamlPath string) {
 	source, err := ioutil.ReadFile(yamlPath)
 	if err != nil {
 		removeTempDir()
-		log.Fatal("failed to read builder yaml", err)
+		BuilderLog.Fatal("failed to read builder yaml", err)
 	}
 
 	//unpacks yaml file in a map int{}
 	err = yaml.Unmarshal([]byte(source), &f)
 	if err != nil {
-		log.Error("error: %v", err)
+		BuilderLog.Error("error: %v", err)
 	}
 
 	//pass map int{} to callback that sets env vars
@@ -45,6 +44,6 @@ func removeTempDir() {
 	//delete tempRepo dir
 	err := os.RemoveAll("./tempRepo")
 	if err != nil {
-		log.Fatal("Failed to delete tempRepo directory", err)
+		BuilderLog.Fatal("Failed to delete tempRepo directory", err)
 	}
 }

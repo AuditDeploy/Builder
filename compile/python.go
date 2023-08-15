@@ -76,11 +76,11 @@ func Python() {
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
 
 	stdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		log.Fatal(pipeErr.Error())
+		BuilderLog.Fatal(pipeErr.Error())
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -105,7 +105,7 @@ func Python() {
 	}()
 
 	if err := cmd.Start(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	// Wait for all output to be processed
@@ -113,7 +113,7 @@ func Python() {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	yaml.CreateBuilderYaml(fullPath)
@@ -143,7 +143,7 @@ func Python() {
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
 	if err != nil {
-		log.Fatal("Python failed to get artifact", err)
+		BuilderLog.Fatalf("Python failed to get artifact", err)
 	}
 
 	defer outFile.Close()
@@ -156,7 +156,7 @@ func Python() {
 
 	err = w.Close()
 	if err != nil {
-		log.Fatal("Python project failed to compile", err)
+		BuilderLog.Fatalf("Python project failed to compile", err)
 	}
 	packagePythonArtifact(fullPath)
 
@@ -164,7 +164,7 @@ func Python() {
 	// if artifactPath != "" {
 	// 	exec.Command("cp", "-a", workspaceDir+"/temp.zip", artifactPath).Run()
 	// }
-	log.Info("Python project compiled successfully.")
+	BuilderLog.Info("Python project compiled successfully.")
 }
 
 func packagePythonArtifact(fullPath string) {

@@ -1,10 +1,10 @@
 package yaml
 
 import (
-	"Builder/utils/log"
 	"io/ioutil"
 	"os"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -23,6 +23,8 @@ type BuilderYaml struct {
 	RepoBranch    string
 	BypassPrompts string
 }
+
+var BuilderLog = zap.S()
 
 func CreateBuilderYaml(fullPath string) {
 
@@ -58,10 +60,10 @@ func CreateBuilderYaml(fullPath string) {
 
 	_, err := os.Stat(fullPath + "/builder.yaml")
 	if err == nil {
-		log.Warn("builder.yaml already exists ⛔️")
+		BuilderLog.Warn("builder.yaml already exists ⛔️")
 	} else {
 		OutputData(fullPath, &builderData)
-		log.Info("builder.yaml created ✅")
+		BuilderLog.Info("builder.yaml created ✅")
 	}
 }
 
@@ -70,6 +72,6 @@ func OutputData(fullPath string, allData *BuilderYaml) {
 	err := ioutil.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
 
 	if err != nil {
-		log.Fatal("builder.yaml creation failed ⛔️")
+		BuilderLog.Fatal("builder.yaml creation failed ⛔️")
 	}
 }

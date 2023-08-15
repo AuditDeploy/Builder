@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"Builder/utils/log"
 	"encoding/json"
 	"io/ioutil"
 	"net"
@@ -11,8 +10,11 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
+
+var BuilderLog = zap.S()
 
 func Metadata(path string) {
 	//Metedata
@@ -67,7 +69,7 @@ func GetUserData() *user.User {
 func GetIPAdress() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		log.Fatal("could not connect to outbound ip", err)
+		BuilderLog.Fatalf("could not connect to outbound ip", err)
 	}
 	defer conn.Close()
 
@@ -85,11 +87,11 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	err2 := ioutil.WriteFile(path+"/metadata.yaml", yamlData, 0666)
 
 	if err != nil {
-		log.Fatal("JSON Metadata creation unsuccessful.")
+		BuilderLog.Fatal("JSON Metadata creation unsuccessful.")
 	}
 
 	if err2 != nil {
-		log.Fatal("YAML Metadata creation unsuccessful.")
+		BuilderLog.Fatal("YAML Metadata creation unsuccessful.")
 	}
 }
 

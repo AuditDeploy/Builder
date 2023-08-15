@@ -1,7 +1,6 @@
 package directory
 
 import (
-	"Builder/utils/log"
 	"Builder/utils"
 	"fmt"
 	"os"
@@ -14,7 +13,7 @@ func hiddenDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
-		log.Warn("Path already exists")
+		BuilderLog.Warn("Path already exists")
 
 	}
 
@@ -22,7 +21,7 @@ func hiddenDir(path string) (bool, error) {
 	if os.IsNotExist(err) {
 		errDir := os.Mkdir(path, 0755)
 		if errDir != nil {
-			log.Fatal("failed to create hidden directory", err)
+			BuilderLog.Fatalf("failed to create hidden directory", err)
 		}
 	}
 

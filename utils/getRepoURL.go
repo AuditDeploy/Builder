@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"Builder/utils/log"
 	"os"
 )
 
@@ -14,7 +13,7 @@ func GetRepoURL() string {
 		if v == "init" || v == "config" {
 			if len(args) <= i+1 {
 				// logger.ErrorLogger.Println("No Repo Url Provided")
-				log.Fatal("No Repo Url Provided")
+				BuilderLog.Fatal("No Repo Url Provided")
 
 			} else {
 				repo = args[i+1]
@@ -23,7 +22,7 @@ func GetRepoURL() string {
 	}
 	if repo == "" {
 		// logger.ErrorLogger.Println("No Repo Url Provided")
-		log.Fatal("No Repo Url Provided")
+		BuilderLog.Fatal("No Repo Url Provided")
 	}
 	return repo
 }

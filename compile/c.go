@@ -12,7 +12,11 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+
+	"go.uber.org/zap"
 )
+
+var BuilderLog = zap.S()
 
 // C/C++ does ...
 func C(filePath string) {
@@ -65,14 +69,14 @@ func C(filePath string) {
 	}
 
 	//run config cmd, check for err, log config cmd
-	log.Info("run command", cmd)
+	BuilderLog.Infof("run command", cmd)
 	err := cmd.Run()
 	if err != nil {
 		var outb, errb bytes.Buffer
 		cmd.Stdout = &outb
 		cmd.Stderr = &errb
 		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("C/C++ failed to compile", err)
+		BuilderLog.Fatalf("C/C++ failed to compile", err)
 	}
 
 	if buildCmd != "" {
@@ -95,11 +99,11 @@ func C(filePath string) {
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
 
 	stdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		log.Fatal(pipeErr.Error())
+		BuilderLog.Fatal(pipeErr.Error())
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -124,7 +128,7 @@ func C(filePath string) {
 	}()
 
 	if err := cmd.Start(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	// Wait for all output to be processed
@@ -132,7 +136,7 @@ func C(filePath string) {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		log.Fatal(err.Error())
+		BuilderLog.Fatal(err.Error())
 	}
 
 	//creates default builder.yaml if it doesn't exist
@@ -140,7 +144,7 @@ func C(filePath string) {
 
 	packageCArtifact(fullPath + "/build")
 
-	log.Info("C/C++ project compiled successfully.")
+	BuilderLog.Info("C/C++ project compiled successfully.")
 }
 
 func packageCArtifact(fullPath string) {

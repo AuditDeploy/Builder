@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"Builder/utils/log"
 	"bytes"
 	"fmt"
 	"os"
@@ -41,18 +40,18 @@ func Docker() {
 		} else if contains(nonCompType, projectType) {
 			cmd.Dir = workspaceDir + "/temp/"
 		} else {
-			log.Fatal("Please define your projectType in builder.yaml")
+			BuilderLog.Fatal("Please define your projectType in builder.yaml")
 		}
 
 		//RUN DOCKER BUILD
-		log.Info("running command", cmd)
+		BuilderLog.Infof("running command", cmd)
 		err := cmd.Run()
 		if err != nil {
 			var outb, errb bytes.Buffer
 			cmd.Stdout = &outb
 			cmd.Stderr = &errb
 			fmt.Println("out:", outb.String(), "err:", errb.String())
-			log.Fatal("docker build failed", err)
+			BuilderLog.Fatalf("docker build failed", err)
 		}
 
 		//RUN DOCKER PUSH
@@ -65,7 +64,7 @@ func CheckDockerFlag() bool {
 	cArgs := os.Args[1:]
 	for _, v := range cArgs {
 		if v == "--docker" || v == "-d" {
-			log.Info("Building docker image 🐳")
+			BuilderLog.Info("Building docker image 🐳")
 			exists = true
 		} else {
 			exists = false

@@ -3,7 +3,6 @@ package derive
 import (
 	"Builder/compile"
 	"Builder/utils"
-	"Builder/utils/log"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,7 +10,10 @@ import (
 	"strings"
 
 	"github.com/manifoldco/promptui"
+	"go.uber.org/zap"
 )
+
+var BuilderLog = zap.S()
 
 // ProjectType will derive the project type and execute its compiler
 func ProjectType() {
@@ -37,7 +39,7 @@ func ProjectType() {
 		//double check it exists
 		fileExists, err := fileExistsInDir(filePath)
 		if err != nil {
-			log.Fatal("No Go, Npm, Ruby, Python, C/C++ or Java File Exists", err)
+			BuilderLog.Fatalf("No Go, Npm, Ruby, Python, C/C++ or Java File Exists", err)
 		}
 		//if file exists and filePath isn't empty, run conditional to find correct compiler
 		if fileExists && filePath != "" && filePath != "./" {
@@ -45,12 +47,12 @@ func ProjectType() {
 				//executes go compiler
 				finalPath := createFinalPath(filePath, file)
 				utils.CopyDir()
-				log.Info("Go project detected")
+				BuilderLog.Info("Go project detected")
 				compile.Go(finalPath)
 				return
 			} else if file == "package.json" || configType == "node" || configType == "npm" {
 				//executes node compiler
-				log.Info("Npm project detected")
+				BuilderLog.Info("Npm project detected")
 				compile.Npm()
 				return
 			} else if file == "pom.xml" || configType == "java" {
@@ -58,18 +60,18 @@ func ProjectType() {
 				finalPath := createFinalPath(filePath, file)
 
 				utils.CopyDir()
-				log.Info("Java project detected")
+				BuilderLog.Info("Java project detected")
 
 				compile.Java(finalPath)
 				return
 			} else if file == "gemfile.lock" || file == "gemfile" || configType == "ruby" {
 				//executes ruby compiler
-				log.Info("Ruby project detected")
+				BuilderLog.Info("Ruby project detected")
 				compile.Ruby()
 				return
 			} else if file == "requirements.txt" || configType == "python" {
 				//executes python compiler
-				log.Info("Python project detected")
+				BuilderLog.Info("Python project detected")
 				compile.Python()
 				return
 			} else if file == "Makefile.am" || configType == "c" {
@@ -77,7 +79,7 @@ func ProjectType() {
 				finalPath := createFinalPath(filePath, file)
 
 				utils.CopyDir()
-				log.Info("C/C++ project detected")
+				BuilderLog.Info("C/C++ project detected")
 
 				compile.C(finalPath)
 				return
@@ -110,7 +112,7 @@ func deriveProjectByExtension() {
 				if os.Getenv("BUILDER_COMMAND") != "true" {
 					utils.CopyDir()
 				}
-				log.Info("C# project detected, Ext .csproj")
+				BuilderLog.Info("C# project detected, Ext .csproj")
 				compile.CSharp(filePath)
 
 			//if it's .sln, it will find all the project path in the solution(repo)
@@ -120,14 +122,14 @@ func deriveProjectByExtension() {
 				listOfProjects, err := exec.Command("dotnet", "sln", filePath, "list").Output()
 
 				if err != nil {
-					log.Fatal("dotnet sln failed", err)
+					BuilderLog.Fatalf("dotnet sln failed", err)
 				}
 
 				stringifyListOfProjects := string(listOfProjects)
 				listOfProjectsArray := strings.Split(stringifyListOfProjects, "\n")[2:]
 				//if there's more than 5 projects in solution(repo), user will be asked to use builder config instead
 				if len(listOfProjectsArray) > 5 {
-					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml")
+					BuilderLog.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml")
 				} else {
 					// < 5 projects in solution(repo), user will be prompt to choose a project path.
 					pathToCompileFrom := selectPathToCompileFrom(listOfProjectsArray)
@@ -135,7 +137,7 @@ func deriveProjectByExtension() {
 					pathToCompileFrom = workspace + "/" + pathToCompileFrom
 
 					utils.CopyDir()
-					log.Info("C# project detected, Ext .sln")
+					BuilderLog.Info("C# project detected, Ext .sln")
 					compile.CSharp(pathToCompileFrom)
 
 				}
@@ -166,7 +168,7 @@ func findPath(file string) string {
 	})
 
 	if err != nil {
-		log.Fatal("failed to findpath", err)
+		BuilderLog.Fatalf("failed to findpath", err)
 	}
 
 	configPath := os.Getenv("BUILDER_DIR_PATH")
@@ -238,7 +240,7 @@ func selectPathToCompileFrom(filePaths []string) string {
 	}
 	_, result, err := prompt.Run()
 	if err != nil {
-		log.Fatal("Prompt failed %v\n", err)
+		BuilderLog.Fatalf("Prompt failed %v\n", err)
 	}
 
 	return result

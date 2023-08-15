@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"Builder/utils/log"
 	"fmt"
 	"os"
 	"os/exec"
@@ -14,7 +13,7 @@ func CheckArgs() {
 	cArgs := os.Args[1:]
 	//if flag present, but no url
 	if repo == "" {
-		log.Fatal("No Repo Url Provided")
+		BuilderLog.Fatal("No Repo Url Provided")
 	}
 
 	//check to see if repo exists
@@ -22,7 +21,7 @@ func CheckArgs() {
 	//returns the exit status in err
 	_, err := exec.Command("git", "ls-remote", repo, "-q").Output()
 	if err != nil {
-		log.Fatal("Provided repository does not exist")
+		BuilderLog.Fatal("Provided repository does not exist")
 	}
 
 	//check if artifact path is passed in
@@ -30,7 +29,7 @@ func CheckArgs() {
 	for i, v := range cArgs {
 		if v == "--output" || v == "-o" {
 			if len(cArgs) <= i+1 {
-				log.Fatal("No Output Path Provided")
+				BuilderLog.Fatal("No Output Path Provided")
 
 			} else {
 				artifactPath = cArgs[i+1]
@@ -40,7 +39,7 @@ func CheckArgs() {
 				} else {
 					fmt.Println("BUILDER_OUTPUT_PATH", val)
 					fmt.Println("Output Path already present")
-					log.Error("Output path already present")
+					BuilderLog.Error("Output path already present")
 				}
 			}
 		}
