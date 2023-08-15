@@ -8,7 +8,7 @@ import (
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
-	"bytes"
+	"bufio"
 	"os"
 	"os/exec"
 	"runtime"
@@ -29,8 +29,8 @@ func Go(filePath string) {
 	}
 
 	//Set up local logger
-        localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
-        locallogger = log.NewLogger("logs", localPath)
+	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+	locallogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -67,30 +67,57 @@ func Go(filePath string) {
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else if buildTool == "go" {
-		cmd = exec.Command("go", "build", buildFile)
+		cmd = exec.Command("go", "build", "-v", "-x", buildFile)
 		cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x "+buildFile)
 	} else {
 		//default
-		cmd = exec.Command("go", "build", "-o", strings.TrimSuffix(utils.GetName(), ".git"))
+		cmd = exec.Command("go", "build", "-v", "-x", "-o", strings.TrimSuffix(utils.GetName(), ".git"))
 		cmd.Dir = fullPath // or whatever directory it's in
-		os.Setenv("BUILDER_BUILD_COMMAND", "go build -o "+strings.TrimSuffix(utils.GetName(), ".git"))
+		os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x -o "+strings.TrimSuffix(utils.GetName(), ".git"))
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("run command", cmd)
-	out, err := cmd.Output()
-	
-	//Log output to local log
-        stdOut := string(out[:])
-        if stdOut != "" {
-                locallogger.Info(stdOut)
-        }
+	log.Info("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
 
-	if err != nil {
-		var _, errb bytes.Buffer
-		locallogger.Error(errb.String())
-		log.Fatal("GO project failed to build", err)
+	stdout, pipeErr := cmd.StdoutPipe()
+	if pipeErr != nil {
+		log.Fatal(pipeErr.Error())
 	}
+
+	cmd.Stderr = cmd.Stdout
+
+	// Make a new channel which will be used to ensure we get all output
+	done := make(chan struct{})
+
+	scanner := bufio.NewScanner(stdout)
+
+	// Use the scanner to scan the output line by line and log it
+	// It's running in a goroutine so that it doesn't block
+	go func() {
+		// Read line by line and process it
+		for scanner.Scan() {
+			line := scanner.Text()
+			locallogger.Info(line)
+		}
+
+		// We're all done, unblock the channel
+		done <- struct{}{}
+
+	}()
+
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// Wait for all output to be processed
+	<-done
+
+	// Wait for cmd to finish
+	if err := cmd.Wait(); err != nil {
+		log.Fatal(err.Error())
+	}
+
 	yaml.CreateBuilderYaml(fullPath)
 
 	packageGoArtifact(fullPath)
