@@ -6,7 +6,7 @@ import (
 	"Builder/utils/log"
 	"Builder/yaml"
 	"archive/zip"
-	"bytes"
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -26,8 +26,8 @@ func Ruby() {
 	}
 
 	//Set up local logger
-        localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
-        locallogger = log.NewLogger("logs", localPath)
+	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+	locallogger = log.NewLogger("logs", localPath)
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -65,6 +65,7 @@ func Ruby() {
 		fmt.Println(buildTool)
 		cmd = exec.Command("bundle", "install", "--path", "vendor/bundle")
 		cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_COMMAND", "bundle install --path vendor/bundle")
 	} else {
 		//default
 		cmd = exec.Command("bundle", "install", "--path", "vendor/bundle")
@@ -72,21 +73,47 @@ func Ruby() {
 		os.Setenv("BUILDER_BUILD_TOOL", "bundler")
 		os.Setenv("BUILDER_BUILD_COMMAND", "bundle install --path vendor/bundle")
 	}
+
 	//run cmd, check for err, log cmd
-	log.Info("run command", cmd)
-	out, err := cmd.Output()
+	log.Info("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
 
-        //Log output to local log
-        stdOut := string(out[:])
-        if stdOut != "" {
-                locallogger.Info(stdOut)
-        }
+	stdout, pipeErr := cmd.StdoutPipe()
+	if pipeErr != nil {
+		log.Fatal(pipeErr.Error())
+	}
 
-        if err != nil {
-                var _, errb bytes.Buffer
-                locallogger.Error(errb.String())
-                log.Fatal("Ruby project failed to build", err)
-        }
+	cmd.Stderr = cmd.Stdout
+
+	// Make a new channel which will be used to ensure we get all output
+	done := make(chan struct{})
+
+	scanner := bufio.NewScanner(stdout)
+
+	// Use the scanner to scan the output line by line and log it
+	// It's running in a goroutine so that it doesn't block
+	go func() {
+		// Read line by line and process it
+		for scanner.Scan() {
+			line := scanner.Text()
+			locallogger.Info(line)
+		}
+
+		// We're all done, unblock the channel
+		done <- struct{}{}
+
+	}()
+
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// Wait for all output to be processed
+	<-done
+
+	// Wait for cmd to finish
+	if err := cmd.Wait(); err != nil {
+		log.Fatal(err.Error())
+	}
 
 	yaml.CreateBuilderYaml(fullPath)
 

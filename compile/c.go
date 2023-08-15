@@ -5,6 +5,7 @@ import (
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
+	"bufio"
 	"bytes"
 	"fmt"
 	"os"
@@ -20,6 +21,10 @@ func C(filePath string) {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "c")
 	}
+
+	//Set up local logger
+	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+	locallogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -78,6 +83,7 @@ func C(filePath string) {
 	} else if strings.Contains(buildTool, "Make") && buildFile != "" {
 		cmd = exec.Command("make -f", buildFile)
 		cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_COMMAND", "make -f "+buildFile)
 	} else {
 		//default
 		cmd = exec.Command("make")
@@ -88,15 +94,45 @@ func C(filePath string) {
 		os.Setenv("BUILDER_BUILD_COMMAND", "make")
 	}
 
-	//run build cmd, check for err, log build cmd
-	log.Info("run command", cmd)
-	err = cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("C/C++ failed to compile", err)
+	//run cmd, check for err, log cmd
+	log.Info("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+
+	stdout, pipeErr := cmd.StdoutPipe()
+	if pipeErr != nil {
+		log.Fatal(pipeErr.Error())
+	}
+
+	cmd.Stderr = cmd.Stdout
+
+	// Make a new channel which will be used to ensure we get all output
+	done := make(chan struct{})
+
+	scanner := bufio.NewScanner(stdout)
+
+	// Use the scanner to scan the output line by line and log it
+	// It's running in a goroutine so that it doesn't block
+	go func() {
+		// Read line by line and process it
+		for scanner.Scan() {
+			line := scanner.Text()
+			locallogger.Info(line)
+		}
+
+		// We're all done, unblock the channel
+		done <- struct{}{}
+
+	}()
+
+	if err := cmd.Start(); err != nil {
+		log.Fatal(err.Error())
+	}
+
+	// Wait for all output to be processed
+	<-done
+
+	// Wait for cmd to finish
+	if err := cmd.Wait(); err != nil {
+		log.Fatal(err.Error())
 	}
 
 	//creates default builder.yaml if it doesn't exist
