@@ -2,6 +2,7 @@ package utils
 
 import (
 	"Builder/utils/log"
+	"runtime"
 
 	"encoding/json"
 	"io/ioutil"
@@ -36,7 +37,15 @@ func Metadata(path string) {
 	}
 
 	ip := GetIPAdress().String()
+
 	userName := GetUserData().Username
+
+	// If on Windows, remove computer ID prefix from returned username
+	if runtime.GOOS == "windows" {
+		splitString := strings.Split(userName, "\\")
+		userName = splitString[1]
+	}
+
 	homeDir := GetUserData().HomeDir
 	startTime := os.Getenv("BUILD_START_TIME")
 	endTime := os.Getenv("BUILD_END_TIME")
