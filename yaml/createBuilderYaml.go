@@ -59,9 +59,7 @@ func CreateBuilderYaml(fullPath string) {
 	}
 
 	_, err := os.Stat(fullPath + "/builder.yaml")
-	if err == nil {
-		BuilderLog.Warn("builder.yaml already exists ⛔️")
-	} else {
+	if err != nil {
 		OutputData(fullPath, &builderData)
 		BuilderLog.Info("builder.yaml created ✅")
 	}
