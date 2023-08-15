@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 // CloneRepo grabs url and clones the repo/copies current dir
@@ -33,6 +34,9 @@ func CloneRepo() {
 
 			cmd := exec.Command("git", "clone", repo, "./tempRepo")
 			cmd.Run()
+
+			// Get branch name
+			os.Setenv("REPO_BRANCH_NAME", GetBranchName())
 		} else {
 			bFlagExists, branchExists, branchName := bFlagAndBranchExists()
 
@@ -41,54 +45,62 @@ func CloneRepo() {
 					cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
 					cmd.Run()
 					log.Info("git clone", cmd)
+
+					// Get branch name
+					os.Setenv("REPO_BRANCH_NAME", branchName)
 				} else {
 					log.Fatal("Branch does not exists")
 				}
+			} else if branchExists { // Repo branch given in builder.yaml not by -b flag
+				cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
+				cmd.Run()
+				log.Info("git clone", cmd)
+
+				// Get branch name
+				os.Setenv("REPO_BRANCH_NAME", branchName)
 			} else {
 				cmd := exec.Command("git", "clone", repo, hiddenDir)
 				cmd.Run()
 				log.Info("git clone", cmd)
+
+				// Get branch name
+				os.Setenv("REPO_BRANCH_NAME", GetBranchName())
 			}
 		}
 	}
 }
 
 func bFlagAndBranchExists() (bool, bool, string) {
-	//if init cmd, clone to hidden dir
-	bFlagExists, branchName := CloneBranch()
-
-	//check if branch exist
-	branches, _, _, _ := GitHashAndName()
-	branchExists, _ := BranchNameExists(branches)
-
-	return bFlagExists, branchExists, branchName
-}
-
-func CloneBranch() (bool, string) {
+	var bFlagExists, branchExists = false, false
 	args := os.Args[1:]
 
-	//if branch is empty string strings.Contain does not work, function found in metadata
-	branchName := "%$F"
-	branchFlag := false
+	branchName := os.Getenv("REPO_BRANCH")
 
-	repoBranch, present := os.LookupEnv("REPO_BRANCH")
-	if present && (repoBranch != "") && !(contains(args, "-b") || contains(args, "--branch")) {
-		//convert val interface{} to string to be set as env var
-		branchName = repoBranch
-		branchFlag = true
-	} else {
-		for i, v := range args {
-			if v == "-b" || v == "--branch" {
-				if len(args) <= i+1 {
-					log.Fatal("No Branch Name Provided")
+	for i, v := range args {
+		if v == "-b" || v == "--branch" {
+			if len(args) <= i+1 {
+				log.Fatal("No Branch Name Provided")
 
-				} else {
-					branchName = args[i+1]
-					branchFlag = true
-				}
+			} else {
+				branchName = args[i+1]
+				bFlagExists = true
 			}
 		}
 	}
 
-	return branchFlag, branchName
+	if branchName != "" {
+		branchExists = true
+	}
+
+	return bFlagExists, branchExists, branchName
+}
+
+func GetBranchName() string {
+	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+
+	branchCmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	branchCmd.Dir = hiddenDir
+	branch, _ := branchCmd.Output()
+
+	return strings.TrimSuffix(string(branch), "\n")
 }

@@ -12,7 +12,7 @@ func ConfigEnvs(byi interface{}) {
 	//~~~Check for specific key and create env var based on value~~~
 
 	//check for dir name
-	if val, ok := bldyml["projectName"]; ok {
+	if val, ok := bldyml["projectname"]; ok {
 		_, present := os.LookupEnv("BUILDER_DIR_NAME")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -24,7 +24,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for dir path
-	if val, ok := bldyml["projectPath"]; ok {
+	if val, ok := bldyml["projectpath"]; ok {
 		_, present := os.LookupEnv("BUILDER_DIR_PATH")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -36,7 +36,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for project type
-	if val, ok := bldyml["projectType"]; ok {
+	if val, ok := bldyml["projecttype"]; ok {
 		_, present := os.LookupEnv("BUILDER_PROJECT_TYPE")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -48,7 +48,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for build type
-	if val, ok := bldyml["buildTool"]; ok {
+	if val, ok := bldyml["buildtool"]; ok {
 		_, present := os.LookupEnv("BUILDER_BUILD_TOOL")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -58,7 +58,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for build file
-	if val, ok := bldyml["buildFile"]; ok {
+	if val, ok := bldyml["buildfile"]; ok {
 		_, present := os.LookupEnv("BUILDER_BUILD_FILE")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -70,7 +70,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for build cmd
-	if val, ok := bldyml["buildCmd"]; ok {
+	if val, ok := bldyml["buildcmd"]; ok {
 		_, present := os.LookupEnv("BUILDER_BUILD_COMMAND")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -80,7 +80,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for build type
-	if val, ok := bldyml["outputPath"]; ok {
+	if val, ok := bldyml["outputpath"]; ok {
 		_, present := os.LookupEnv("BUILDER_OUTPUT_PATH")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -90,7 +90,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for docker cmd
-	if val, ok := bldyml["dockerCmd"]; ok {
+	if val, ok := bldyml["dockercmd"]; ok {
 		_, present := os.LookupEnv("BUILDER_DOCKER_CMD")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -100,7 +100,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for global logs path
-	if val, ok := bldyml["globalLogs"]; ok {
+	if val, ok := bldyml["globallogs"]; ok {
 		_, present := os.LookupEnv("GLOBAL_LOGS_PATH")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -110,7 +110,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for bypass prompts val
-	if val, ok := bldyml["bypassPrompts"]; ok {
+	if val, ok := bldyml["bypassprompts"]; ok {
 		_, present := os.LookupEnv("BYPASS_PROMPTS")
 		if !present {
 			//convert val interface{} to string to be set as env var
@@ -120,8 +120,8 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for branch repo
-	if val, ok := bldyml["repoBranch"]; ok {
-		_, present := os.LookupEnv("repoBranch")
+	if val, ok := bldyml["repobranch"]; ok {
+		_, present := os.LookupEnv("REPO_BRANCH")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)

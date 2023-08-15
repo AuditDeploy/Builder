@@ -41,10 +41,13 @@ func Metadata(path string) {
 	startTime := os.Getenv("BUILD_START_TIME")
 	endTime := os.Getenv("BUILD_END_TIME")
 
-	var masterGitHash, branchHash, branchName string
+	var masterGitHash string
 	if os.Getenv("BUILDER_COMMAND") != "true" {
-		_, masterGitHash, branchHash, branchName = GitHashAndName()
+		_, masterGitHash = GitHashAndName()
 	}
+
+	branchName := os.Getenv("REPO_BRANCH_NAME")
+	buildHash := os.Getenv("BUILD_HASH")
 
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
@@ -59,7 +62,7 @@ func Metadata(path string) {
 		EndTime:          endTime,
 		MasterGitHash:    masterGitHash,
 		BranchName:       branchName,
-		BranchHash:       branchHash}
+		BuildHash:        buildHash}
 
 	OutputMetadata(path, &userMetaData)
 }
@@ -77,7 +80,7 @@ type AllMetaData struct {
 	EndTime          string
 	MasterGitHash    string
 	BranchName       string
-	BranchHash       string
+	BuildHash        string
 }
 
 // GetUserData return username and userdir
@@ -123,7 +126,7 @@ func OutputMetadata(path string, allData *AllMetaData) {
 }
 
 // GitHas gets the latest git commit id in a repo
-func GitHashAndName() ([]string, string, string, string) {
+func GitHashAndName() ([]string, string) {
 	//Get repoURL
 	repo := GetRepoURL()
 
@@ -136,36 +139,10 @@ func GitHashAndName() ([]string, string, string, string) {
 
 	//return an array with all the git commit hashs
 	arrayGitHashAndName := strings.Split(stringGitHashAndName, "\n")
-	branchExists, branchNameAndHash := BranchNameExists(arrayGitHashAndName)
 
 	//gets the hash of type []string of master branch
 	masterHashStringArray := strings.Fields(arrayGitHashAndName[0])
 	masterHash := masterHashStringArray[0]
 
-	if branchExists {
-		//gets hash and name of type []string of a specific branch
-		branchHash := strings.Fields(branchNameAndHash)[0]
-		branchName := strings.Fields(branchNameAndHash)[1]
-		return arrayGitHashAndName, masterHash[0:7], branchHash[0:7], branchName
-	} else {
-		return arrayGitHashAndName, masterHash[0:7], "", ""
-	}
-
-}
-
-func BranchNameExists(branches []string) (bool, string) {
-	branchExists := false
-	var branchNameAndHash string
-
-	_, clonedBranchName := CloneBranch()
-
-	for _, branch := range branches {
-		nameSlice := strings.Split(branch, "/")
-		sliceLen := len(nameSlice)
-		if branch[strings.LastIndex(branch, "/")+1:] == clonedBranchName || (sliceLen > 2 && (nameSlice[sliceLen-2]+"/"+nameSlice[sliceLen-1] == clonedBranchName)) {
-			branchExists = true
-			branchNameAndHash = branch
-		}
-	}
-	return branchExists, branchNameAndHash
+	return arrayGitHashAndName, masterHash[0:7]
 }
