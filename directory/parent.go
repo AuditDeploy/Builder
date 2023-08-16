@@ -3,7 +3,7 @@ package directory
 import (
 	"fmt"
 	"os"
-	"strconv"
+	"strings"
 	"time"
 
 	"Builder/utils"
@@ -18,22 +18,16 @@ func MakeDirs() {
 	//handles -n flag
 	name := utils.GetName()
 
-	//add Unix timestamp to dir name
-	currentTime := time.Now().Unix()
-
 	//check for projectPath env from builder.yaml
 	configPath := os.Getenv("BUILDER_DIR_PATH")
-
-	unixTime := strconv.FormatInt(currentTime, 10)
-	os.Setenv("BUILDER_TIMESTAMP", unixTime)
 
 	var path string
 	if configPath != "" {
 		// used for 'config' cmd, set by builder.yaml
-		path = configPath + "/" + name + "_" + unixTime
+		path = configPath + "/" + name + "_START"
 	} else {
 		// local path, used for 'init' cmd/default
-		path = "./" + name + "_" + unixTime
+		path = "./" + name + "_START"
 	}
 
 	MakeParentDir(path)
@@ -72,4 +66,26 @@ func MakeParentDir(path string) (bool, error) {
 	}
 
 	return true, err
+}
+
+func UpdateParentDirName(pathWithWrongParentName string) string {
+	oldName, _ := os.LookupEnv("BUILDER_PARENT_DIR")
+	startTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
+	unixTimestamp := startTime.Unix()
+	newName := strings.TrimSuffix(oldName, "START") + fmt.Sprint(unixTimestamp)
+
+	path := os.Getenv("BUILDER_DIR_PATH")
+
+	err := os.Rename(path+"/"+oldName[2:], path+"/"+newName[2:])
+	if err != nil {
+		fmt.Println(err.(*os.LinkError).Err)
+		BuilderLog.Fatal("could not rename parent dir")
+	}
+
+	os.Setenv("BUILDER_PARENT_DIR", newName)
+
+	// Return new path with new parent directory name
+	newPath := strings.Replace(pathWithWrongParentName, oldName[2:], newName[2:], 1)
+
+	return newPath
 }

@@ -25,9 +25,11 @@ func ArtifactDir() {
 	dirPath = os.Getenv("BUILDER_PARENT_DIR")
 	dirName := os.Getenv("BUILDER_DIR_NAME")
 	// }
+	startTime := os.Getenv("BUILD_START_TIME")
 
-	currentTime := time.Now().Unix()
-	artifactStamp := dirName + "_artifact_" + strconv.FormatInt(currentTime, 10)
+	parsedStartTime, _ := time.Parse(time.RFC850, startTime)
+	timeBuildStarted := parsedStartTime.Unix()
+	artifactStamp := dirName + "_artifact_" + strconv.FormatInt(timeBuildStarted, 10)
 	os.Setenv("BUILDER_ARTIFACT_STAMP", artifactStamp)
 	artifactDir := dirPath + "/" + artifactStamp
 

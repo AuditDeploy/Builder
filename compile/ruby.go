@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -27,7 +28,7 @@ func Ruby() {
 
 	//Set up local logger
 	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
-	locallogger = log.NewLogger("logs", localPath)
+	locallogger, closeLocalLogger = log.NewLogger("logs", localPath)
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -103,6 +104,8 @@ func Ruby() {
 
 	}()
 
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
+
 	if err := cmd.Start(); err != nil {
 		BuilderLog.Fatal(err.Error())
 	}
@@ -114,6 +117,14 @@ func Ruby() {
 	if err := cmd.Wait(); err != nil {
 		BuilderLog.Fatal(err.Error())
 	}
+
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
+
+	// Close log file
+	closeLocalLogger()
+
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	yaml.CreateBuilderYaml(fullPath)
 
@@ -138,9 +149,10 @@ func Ruby() {
 	}
 
 	//CreateZip artifact dir with timestamp
-	currentTime := time.Now().Unix()
+	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
+	timeBuildStarted := parsedStartTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
+	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
 	if err != nil {
 		BuilderLog.Fatalf("Ruby failed to get artifact", err)
 	}

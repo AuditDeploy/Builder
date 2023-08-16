@@ -2,6 +2,7 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -12,6 +13,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 func CSharp(filePath string) {
@@ -24,7 +26,7 @@ func CSharp(filePath string) {
 
 	//Set up local logger
 	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
-	locallogger = log.NewLogger("logs", localPath)
+	locallogger, closeLocalLogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -95,6 +97,8 @@ func CSharp(filePath string) {
 
 	}()
 
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
+
 	if err := cmd.Start(); err != nil {
 		BuilderLog.Fatal(err.Error())
 	}
@@ -107,7 +111,13 @@ func CSharp(filePath string) {
 		BuilderLog.Fatal(err.Error())
 	}
 
-	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
+
+	// Close log file
+	closeLocalLogger()
+
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	yaml.CreateBuilderYaml(fullPath)
 

@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -10,16 +11,19 @@ import (
 
 var logger *zap.Logger
 
-func NewLogger(logFileName string, path string) *zap.Logger {
+func NewLogger(logFileName string, path string) (*zap.Logger, func()) {
 	defaultLogLevel := zapcore.Level(logLevel)
 
 	config := zap.NewProductionEncoderConfig()
 	config.TimeKey = "timestamp"
 	config.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	logfile, _ := os.OpenFile(filepath.Join(path, logFileName+".json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	//logfile, _ := os.OpenFile(filepath.Join(path, logFileName+".json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
-	writer := zapcore.AddSync(logfile)
+	writer, closeFile, err := zap.Open(filepath.Join(path, logFileName+".json"))
+	if err != nil {
+		fmt.Println("logger err")
+	}
 	fileEncoder := zapcore.NewJSONEncoder(config)
 	core := zapcore.NewTee(
 		zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
@@ -40,7 +44,7 @@ func NewLogger(logFileName string, path string) *zap.Logger {
 		logger = zap.New(core, zap.AddStacktrace(zapcore.ErrorLevel))
 	}
 
-	return logger
+	return logger, closeFile
 }
 
 func init() {

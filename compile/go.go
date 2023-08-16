@@ -5,6 +5,7 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -13,6 +14,7 @@ import (
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
 
 	"go.uber.org/zap"
 )
@@ -30,7 +32,7 @@ func Go(filePath string) {
 
 	//Set up local logger
 	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
-	locallogger = log.NewLogger("logs", localPath)
+	locallogger, closeLocalLogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -106,6 +108,8 @@ func Go(filePath string) {
 
 	}()
 
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
+
 	if err := cmd.Start(); err != nil {
 		BuilderLog.Fatal(err.Error())
 	}
@@ -117,6 +121,14 @@ func Go(filePath string) {
 	if err := cmd.Wait(); err != nil {
 		BuilderLog.Fatal(err.Error())
 	}
+
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
+
+	// Close log file
+	closeLocalLogger()
+
+	// Update parent dir name to include start time
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	yaml.CreateBuilderYaml(fullPath)
 

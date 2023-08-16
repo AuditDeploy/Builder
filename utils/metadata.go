@@ -2,17 +2,19 @@ package utils
 
 import (
 	"bytes"
+	"runtime"
+
 	"encoding/json"
 	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
 	"os/user"
-	"runtime"
 	"strings"
-	"time"
 
 	"go.uber.org/zap"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
 )
 
@@ -20,38 +22,77 @@ var BuilderLog = zap.S()
 
 func Metadata(path string) {
 	//Metedata
-	timestamp := time.Now().Format(time.RFC850)
-	ip := GetIPAdress().String()
-	userName := GetUserData().Username
-	homeDir := GetUserData().HomeDir
+	projectName := GetName()
 
-	var masterGitHash, branchHash, branchName string
-	if os.Getenv("BUILDER_COMMAND") != "true" {
-		_, masterGitHash, branchHash, branchName = GitHashAndName()
+	caser := cases.Title(language.English)
+	projectType := caser.String(os.Getenv("BUILDER_PROJECT_TYPE"))
+
+	artifactName := os.Getenv("BUILDER_ARTIFACT_STAMP")
+	var artifactLocation string
+	if os.Getenv("BUILDER_OUTPUT_PATH") != "" {
+		artifactLocation = os.Getenv("BUILDER_OUTPUT_PATH")
+	} else {
+		builderPath, _ := os.Getwd()
+		artifactRelativePath := os.Getenv("BUILDER_ARTIFACT_DIR")
+		artifactDir := artifactRelativePath[1:]
+
+		artifactLocation = builderPath + artifactDir
 	}
 
-	//Contains a collection of fileds with user's metadata
+	ip := GetIPAdress().String()
+
+	userName := GetUserData().Username
+
+	// If on Windows, remove computer ID prefix from returned username
+	if runtime.GOOS == "windows" {
+		splitString := strings.Split(userName, "\\")
+		userName = splitString[1]
+	}
+
+	homeDir := GetUserData().HomeDir
+	startTime := os.Getenv("BUILD_START_TIME")
+	endTime := os.Getenv("BUILD_END_TIME")
+
+	var masterGitHash string
+	if os.Getenv("BUILDER_COMMAND") != "true" {
+		_, masterGitHash = GitHashAndName()
+	}
+
+	branchName := os.Getenv("REPO_BRANCH_NAME")
+	buildHash := os.Getenv("BUILD_HASH")
+
+	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
-		UserName:      userName,
-		HomeDir:       homeDir,
-		IP:            ip,
-		Timestamp:     timestamp,
-		MasterGitHash: masterGitHash,
-		BranchName:    branchName,
-		BranchHash:    branchHash}
+		ProjectName:      projectName,
+		ProjectType:      projectType,
+		ArtifactName:     artifactName,
+		ArtifactLocation: artifactLocation,
+		UserName:         userName,
+		HomeDir:          homeDir,
+		IP:               ip,
+		StartTime:        startTime,
+		EndTime:          endTime,
+		MasterGitHash:    masterGitHash,
+		BranchName:       branchName,
+		BuildHash:        buildHash}
 
 	OutputMetadata(path, &userMetaData)
 }
 
 // AllMetaData holds the stuct of all the arguments
 type AllMetaData struct {
-	UserName      string
-	HomeDir       string
-	IP            string
-	Timestamp     string
-	MasterGitHash string
-	BranchName    string
-	BranchHash    string
+	ProjectName      string
+	ProjectType      string
+	ArtifactName     string
+	ArtifactLocation string
+	UserName         string
+	HomeDir          string
+	IP               string
+	StartTime        string
+	EndTime          string
+	MasterGitHash    string
+	BranchName       string
+	BuildHash        string
 }
 
 // GetUserData return username and userdir
@@ -97,7 +138,7 @@ func OutputMetadata(path string, allData *AllMetaData) {
 }
 
 // GitHas gets the latest git commit id in a repo
-func GitHashAndName() ([]string, string, string, string) {
+func GitHashAndName() ([]string, string) {
 	//Get repoURL
 	repo := GetRepoURL()
 
@@ -110,38 +151,12 @@ func GitHashAndName() ([]string, string, string, string) {
 
 	//return an array with all the git commit hashs
 	arrayGitHashAndName := strings.Split(stringGitHashAndName, "\n")
-	branchExists, branchNameAndHash := BranchNameExists(arrayGitHashAndName)
 
 	//gets the hash of type []string of master branch
 	masterHashStringArray := strings.Fields(arrayGitHashAndName[0])
 	masterHash := masterHashStringArray[0]
 
-	if branchExists {
-		//gets hash and name of type []string of a specific branch
-		branchHash := strings.Fields(branchNameAndHash)[0]
-		branchName := strings.Fields(branchNameAndHash)[1]
-		return arrayGitHashAndName, masterHash[0:7], branchHash[0:7], branchName
-	} else {
-		return arrayGitHashAndName, masterHash[0:7], "", ""
-	}
-
-}
-
-func BranchNameExists(branches []string) (bool, string) {
-	branchExists := false
-	var branchNameAndHash string
-
-	_, clonedBranchName := CloneBranch()
-
-	for _, branch := range branches {
-		nameSlice := strings.Split(branch, "/")
-		sliceLen := len(nameSlice)
-		if branch[strings.LastIndex(branch, "/")+1:] == clonedBranchName || (sliceLen > 2 && (nameSlice[sliceLen-2]+"/"+nameSlice[sliceLen-1] == clonedBranchName)) {
-			branchExists = true
-			branchNameAndHash = branch
-		}
-	}
-	return branchExists, branchNameAndHash
+	return arrayGitHashAndName, masterHash[0:7]
 }
 
 func StoreBuildMetadataLocally() {
