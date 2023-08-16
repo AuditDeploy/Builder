@@ -1,12 +1,14 @@
 package utils
 
 import (
+	"bytes"
 	"encoding/json"
 	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
 	"os/user"
+	"runtime"
 	"strings"
 	"time"
 
@@ -39,7 +41,6 @@ func Metadata(path string) {
 		BranchHash:    branchHash}
 
 	OutputMetadata(path, &userMetaData)
-
 }
 
 // AllMetaData holds the stuct of all the arguments
@@ -141,4 +142,46 @@ func BranchNameExists(branches []string) (bool, string) {
 		}
 	}
 	return branchExists, branchNameAndHash
+}
+
+func StoreBuildMetadataLocally() {
+	// Read in build JSON data from build artifact directory
+	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+
+	metadataJSON, err := os.ReadFile(artifactDir + "/metadata.json")
+	if err != nil {
+		var _, errb bytes.Buffer
+		BuilderLog.Fatalf("Cannot find metadata.json file", errb)
+	}
+
+	// Check if builds.json exists and append to it, if not, create it
+	textToAppend := string(metadataJSON) + ",\n"
+
+	var pathToBuildsJSON string
+
+	if runtime.GOOS == "windows" {
+		appDataDir := os.Getenv("LOCALAPPDATA")
+		if appDataDir == "" {
+			appDataDir = os.Getenv("APPDATA")
+		}
+
+		pathToBuildsJSON = appDataDir + "/Builder/builds.json"
+	} else {
+		user, _ := user.Current()
+		homeDir := user.HomeDir
+
+		pathToBuildsJSON = homeDir + "/.builder/builds.json"
+	}
+
+	buildsFile, err := os.OpenFile(pathToBuildsJSON, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+	if err != nil {
+		BuilderLog.Fatalf("Could not create builds.json file", err)
+	}
+	if _, err := buildsFile.Write([]byte(textToAppend)); err != nil {
+		BuilderLog.Fatalf("Could not write to builds.json file", err)
+	}
+	if err := buildsFile.Close(); err != nil {
+		BuilderLog.Fatalf("Could not close builds.json file", err)
+	}
 }
