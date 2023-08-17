@@ -40,6 +40,7 @@ Builder is great at guessing what to do with most repos it's given, for the othe
 - `builder`: user cds into a project path with a builder.yaml, it then pulls changes, creates new artifact and new metadata
   - no arguments accepted at this time
   - if you would like the new artifact sent to a specified dir, make sure your output path is specified in the builder.yaml
+  - `builder gui`: display the Builder GUI
 
 ### Flags:
 
@@ -101,8 +102,6 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - ("docker build -t my-project:1.3 .")
 - repoBranch: specify repo branch name
   - (“feature/“new-branch”)
-- bypassPrompts: bypass prompts
-  - (true)
 
 ## Builder ENV Vars
 
@@ -147,7 +146,6 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - create 'path' var either locally or with configPath + name + timestamp
 - call MakeParentDir:
   - check if path already exists
-  - check for '-y' flag to bypassPrompt
   - make entire parentDir path
   - set 'BUILDER_PARENT_DIR' env var
 - call MakeHiddenDir:
@@ -212,11 +210,19 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 #### 5. Metadata:
 
 - create a yaml & json inside parent dir with:
-  - UserName
-  - HomeDir
-  - IP
-  - Timestamp
-  - GitHash
+  - ProjectName
+	- ProjectType
+	- ArtifactName
+	- ArtifactChecksum
+	- ArtifactLocation
+	- UserName
+	- HomeDir
+	- IP
+	- StartTime
+	- EndTime
+	- GitURL
+	- MasterGitHash
+	- BranchName
 
 #### 6. MakeHidden:
 
