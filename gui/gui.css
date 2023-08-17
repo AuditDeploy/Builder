@@ -195,7 +195,6 @@ table {
     background-color: black;
     opacity: 50%;
     min-height: 30px;
-    overflow: hidden;
     margin-top: -4px;
     display: flex;
     align-items: center;
@@ -209,7 +208,9 @@ table {
 #artifactsLocation {
     color: lightgray;
     margin-left: 8px;
+    margin-right: 8px;
     font-size: 14px;
+    word-break: break-word;
 }
 
 #logsContainer {
