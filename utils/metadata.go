@@ -56,6 +56,7 @@ func Metadata(path string) {
 	startTime := os.Getenv("BUILD_START_TIME")
 	endTime := os.Getenv("BUILD_END_TIME")
 
+	var gitURL = GetRepoURL()
 	var masterGitHash string
 	if os.Getenv("BUILDER_COMMAND") != "true" {
 		_, masterGitHash = GitHashAndName()
@@ -75,6 +76,7 @@ func Metadata(path string) {
 		IP:               ip,
 		StartTime:        startTime,
 		EndTime:          endTime,
+		GitURL:           gitURL,
 		MasterGitHash:    masterGitHash,
 		BranchName:       branchName}
 
@@ -93,6 +95,7 @@ type AllMetaData struct {
 	IP               string
 	StartTime        string
 	EndTime          string
+	GitURL           string
 	MasterGitHash    string
 	BranchName       string
 }
