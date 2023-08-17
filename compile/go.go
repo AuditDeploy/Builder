@@ -74,9 +74,15 @@ func Go(filePath string) {
 		os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x "+buildFile)
 	} else {
 		//default
-		cmd = exec.Command("go", "build", "-v", "-x", "-o", strings.TrimSuffix(utils.GetName(), ".git"))
-		cmd.Dir = fullPath // or whatever directory it's in
-		os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x -o "+strings.TrimSuffix(utils.GetName(), ".git"))
+		if runtime.GOOS != "windows" {
+			cmd = exec.Command("go", "build", "-v", "-x", "-o", strings.TrimSuffix(utils.GetName(), ".git"))
+			cmd.Dir = fullPath // or whatever directory it's in
+			os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x -o "+strings.TrimSuffix(utils.GetName(), ".git"))
+		} else {
+			cmd = exec.Command("go", "build", "-v", "-x", "-o", strings.TrimSuffix(utils.GetName(), ".git")+".exe")
+			cmd.Dir = fullPath // or whatever directory it's in
+			os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x -o "+strings.TrimSuffix(utils.GetName(), ".git")+".exe")
+		}
 	}
 
 	//run cmd, check for err, log cmd

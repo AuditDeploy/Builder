@@ -60,7 +60,7 @@ function createBuildsListTable(buildsJSON) {
     for (let build in builds) {
         text += "</tr>"
 
-        let tdString = "<td class='buildsListTableCell' onclick='displayDetailsPage(`" + builds[build].BuildHash + "`)'>"
+        let tdString = "<td class='buildsListTableCell' onclick='displayDetailsPage(`" + builds[build].BuildID + "`)'>"
         let dateObj = Date.parse(builds[build].EndTime)
         let time = new Date(dateObj).toUTCString();
 
@@ -117,7 +117,7 @@ async function onPageLoad() {
 
 // Details page functions
 
-function displayDetailsPage(buildHash) {
+function displayDetailsPage(buildID) {
     let detailspage = document.getElementById("detailspage");
     let backBtn = document.getElementById("headerBackBtn");
     let homepage = document.getElementById("homepage");
@@ -132,11 +132,11 @@ function displayDetailsPage(buildHash) {
     homepage.style.display = "none";
     homepage.style.visibility = "hidden";
 
-    displayDetailsData(buildHash);
+    displayDetailsData(buildID);
 }
 
-async function displayDetailsData(buildHash) {
-    let build = builds.find(build => build.BuildHash.match(buildHash));
+async function displayDetailsData(buildID) {
+    let build = builds.find(build => build.BuildID.match(buildID));
 
     document.getElementById("projectName").innerHTML = build.ProjectName;
 
@@ -152,7 +152,7 @@ async function displayDetailsData(buildHash) {
     document.getElementById("gitURL").innerHTML = build.GitURL;
     document.getElementById("gitHash").innerHTML = build.MasterGitHash;
     document.getElementById("branchName").innerHTML = build.BranchName;
-    document.getElementById("buildHash").innerHTML = build.BuildHash;
+    document.getElementById("buildID").innerHTML = build.BuildID;
     
     // Display artifact(s)
     let text = "";

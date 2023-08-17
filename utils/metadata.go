@@ -2,6 +2,8 @@ package utils
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"fmt"
 	"runtime"
 
 	"encoding/json"
@@ -28,6 +30,7 @@ func Metadata(path string) {
 	projectType := caser.String(os.Getenv("BUILDER_PROJECT_TYPE"))
 
 	artifactName := os.Getenv("BUILDER_ARTIFACT_STAMP")
+	artifactChecksum := GetArtifactChecksum()
 	var artifactLocation string
 	if os.Getenv("BUILDER_OUTPUT_PATH") != "" {
 		artifactLocation = os.Getenv("BUILDER_OUTPUT_PATH")
@@ -59,13 +62,13 @@ func Metadata(path string) {
 	}
 
 	branchName := os.Getenv("REPO_BRANCH_NAME")
-	buildHash := os.Getenv("BUILD_HASH")
 
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
 		ProjectName:      projectName,
 		ProjectType:      projectType,
 		ArtifactName:     artifactName,
+		ArtifactChecksum: artifactChecksum,
 		ArtifactLocation: artifactLocation,
 		UserName:         userName,
 		HomeDir:          homeDir,
@@ -73,8 +76,7 @@ func Metadata(path string) {
 		StartTime:        startTime,
 		EndTime:          endTime,
 		MasterGitHash:    masterGitHash,
-		BranchName:       branchName,
-		BuildHash:        buildHash}
+		BranchName:       branchName}
 
 	OutputMetadata(path, &userMetaData)
 }
@@ -84,6 +86,7 @@ type AllMetaData struct {
 	ProjectName      string
 	ProjectType      string
 	ArtifactName     string
+	ArtifactChecksum string
 	ArtifactLocation string
 	UserName         string
 	HomeDir          string
@@ -92,7 +95,6 @@ type AllMetaData struct {
 	EndTime          string
 	MasterGitHash    string
 	BranchName       string
-	BuildHash        string
 }
 
 // GetUserData return username and userdir
@@ -159,6 +161,64 @@ func GitHashAndName() ([]string, string) {
 	return arrayGitHashAndName, masterHash[0:7]
 }
 
+func GetArtifactChecksum() string {
+	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+
+	files, err := os.ReadDir(artifactDir)
+	if err != nil {
+		BuilderLog.Fatal(err)
+	}
+
+	var checksum string
+	for _, file := range files {
+		if file.Name() != "metadata.json" && file.Name() != "metadata.yaml" {
+			// Get checksum of artifact
+			artifact, err := os.ReadFile(artifactDir + "/" + file.Name())
+			if err != nil {
+				BuilderLog.Fatal(err)
+			}
+
+			sum := sha256.Sum256(artifact)
+			checksum = fmt.Sprintf("%x", sum)
+		}
+	}
+
+	return checksum
+}
+
+func GetBuildID() string {
+	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	var checksum string
+
+	// Get checksum of metadata.json
+	metadata, err := os.ReadFile(artifactDir + "/metadata.json")
+	if err != nil {
+		BuilderLog.Fatal(err)
+	}
+
+	sum := sha256.Sum256(metadata)
+	checksum = fmt.Sprintf("%x", sum)
+
+	// Only return first 10 char of sum
+	return checksum[0:9]
+}
+
+// AllMetaData holds the stuct of all the arguments
+type MetadataFormat struct {
+	ProjectName      string `json:"ProjectName"`
+	ProjectType      string `json:"ProjectType"`
+	ArtifactName     string `json:"ArtifactName"`
+	ArtifactChecksum string `json:"ArtifactChecksum"`
+	ArtifactLocation string `json:"ArtifactLocation"`
+	UserName         string `json:"UserName"`
+	HomeDir          string `json:"HomeDir"`
+	IP               string `json:"IP"`
+	StartTime        string `json:"StartTime"`
+	EndTime          string `json:"EndTime"`
+	MasterGitHash    string `json:"MasterGitHash"`
+	BranchName       string `json:"BranchName"`
+}
+
 func StoreBuildMetadataLocally() {
 	// Read in build JSON data from build artifact directory
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
@@ -169,8 +229,15 @@ func StoreBuildMetadataLocally() {
 		BuilderLog.Fatalf("Cannot find metadata.json file", errb)
 	}
 
+	// Unmarshal json data so we can add buildID
+	var metadataFormat map[string]interface{}
+	json.Unmarshal(metadataJSON, &metadataFormat)
+	metadataFormat["BuildID"] = GetBuildID()
+
+	updatedMetadataJSON, err := json.Marshal(metadataFormat)
+
 	// Check if builds.json exists and append to it, if not, create it
-	textToAppend := string(metadataJSON) + ",\n"
+	textToAppend := string(updatedMetadataJSON) + ",\n"
 
 	var pathToBuildsJSON string
 
