@@ -204,7 +204,8 @@ func packageCArtifact(fullPath string) {
 
 	// If we were given an artifacts list, handle it
 	if artifactList != "" {
-		artifactArray := strings.Fields(artifactList)
+		artifactArray := strings.Split(artifactList, ",")
+		os.Setenv("BUILDER_ARTIFACT_NAMES", artifactList)
 
 		//copy artifact(s), then remove artifact(s) from workspace
 		for _, artifact := range artifactArray {
@@ -234,6 +235,7 @@ func packageCArtifact(fullPath string) {
 		//find artifact(s) by extension
 		// WalkMatch function defined in compile/c#.go
 		artifactArray, _ := WalkMatch(fullPath, artifactExt)
+		os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactArray), ","))
 
 		//copy artifact(s), then remove artifact(s) from workspace
 		for i := 0; i < len(artifactArray); i++ {

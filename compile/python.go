@@ -192,6 +192,7 @@ func packagePythonArtifact(fullPath string) {
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
+	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
 	//copy artifact, then remove artifact in workspace
 	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
 	exec.Command("rm", fullPath+"/"+extName).Run()

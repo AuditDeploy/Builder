@@ -119,13 +119,13 @@ func ConfigEnvs(byi interface{}) {
 		}
 	}
 
-	//check for bypass prompts val
-	if val, ok := bldyml["bypassprompts"]; ok {
-		_, present := os.LookupEnv("BYPASS_PROMPTS")
+	//check for an artifacts list
+	if val, ok := bldyml["artifactlist"]; ok {
+		_, present := os.LookupEnv("BUILDER_ARTIFACT_LIST")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BYPASS_PROMPTS", valStr)
+			os.Setenv("BUILDER_ARTIFACT_LIST", valStr)
 		}
 	}
 

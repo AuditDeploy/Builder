@@ -156,9 +156,14 @@ async function displayDetailsData(buildID) {
     
     // Display artifact(s)
     let text = "";
-    text += "</tr>"
-    text += "<td class='artifact'>" + build.ArtifactName + "</td>";
-    text += "</tr>"
+
+    let artifactArray = build.ArtifactName.split(",")
+
+    for (artifact in artifactArray) {
+        text += "</tr>"
+        text += "<td class='artifact'>" + artifactArray[artifact] + "</td>";
+        text += "</tr>"
+    }
     
     document.getElementById("artifactsTableBody").innerHTML = text;
     

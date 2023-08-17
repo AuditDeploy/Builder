@@ -29,7 +29,7 @@ func Metadata(path string) {
 	caser := cases.Title(language.English)
 	projectType := caser.String(os.Getenv("BUILDER_PROJECT_TYPE"))
 
-	artifactName := os.Getenv("BUILDER_ARTIFACT_STAMP")
+	artifactName := os.Getenv("BUILDER_ARTIFACT_NAMES")
 	artifactChecksum := GetArtifactChecksum()
 	var artifactLocation string
 	if os.Getenv("BUILDER_OUTPUT_PATH") != "" {

@@ -139,6 +139,7 @@ func packageCSharpArtifact(fullPath string) {
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	//find artifact by extension
 	artifactsArray, _ := WalkMatch(fullPath, "*.dll")
+	os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactsArray), ","))
 
 	//copy artifact, then remove artifact in workspace
 	exec.Command("cp", "-a", artifactsArray[0], artifactDir).Run()
