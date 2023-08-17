@@ -33,7 +33,7 @@ func NewLogger(logFileName string, path string) (*zap.Logger, func()) {
 		if args[i] == "-v" || args[i] == "--verbose" {
 			verboseFlag = true
 		}
-		if args[i] == "-g" || args[i] == "--debug" {
+		if args[i] == "-d" || args[i] == "--debug" {
 			debugFlag = true
 		}
 	}
@@ -70,7 +70,7 @@ func init() {
 
 	// If debug flag given display Builder logs to console
 	for i := 0; i < len(args); i++ {
-		if args[i] == "-g" || args[i] == "--debug" {
+		if args[i] == "-d" || args[i] == "--debug" {
 			logger, _ := zap.NewDevelopment()
 			defer logger.Sync()
 

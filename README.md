@@ -48,9 +48,9 @@ Builder is great at guessing what to do with most repos it's given, for the othe
 - '--output' or '-o': user defined output path for artifact
 - '--name' or '-n': user defined project name
 - '--branch' or '-b': specify repo branch
-- '--debug' or '-g': show Builder log output
+- '--debug' or '-d': show Builder log output
 - '--verbose' or '-v': show log output for project being built
-- '--docker' or '-d': build Docker image
+- '--docker' or '-D': build Docker image
 
 ## Builder Compatibility
 

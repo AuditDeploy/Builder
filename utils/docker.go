@@ -12,7 +12,7 @@ import (
 func Docker() {
 	dockerFlag := CheckDockerFlag()
 
-	//if -d flag exists, build image
+	//if -D flag exists, build image
 	if dockerFlag {
 		//DETERMINE CMD
 		var cmd *exec.Cmd
@@ -63,7 +63,7 @@ func CheckDockerFlag() bool {
 	var exists bool
 	cArgs := os.Args[1:]
 	for _, v := range cArgs {
-		if v == "--docker" || v == "-d" {
+		if v == "--docker" || v == "-D" {
 			BuilderLog.Info("Building docker image 🐳")
 			exists = true
 		} else {
