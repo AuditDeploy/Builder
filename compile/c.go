@@ -7,8 +7,6 @@ import (
 	"Builder/utils/log"
 	"Builder/yaml"
 	"bufio"
-	"bytes"
-	"fmt"
 	"os"
 	"os/exec"
 	"runtime"
@@ -72,16 +70,47 @@ func C(filePath string) {
 	}
 
 	//run config cmd, check for err, log config cmd
-	BuilderLog.Infof("run command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		BuilderLog.Fatalf("C/C++ failed to compile", err)
+	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_CONFIG_COMMAND"))
+
+	configStdout, pipeErr := cmd.StdoutPipe()
+	if pipeErr != nil {
+		BuilderLog.Fatal(pipeErr.Error())
 	}
 
+	cmd.Stderr = cmd.Stdout
+
+	// Make a new channel which will be used to ensure we get all output
+	configDone := make(chan struct{})
+
+	configScanner := bufio.NewScanner(configStdout)
+
+	// Use the scanner to scan the output line by line and log it
+	// It's running in a goroutine so that it doesn't block
+	go func() {
+		// Read line by line and process it
+		for configScanner.Scan() {
+			line := configScanner.Text()
+			locallogger.Info(line)
+		}
+
+		// We're all done, unblock the channel
+		configDone <- struct{}{}
+
+	}()
+
+	if err := cmd.Start(); err != nil {
+		BuilderLog.Fatal(err.Error())
+	}
+
+	// Wait for all output to be processed
+	<-configDone
+
+	// Wait for cmd to finish
+	if err := cmd.Wait(); err != nil {
+		BuilderLog.Fatal(err.Error())
+	}
+
+	// Build command
 	if buildCmd != "" {
 		//user specified cmd
 		buildCmdArray := strings.Fields(buildCmd)
