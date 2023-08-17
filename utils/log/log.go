@@ -24,20 +24,38 @@ func NewLogger(logFileName string, path string) (*zap.Logger, func()) {
 	if err != nil {
 		fmt.Println("logger err")
 	}
-	fileEncoder := zapcore.NewJSONEncoder(config)
-	core := zapcore.NewTee(
-		zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
-	)
 
-	// If debug flag given display caller in log as well
+	// If debug flag given display caller in log and print build logs to console
 	args := os.Args[1:]
+	verboseFlag := false
 	debugFlag := false
 	for i := 0; i < len(args); i++ {
-		if args[i] == "-d" || args[i] == "--debug" {
+		if args[i] == "-v" || args[i] == "--verbose" {
+			verboseFlag = true
+		}
+		if args[i] == "-g" || args[i] == "--debug" {
 			debugFlag = true
 		}
 	}
 
+	var core zapcore.Core
+
+	// If verbose flag given display build logs to console as well as to file
+	if verboseFlag {
+		fileEncoder := zapcore.NewJSONEncoder(config)
+		consoleEncoder := zapcore.NewConsoleEncoder(config)
+		core = zapcore.NewTee(
+			zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
+			zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), defaultLogLevel),
+		)
+	} else {
+		fileEncoder := zapcore.NewJSONEncoder(config)
+		core = zapcore.NewTee(
+			zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
+		)
+	}
+
+	// If debug flag given add Builder caller to build logs
 	if debugFlag {
 		logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
 	} else {
@@ -50,9 +68,9 @@ func NewLogger(logFileName string, path string) (*zap.Logger, func()) {
 func init() {
 	args := os.Args[1:]
 
-	// If verbose flag given display Builder logs to console
+	// If debug flag given display Builder logs to console
 	for i := 0; i < len(args); i++ {
-		if args[i] == "-v" || args[i] == "--verbose" {
+		if args[i] == "-g" || args[i] == "--debug" {
 			logger, _ := zap.NewDevelopment()
 			defer logger.Sync()
 
