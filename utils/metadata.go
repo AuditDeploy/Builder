@@ -203,22 +203,6 @@ func GetBuildID() string {
 	return checksum[0:9]
 }
 
-// AllMetaData holds the stuct of all the arguments
-type MetadataFormat struct {
-	ProjectName      string `json:"ProjectName"`
-	ProjectType      string `json:"ProjectType"`
-	ArtifactName     string `json:"ArtifactName"`
-	ArtifactChecksum string `json:"ArtifactChecksum"`
-	ArtifactLocation string `json:"ArtifactLocation"`
-	UserName         string `json:"UserName"`
-	HomeDir          string `json:"HomeDir"`
-	IP               string `json:"IP"`
-	StartTime        string `json:"StartTime"`
-	EndTime          string `json:"EndTime"`
-	MasterGitHash    string `json:"MasterGitHash"`
-	BranchName       string `json:"BranchName"`
-}
-
 func StoreBuildMetadataLocally() {
 	// Read in build JSON data from build artifact directory
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
