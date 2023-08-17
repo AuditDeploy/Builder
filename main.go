@@ -2,6 +2,7 @@ package main
 
 import (
 	"Builder/cmd"
+	"Builder/gui"
 	"Builder/utils"
 	"fmt"
 	"os"
@@ -20,6 +21,8 @@ func main() {
 			cmd.Init()
 		} else if builderCommand == "config" {
 			cmd.Config()
+		} else if builderCommand == "gui" {
+			gui.Gui()
 		} else {
 			cmd.Builder()
 		}
