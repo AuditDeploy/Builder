@@ -40,7 +40,7 @@ Builder is great at guessing what to do with most repos it's given, for the othe
 - `builder`: user cds into a project path with a builder.yaml, it then pulls changes, creates new artifact and new metadata
   - no arguments accepted at this time
   - if you would like the new artifact sent to a specified dir, make sure your output path is specified in the builder.yaml
-  - `builder gui`: display the Builder GUI
+- `builder gui`: display the Builder GUI
 
 ### Flags:
 
