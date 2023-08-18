@@ -107,42 +107,9 @@ function createBuildsListTable(buildsJSON) {
 }
 
 const renderBuildsList = async () => {
+    // Render builds data into table
     let buildsJSON = await getBuildsJSON();
     buildsTable.innerHTML = createBuildsListTable(buildsJSON);
-};
-
-function displayHomePage() {
-    let detailspage = document.getElementById("detailspage");
-    let backBtn = document.getElementById("headerBackBtn");
-    let homepage = document.getElementById("homepage");
-    
-    detailspage.style.display = "none";
-    detailspage.style.visibility = "hidden";
-
-    backBtn.style.display = "none";
-    backBtn.style.visibility = "hidden";
-    
-    homepage.style.display = "block";
-    homepage.style.visibility = "visible";
-
-    renderBuildsList();
-}
-
-async function onPageLoad() {
-    // Load and display Builder logo
-    let image = await getImage();
-    document.getElementById("logo").src = "data:image/png;base64," + image;
-
-    // Display homepage only
-    document.getElementById("homepage").style.display = "block";
-	document.getElementById("homepage").style.visibility = "visible";
-    document.getElementById("detailspage").style.display = "none";
-    document.getElementById("detailspage").style.visibility = "hidden";
-    document.getElementById("headerBackBtn").style.display = "none";
-    document.getElementById("headerBackBtn").style.visibility = "hidden";
-
-    // Render builds data
-    renderBuildsList();
 
     // Load and display language logos to builds list
     // C
@@ -193,6 +160,40 @@ async function onPageLoad() {
     for (let i = 0; i < ruby_logos.length; i++) {
         ruby_logos[i].src = "data:image/png;base64," + ruby_logo_img;
     }
+};
+
+function displayHomePage() {
+    let detailspage = document.getElementById("detailspage");
+    let backBtn = document.getElementById("headerBackBtn");
+    let homepage = document.getElementById("homepage");
+    
+    detailspage.style.display = "none";
+    detailspage.style.visibility = "hidden";
+
+    backBtn.style.display = "none";
+    backBtn.style.visibility = "hidden";
+    
+    homepage.style.display = "block";
+    homepage.style.visibility = "visible";
+
+    renderBuildsList();
+}
+
+async function onPageLoad() {
+    // Load and display Builder logo
+    let image = await getImage();
+    document.getElementById("logo").src = "data:image/png;base64," + image;
+
+    // Display homepage only
+    document.getElementById("homepage").style.display = "block";
+	document.getElementById("homepage").style.visibility = "visible";
+    document.getElementById("detailspage").style.display = "none";
+    document.getElementById("detailspage").style.visibility = "hidden";
+    document.getElementById("headerBackBtn").style.display = "none";
+    document.getElementById("headerBackBtn").style.visibility = "hidden";
+
+    // Render builds data
+    renderBuildsList();
 }
 
 // Details page functions
