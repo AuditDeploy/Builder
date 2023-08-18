@@ -83,6 +83,8 @@ table {
     height: 30px;
     color: lightgray;
     font-weight: normal;
+    position: sticky;
+    top: 0;
 }
 
 .buildsListTableCell {
