@@ -34,6 +34,41 @@ var cssContents []byte
 //go:embed logo.png
 var logo []byte
 
+// Embed C logo
+//
+//go:embed CLogo.png
+var CLogo []byte
+
+// Embed CSharp logo
+//
+//go:embed CSharpLogo.png
+var CSharpLogo []byte
+
+// Embed Go logo
+//
+//go:embed GoLogo.png
+var GoLogo []byte
+
+// Embed Java logo
+//
+//go:embed JavaLogo.png
+var JavaLogo []byte
+
+// Embed Node logo
+//
+//go:embed NodeLogo.png
+var NodeLogo []byte
+
+// Embed Python logo
+//
+//go:embed PythonLogo.png
+var PythonLogo []byte
+
+// Embed Ruby logo
+//
+//go:embed RubyLogo.png
+var RubyLogo []byte
+
 type Build struct {
 	ProjectName      string `json:"ProjectName"`
 	ProjectType      string `json:"ProjectType"`
@@ -110,6 +145,48 @@ func Gui() {
 		return image
 	}
 
+	getCLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(CLogo)
+
+		return image
+	}
+
+	getCSharpLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(CSharpLogo)
+
+		return image
+	}
+
+	getGoLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(GoLogo)
+
+		return image
+	}
+
+	getJavaLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(JavaLogo)
+
+		return image
+	}
+
+	getNodeLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(NodeLogo)
+
+		return image
+	}
+
+	getPythonLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(PythonLogo)
+
+		return image
+	}
+
+	getRubyLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(RubyLogo)
+
+		return image
+	}
+
 	// Combine html, css, and js files for gui
 	cssRegex := regexp.MustCompile(`cssgoeshere`)
 	jsRegex := regexp.MustCompile(`jsgoeshere`)
@@ -131,6 +208,13 @@ func Gui() {
 	ui.Bind("getBuildsJSON", getBuildsJSON)
 	ui.Bind("getLogsJSON", getLogsJSON)
 	ui.Bind("getImage", getImage)
+	ui.Bind("getCLogoImage", getCLogoImage)
+	ui.Bind("getCSharpLogoImage", getCSharpLogoImage)
+	ui.Bind("getGoLogoImage", getGoLogoImage)
+	ui.Bind("getJavaLogoImage", getJavaLogoImage)
+	ui.Bind("getNodeLogoImage", getNodeLogoImage)
+	ui.Bind("getPythonLogoImage", getPythonLogoImage)
+	ui.Bind("getRubyLogoImage", getRubyLogoImage)
 
 	ui.Load("data:text/html," + url.PathEscape(finalHTMLContent))
 

@@ -89,13 +89,16 @@ table {
     background-color: #2F2F2F;
     height: 43px;
     padding: 0 10px 0 10px;
-    margin-bottom: 2px;
     text-align: center;
     color: lightgray;
     border-bottom: 4px solid #1E1E1E;
 }
 
-.buildsListTableCell:nth-child(4) {
+.buildsListTableCell:nth-child(1) {
+    padding: 2px 10px 0 10px;
+}
+
+.buildsListTableCell:nth-child(5) {
     color: #F16522;
 }
 

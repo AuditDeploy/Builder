@@ -64,6 +64,36 @@ function createBuildsListTable(buildsJSON) {
         let dateObj = Date.parse(builds[build].EndTime)
         let time = new Date(dateObj).toUTCString();
 
+        // Determine what language logo to show
+        let image
+        switch (builds[build].ProjectType.toLowerCase()) {
+            case "c":
+                image = "<img src='' alt='C Logo' class='c_logo' width='30' height='30'>"
+                break;
+            case "csharp":
+                image = "<img src='' alt='C# Logo' class='csharp_logo' width='30' height='30'>"
+                break;
+            case "go":
+                image = "<img src='' alt='Go Logo' class='go_logo' width='48' height='30'>"
+                break;
+            case "java":
+                image = "<img src='' alt='Java Logo' class='java_logo' width='30' height='30'>"
+                break;
+            case "node":
+                image = "<img src='' alt='Node Logo' class='node_logo' width='30' height='30'>"
+                break;
+            case "python":
+                image = "<img src='' alt='Python Logo' class='python_logo' width='30' height='30'>"
+                break;
+            case "ruby":
+                image = "<img src='' alt='Ruby Logo' class='ruby_logo' width='30' height='30'>"
+                break;
+            default:
+                image = ""
+        }
+        text += tdString + image + "</td>"
+
+        // Fill in table data
         text += tdString + time + "</td>"
         text += tdString + builds[build].UserName + "</td>"
         text += tdString + builds[build].ArtifactName + "</td>"
@@ -111,8 +141,58 @@ async function onPageLoad() {
     document.getElementById("headerBackBtn").style.display = "none";
     document.getElementById("headerBackBtn").style.visibility = "hidden";
 
-    // Render data
+    // Render builds data
     renderBuildsList();
+
+    // Load and display language logos to builds list
+    // C
+    let c_logo_img = await getCLogoImage();
+    const c_logos = document.getElementsByClassName("c_logo");
+    for (let i = 0; i < c_logos.length; i++) {
+        c_logos[i].src = "data:image/png;base64," + c_logo_img;
+    }
+
+    // C#
+    let csharp_logo_img = await getCSharpLogoImage();
+    const csharp_logos = document.getElementsByClassName("csharp_logo");
+    for (let i = 0; i < csharp_logos.length; i++) {
+        csharp_logos[i].src = "data:image/png;base64," + csharp_logo_img;
+    }
+
+    // Go
+    let go_logo_img = await getGoLogoImage();
+    const go_logos = document.getElementsByClassName("go_logo");
+    for (let i = 0; i < go_logos.length; i++) {
+        go_logos[i].src = "data:image/png;base64," + go_logo_img;
+    }
+
+    // Java
+    let java_logo_img = await getJavaLogoImage();
+    const java_logos = document.getElementsByClassName("java_logo");
+    for (let i = 0; i < java_logos.length; i++) {
+        java_logos[i].src = "data:image/png;base64," + java_logo_img;
+    }
+
+    // Node
+    let node_logo_img = await getNodeLogoImage();
+    const node_logos = document.getElementsByClassName("node_logo");
+    for (let i = 0; i < node_logos.length; i++) {
+        node_logos[i].src = "data:image/png;base64," + node_logo_img;
+    }
+
+    // Python
+    let python_logo_img = await getPythonLogoImage();
+    const python_logos = document.getElementsByClassName("python_logo");
+    for (let i = 0; i < python_logos.length; i++) {
+        python_logos[i].src = "data:image/png;base64," + python_logo_img;
+    }
+
+    // Ruby
+    let ruby_logo_img = await getRubyLogoImage();
+    const ruby_logos = document.getElementsByClassName("ruby_logo");
+    for (let i = 0; i < ruby_logos.length; i++) {
+        ruby_logos[i].src = "data:image/png;base64," + ruby_logo_img;
+    }
 }
 
 // Details page functions
