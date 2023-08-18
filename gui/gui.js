@@ -30,7 +30,7 @@ function search() {
             for (i = 1; i < tr.length; i++) {
                 var filtered = false;
                 var tds = tr[i].getElementsByTagName("td");
-                for(t = 0; t < tds.length; t++) {
+                for(t = 1; t < tds.length; t++) {
                     var td = tds[t];
         
                     if (td) {
@@ -57,7 +57,7 @@ function createBuildsListTable(buildsJSON) {
     builds = JSON.parse(buildsJSON);
     let text = ""
 
-    for (let build in builds) {
+    for (let build in builds.reverse()) {
         text += "</tr>"
 
         let tdString = "<td class='buildsListTableCell' onclick='displayDetailsPage(`" + builds[build].BuildID + "`)'>"
