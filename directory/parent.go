@@ -24,10 +24,10 @@ func MakeDirs() {
 	var path string
 	if configPath != "" {
 		// used for 'config' cmd, set by builder.yaml
-		path = configPath + "/" + name + "_START"
+		path = configPath + "/" + name + "_" + name
 	} else {
 		// local path, used for 'init' cmd/default
-		path = "./" + name + "_START"
+		path = "./" + name + "_" + name
 	}
 
 	MakeParentDir(path)
@@ -70,9 +70,10 @@ func MakeParentDir(path string) (bool, error) {
 
 func UpdateParentDirName(pathWithWrongParentName string) string {
 	oldName, _ := os.LookupEnv("BUILDER_PARENT_DIR")
+	projectName := utils.GetName()
 	startTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
 	unixTimestamp := startTime.Unix()
-	newName := strings.TrimSuffix(oldName, "START") + fmt.Sprint(unixTimestamp)
+	newName := strings.TrimSuffix(oldName, projectName) + fmt.Sprint(unixTimestamp)
 
 	path := os.Getenv("BUILDER_DIR_PATH")
 
