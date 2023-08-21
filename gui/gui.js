@@ -58,7 +58,7 @@ function createBuildsListTable(buildsJSON) {
     let text = ""
 
     for (let build in builds.reverse()) {
-        text += "</tr>"
+        text += "<tr>"
 
         let tdString = "<td class='buildsListTableCell' onclick='displayDetailsPage(`" + builds[build].BuildID + "`)'>"
         let dateObj = Date.parse(builds[build].EndTime)
@@ -109,7 +109,17 @@ function createBuildsListTable(buildsJSON) {
 const renderBuildsList = async () => {
     // Render builds data into table
     let buildsJSON = await getBuildsJSON();
-    buildsTable.innerHTML = createBuildsListTable(buildsJSON);
+    let tableBodyToDisplay = createBuildsListTable(buildsJSON);
+    if (tableBodyToDisplay != "") { 
+        // Hide no builds to display div and display table data
+        document.getElementById("noBuildsPresentContainer").style.display = "none";
+        document.getElementById("noBuildsPresentContainer").style.visibility = "hidden";
+        buildsTable.innerHTML = tableBodyToDisplay;
+    } else {
+        // Show no builds to display div
+        document.getElementById("noBuildsPresentContainer").style.display = "block";
+        document.getElementById("noBuildsPresentContainer").style.visibility = "visible";
+    }
 
     // Load and display language logos to builds list
     // C

@@ -104,6 +104,17 @@ table {
     color: #F16522;
 }
 
+#noBuildsPresentContainer {
+    display: none;
+    visibility: hidden;
+    text-align: center;
+}
+
+#noBuildsPresent {
+    color: rgb(167, 166, 166);
+    font-style: italic;
+}
+
 /* Details page */
 
 #detailspage {
