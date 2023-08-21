@@ -19,17 +19,18 @@ func main() {
 		builderCommand := os.Args[1]
 		if builderCommand == "init" {
 			cmd.Init()
+			fmt.Println("Build Complete 🔨")
 		} else if builderCommand == "config" {
 			cmd.Config()
+			fmt.Println("Build Complete 🔨")
 		} else if builderCommand == "gui" {
 			gui.Gui()
 		} else {
 			cmd.Builder()
+			fmt.Println("Build Complete 🔨")
 		}
 	} else {
 		cmd.Builder()
+		fmt.Println("Build Complete 🔨")
 	}
-
-	BuilderLog.Info("Build Complete 🔨")
-	fmt.Println("Build Complete 🔨")
 }

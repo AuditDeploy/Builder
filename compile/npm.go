@@ -3,6 +3,7 @@ package compile
 import (
 	"Builder/artifact"
 	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -75,11 +76,11 @@ func Npm() {
 	}
 
 	//run cmd, check for err, log cmd
-	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+	spinner.LogMessage("running command: "+cmd.String(), "info")
 
 	stdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		BuilderLog.Fatal(pipeErr.Error())
+		spinner.LogMessage(pipeErr.Error(), "fatal")
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -95,7 +96,9 @@ func Npm() {
 		// Read line by line and process it
 		for scanner.Scan() {
 			line := scanner.Text()
+			spinner.Spinner.Stop()
 			locallogger.Info(line)
+			spinner.Spinner.Start()
 		}
 
 		// We're all done, unblock the channel
@@ -106,7 +109,7 @@ func Npm() {
 	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
 
 	if err := cmd.Start(); err != nil {
-		BuilderLog.Fatal(err.Error())
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	// Wait for all output to be processed
@@ -114,7 +117,7 @@ func Npm() {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		BuilderLog.Fatal(err.Error())
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
@@ -153,7 +156,7 @@ func Npm() {
 
 	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
 	if err != nil {
-		BuilderLog.Fatalf("node-npm failed to get artifact", err)
+		spinner.LogMessage("node-npm failed to get artifact: "+err.Error(), "fatal")
 	}
 
 	defer outFile.Close()
@@ -166,7 +169,7 @@ func Npm() {
 
 	err = w.Close()
 	if err != nil {
-		BuilderLog.Fatalf("node-npm project failed to compile", err)
+		spinner.LogMessage("node-npm project failed to compile: "+err.Error(), "fatal")
 	}
 
 	packageNpmArtifact(fullPath)
@@ -177,7 +180,7 @@ func Npm() {
 	// 	fmt.Print(artifactZip)
 	// 	exec.Command("cp", "-a", artifactZip+".zip", artifactPath).Run()
 	// }
-	BuilderLog.Info("node-npm project compiled successfully")
+	spinner.LogMessage("node-npm project compiled successfully", "info")
 }
 
 func packageNpmArtifact(fullPath string) {

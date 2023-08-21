@@ -3,6 +3,7 @@ package compile
 import (
 	"Builder/artifact"
 	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -12,11 +13,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
-
-	"go.uber.org/zap"
 )
 
-var BuilderLog = zap.S()
 var closeLocalLogger func()
 
 // C/C++ does ...
@@ -70,11 +68,11 @@ func C(filePath string) {
 	}
 
 	//run config cmd, check for err, log config cmd
-	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_CONFIG_COMMAND"))
+	spinner.LogMessage("running command: "+cmd.String(), "info")
 
 	configStdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		BuilderLog.Fatal(pipeErr.Error())
+		spinner.LogMessage(pipeErr.Error(), "fatal")
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -99,7 +97,7 @@ func C(filePath string) {
 	}()
 
 	if err := cmd.Start(); err != nil {
-		BuilderLog.Fatal(err.Error())
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	// Wait for all output to be processed
@@ -107,7 +105,7 @@ func C(filePath string) {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		BuilderLog.Fatal(err.Error())
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	// Build command
@@ -131,11 +129,11 @@ func C(filePath string) {
 	}
 
 	//run cmd, check for err, log cmd
-	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+	spinner.LogMessage("running command: "+cmd.String(), "info")
 
 	stdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		BuilderLog.Fatal(pipeErr.Error())
+		spinner.LogMessage(pipeErr.Error(), "fatal")
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -151,7 +149,10 @@ func C(filePath string) {
 		// Read line by line and process it
 		for scanner.Scan() {
 			line := scanner.Text()
+			// Have to stop spinner or it will get printed with log to console
+			spinner.Spinner.Stop()
 			locallogger.Info(line)
+			spinner.Spinner.Start()
 		}
 
 		// We're all done, unblock the channel
@@ -162,7 +163,7 @@ func C(filePath string) {
 	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
 
 	if err := cmd.Start(); err != nil {
-		BuilderLog.Fatal(err.Error())
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	// Wait for all output to be processed
@@ -170,7 +171,7 @@ func C(filePath string) {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		BuilderLog.Fatal(err.Error())
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
@@ -186,7 +187,7 @@ func C(filePath string) {
 
 	packageCArtifact(fullPath + "/build")
 
-	BuilderLog.Info("C/C++ project compiled successfully.")
+	spinner.LogMessage("C/C++ project compiled successfully.", "info")
 }
 
 func packageCArtifact(fullPath string) {

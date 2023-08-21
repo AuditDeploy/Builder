@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Builder/spinner"
 	"os"
 	"strings"
 )
@@ -20,10 +21,10 @@ func GetName() string {
 			for i, v := range args {
 				if v == "--name" || v == "-n" {
 					if len(args) <= i+1 {
-						BuilderLog.Fatal("Please provide a name")
+						spinner.LogMessage("Please provide a name", "fatal")
 					} else {
 						if specialChar(args[i+1]) {
-							BuilderLog.Fatal("Special Characters Not Allowed In Names")
+							spinner.LogMessage("Special Characters Not Allowed In Names", "fatal")
 						}
 						name = args[i+1]
 					}
@@ -33,7 +34,7 @@ func GetName() string {
 			//use current dir name if no --name flag and using builder cmd
 			path, err := os.Getwd()
 			if err != nil {
-				BuilderLog.Errorf("error getting builder command directory", err)
+				spinner.LogMessage("error getting builder command directory", "error")
 			}
 			name = path[strings.LastIndex(path, "/")+1:]
 

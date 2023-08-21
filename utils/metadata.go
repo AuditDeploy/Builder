@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"bytes"
+	"Builder/spinner"
 	"crypto/sha256"
 	"fmt"
 	"runtime"
@@ -14,13 +14,10 @@ import (
 	"os/user"
 	"strings"
 
-	"go.uber.org/zap"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
 )
-
-var BuilderLog = zap.S()
 
 func Metadata(path string) {
 	//Metedata
@@ -116,7 +113,7 @@ func GetUserData() *user.User {
 func GetIPAdress() net.IP {
 	conn, err := net.Dial("udp", "8.8.8.8:80")
 	if err != nil {
-		BuilderLog.Fatalf("could not connect to outbound ip", err)
+		spinner.LogMessage("could not connect to outbound ip: "+err.Error(), "fatal")
 	}
 	defer conn.Close()
 
@@ -134,11 +131,11 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	err2 := ioutil.WriteFile(path+"/metadata.yaml", yamlData, 0666)
 
 	if err != nil {
-		BuilderLog.Fatal("JSON Metadata creation unsuccessful.")
+		spinner.LogMessage("JSON Metadata creation unsuccessful.", "fatal")
 	}
 
 	if err2 != nil {
-		BuilderLog.Fatal("YAML Metadata creation unsuccessful.")
+		spinner.LogMessage("YAML Metadata creation unsuccessful.", "fatal")
 	}
 }
 
@@ -169,7 +166,7 @@ func GetArtifactChecksum() string {
 
 	files, err := os.ReadDir(artifactDir)
 	if err != nil {
-		BuilderLog.Fatal(err)
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	var checksum string
@@ -178,7 +175,7 @@ func GetArtifactChecksum() string {
 			// Get checksum of artifact
 			artifact, err := os.ReadFile(artifactDir + "/" + file.Name())
 			if err != nil {
-				BuilderLog.Fatal(err)
+				spinner.LogMessage(err.Error(), "fatal")
 			}
 
 			sum := sha256.Sum256(artifact)
@@ -196,7 +193,7 @@ func GetBuildID() string {
 	// Get checksum of metadata.json
 	metadata, err := os.ReadFile(artifactDir + "/metadata.json")
 	if err != nil {
-		BuilderLog.Fatal(err)
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	sum := sha256.Sum256(metadata)
@@ -212,8 +209,7 @@ func StoreBuildMetadataLocally() {
 
 	metadataJSON, err := os.ReadFile(artifactDir + "/metadata.json")
 	if err != nil {
-		var _, errb bytes.Buffer
-		BuilderLog.Fatalf("Cannot find metadata.json file", errb)
+		spinner.LogMessage("Cannot find metadata.json file: "+err.Error(), "fatal")
 	}
 
 	// Unmarshal json data so we can add buildID
@@ -245,12 +241,12 @@ func StoreBuildMetadataLocally() {
 	buildsFile, err := os.OpenFile(pathToBuildsJSON, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
 	if err != nil {
-		BuilderLog.Fatalf("Could not create builds.json file", err)
+		spinner.LogMessage("Could not create builds.json file: "+err.Error(), "fatal")
 	}
 	if _, err := buildsFile.Write([]byte(textToAppend)); err != nil {
-		BuilderLog.Fatalf("Could not write to builds.json file", err)
+		spinner.LogMessage("Could not write to builds.json file: "+err.Error(), "fatal")
 	}
 	if err := buildsFile.Close(); err != nil {
-		BuilderLog.Fatalf("Could not close builds.json file", err)
+		spinner.LogMessage("Could not close builds.json file: "+err.Error(), "fatal")
 	}
 }

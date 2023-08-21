@@ -1,10 +1,10 @@
 package yaml
 
 import (
+	"Builder/spinner"
 	"io/ioutil"
 	"os"
 
-	"go.uber.org/zap"
 	"gopkg.in/yaml.v2"
 )
 
@@ -23,8 +23,6 @@ type BuilderYaml struct {
 	RepoBranch    string
 	BypassPrompts string
 }
-
-var BuilderLog = zap.S()
 
 func CreateBuilderYaml(fullPath string) {
 
@@ -61,7 +59,7 @@ func CreateBuilderYaml(fullPath string) {
 	_, err := os.Stat(fullPath + "/builder.yaml")
 	if err != nil {
 		OutputData(fullPath, &builderData)
-		BuilderLog.Info("builder.yaml created ✅")
+		spinner.LogMessage("builder.yaml created ✅", "info")
 	}
 }
 
@@ -70,6 +68,6 @@ func OutputData(fullPath string, allData *BuilderYaml) {
 	err := ioutil.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
 
 	if err != nil {
-		BuilderLog.Fatal("builder.yaml creation failed ⛔️")
+		spinner.LogMessage("builder.yaml creation failed ⛔️", "fatal")
 	}
 }

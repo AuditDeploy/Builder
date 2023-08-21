@@ -6,6 +6,7 @@ package compile
 import (
 	"Builder/artifact"
 	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
@@ -86,11 +87,11 @@ func Go(filePath string) {
 	}
 
 	//run cmd, check for err, log cmd
-	BuilderLog.Infof("running command: ", os.Getenv("BUILDER_BUILD_COMMAND"))
+	spinner.LogMessage("running command: "+cmd.String(), "info")
 
 	stdout, pipeErr := cmd.StdoutPipe()
 	if pipeErr != nil {
-		BuilderLog.Fatal(pipeErr.Error())
+		spinner.LogMessage(pipeErr.Error(), "fatal")
 	}
 
 	cmd.Stderr = cmd.Stdout
@@ -106,7 +107,9 @@ func Go(filePath string) {
 		// Read line by line and process it
 		for scanner.Scan() {
 			line := scanner.Text()
+			spinner.Spinner.Stop()
 			locallogger.Info(line)
+			spinner.Spinner.Start()
 		}
 
 		// We're all done, unblock the channel
@@ -117,7 +120,7 @@ func Go(filePath string) {
 	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
 
 	if err := cmd.Start(); err != nil {
-		BuilderLog.Fatal(err.Error())
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	// Wait for all output to be processed
@@ -125,7 +128,7 @@ func Go(filePath string) {
 
 	// Wait for cmd to finish
 	if err := cmd.Wait(); err != nil {
-		BuilderLog.Fatal(err.Error())
+		spinner.LogMessage(err.Error(), "fatal")
 	}
 
 	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
@@ -140,7 +143,7 @@ func Go(filePath string) {
 
 	packageGoArtifact(fullPath)
 
-	BuilderLog.Info("Go project built successfully.")
+	spinner.LogMessage("Go project built successfully.", "info")
 }
 
 func packageGoArtifact(fullPath string) {

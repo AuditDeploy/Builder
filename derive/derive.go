@@ -2,6 +2,7 @@ package derive
 
 import (
 	"Builder/compile"
+	"Builder/spinner"
 	"Builder/utils"
 	"fmt"
 	"os"
@@ -47,12 +48,12 @@ func ProjectType() {
 				//executes go compiler
 				finalPath := createFinalPath(filePath, file)
 				utils.CopyDir()
-				BuilderLog.Info("Go project detected")
+				spinner.LogMessage("Go project detected", "info")
 				compile.Go(finalPath)
 				return
 			} else if file == "package.json" || configType == "node" || configType == "npm" {
 				//executes node compiler
-				BuilderLog.Info("Npm project detected")
+				spinner.LogMessage("Npm project detected", "info")
 				compile.Npm()
 				return
 			} else if file == "pom.xml" || configType == "java" {
@@ -60,18 +61,18 @@ func ProjectType() {
 				finalPath := createFinalPath(filePath, file)
 
 				utils.CopyDir()
-				BuilderLog.Info("Java project detected")
+				spinner.LogMessage("Java project detected", "info")
 
 				compile.Java(finalPath)
 				return
 			} else if file == "gemfile.lock" || file == "gemfile" || configType == "ruby" {
 				//executes ruby compiler
-				BuilderLog.Info("Ruby project detected")
+				spinner.LogMessage("Ruby project detected", "info")
 				compile.Ruby()
 				return
 			} else if file == "requirements.txt" || configType == "python" {
 				//executes python compiler
-				BuilderLog.Info("Python project detected")
+				spinner.LogMessage("Python project detected", "info")
 				compile.Python()
 				return
 			} else if file == "Makefile.am" || configType == "c" {
@@ -79,7 +80,7 @@ func ProjectType() {
 				finalPath := createFinalPath(filePath, file)
 
 				utils.CopyDir()
-				BuilderLog.Info("C/C++ project detected")
+				spinner.LogMessage("C/C++ project detected", "info")
 
 				compile.C(finalPath)
 				return
@@ -112,7 +113,7 @@ func deriveProjectByExtension() {
 				if os.Getenv("BUILDER_COMMAND") != "true" {
 					utils.CopyDir()
 				}
-				BuilderLog.Info("C# project detected, Ext .csproj")
+				spinner.LogMessage("C# project detected, Ext .csproj", "info")
 				compile.CSharp(filePath)
 
 			//if it's .sln, it will find all the project path in the solution(repo)
@@ -122,14 +123,14 @@ func deriveProjectByExtension() {
 				listOfProjects, err := exec.Command("dotnet", "sln", filePath, "list").Output()
 
 				if err != nil {
-					BuilderLog.Fatalf("dotnet sln failed", err)
+					spinner.LogMessage("dotnet sln failed: "+err.Error(), "fatal")
 				}
 
 				stringifyListOfProjects := string(listOfProjects)
 				listOfProjectsArray := strings.Split(stringifyListOfProjects, "\n")[2:]
 				//if there's more than 5 projects in solution(repo), user will be asked to use builder config instead
 				if len(listOfProjectsArray) > 5 {
-					BuilderLog.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml")
+					spinner.LogMessage("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml", "fatal")
 				} else {
 					// < 5 projects in solution(repo), user will be prompt to choose a project path.
 					pathToCompileFrom := selectPathToCompileFrom(listOfProjectsArray)
@@ -137,7 +138,7 @@ func deriveProjectByExtension() {
 					pathToCompileFrom = workspace + "/" + pathToCompileFrom
 
 					utils.CopyDir()
-					BuilderLog.Info("C# project detected, Ext .sln")
+					spinner.LogMessage("C# project detected, Ext .sln", "info")
 					compile.CSharp(pathToCompileFrom)
 
 				}

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"Builder/spinner"
 	"Builder/utils"
 
 	"go.uber.org/zap"
@@ -45,7 +46,7 @@ func MakeParentDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
-		BuilderLog.Info("Path already exists")
+		spinner.LogMessage("Path already exists", "info")
 	}
 
 	// should return true if file doesn't exist
@@ -53,7 +54,7 @@ func MakeParentDir(path string) (bool, error) {
 		errDir := os.MkdirAll(path, 0755)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
-			BuilderLog.Fatalf("failed to create directory", path, err)
+			spinner.LogMessage("failed to create directory at "+path+": "+err.Error(), "fatal")
 		}
 	}
 
@@ -80,7 +81,7 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 	err := os.Rename(path+"/"+oldName[2:], path+"/"+newName[2:])
 	if err != nil {
 		fmt.Println(err.(*os.LinkError).Err)
-		BuilderLog.Fatal("could not rename parent dir")
+		spinner.LogMessage("could not rename parent dir", "fatal")
 	}
 
 	os.Setenv("BUILDER_PARENT_DIR", newName)

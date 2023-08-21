@@ -3,6 +3,7 @@ package cmd
 import (
 	"Builder/derive"
 	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/yaml"
 )
@@ -10,6 +11,9 @@ import (
 func Config() {
 	//check args normally,
 	utils.CheckArgs()
+
+	// Start loading spinner
+	spinner.Spinner.Start()
 
 	//clone repo into temp dir to pull builder.yaml info
 	utils.CloneRepo()
@@ -19,18 +23,18 @@ func Config() {
 
 	// make dirs
 	directory.MakeDirs()
-	BuilderLog.Info("Directories successfully created.")
+	spinner.LogMessage("Directories successfully created.", "info")
 
 	// clone repo into hidden
 	utils.CloneRepo()
-	BuilderLog.Info("Repo cloned successfully.")
+	spinner.LogMessage("Repo cloned successfully.", "info")
 
 	// compile logic to derive project type
 	derive.ProjectType()
 
 	//Get build metadata (deprecated, func moved inside compiler)
 	// utils.Metadata()
-	BuilderLog.Info("Metadata created successfully.")
+	spinner.LogMessage("Metadata created successfully.", "info")
 
 	// Store build metadata to hidden builder dir
 	utils.StoreBuildMetadataLocally()
@@ -40,5 +44,8 @@ func Config() {
 
 	//makes hidden dir read-only
 	utils.MakeHidden()
-	BuilderLog.Info("Hidden Dir is now read-only.")
+	spinner.LogMessage("Hidden Dir is now read-only.", "info")
+
+	// Stop loading spinner
+	spinner.Spinner.Stop()
 }

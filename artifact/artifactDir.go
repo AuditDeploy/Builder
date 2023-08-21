@@ -1,15 +1,12 @@
 package artifact
 
 import (
+	"Builder/spinner"
 	"fmt"
 	"os"
 	"strconv"
 	"time"
-
-	"go.uber.org/zap"
 )
-
-var BuilderLog = zap.S()
 
 func ArtifactDir() {
 	var dirPath string
@@ -36,7 +33,7 @@ func ArtifactDir() {
 	err := os.Mkdir(artifactDir, 0755)
 	//should return nil once directory is made, if not, throw err
 	if err != nil {
-		BuilderLog.Fatalf("failed to make artifact directory", err)
+		spinner.LogMessage("failed to make artifact directory", "fatal")
 	}
 
 	//check workspace env exists, if not, create it

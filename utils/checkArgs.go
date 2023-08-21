@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Builder/spinner"
 	"fmt"
 	"os"
 	"os/exec"
@@ -13,7 +14,7 @@ func CheckArgs() {
 	cArgs := os.Args[1:]
 	//if flag present, but no url
 	if repo == "" {
-		BuilderLog.Fatal("No Repo Url Provided")
+		spinner.LogMessage("No Repo Url Provided", "fatal")
 	}
 
 	//check to see if repo exists
@@ -21,7 +22,7 @@ func CheckArgs() {
 	//returns the exit status in err
 	_, err := exec.Command("git", "ls-remote", repo, "-q").Output()
 	if err != nil {
-		BuilderLog.Fatal("Provided repository does not exist")
+		spinner.LogMessage("Provided repository does not exist", "fatal")
 	}
 
 	//check if artifact path is passed in
@@ -29,7 +30,7 @@ func CheckArgs() {
 	for i, v := range cArgs {
 		if v == "--output" || v == "-o" {
 			if len(cArgs) <= i+1 {
-				BuilderLog.Fatal("No Output Path Provided")
+				spinner.LogMessage("No Output Path Provided", "fatal")
 
 			} else {
 				artifactPath = cArgs[i+1]
@@ -39,7 +40,7 @@ func CheckArgs() {
 				} else {
 					fmt.Println("BUILDER_OUTPUT_PATH", val)
 					fmt.Println("Output Path already present")
-					BuilderLog.Error("Output path already present")
+					spinner.LogMessage("Output path already present", "error")
 				}
 			}
 		}

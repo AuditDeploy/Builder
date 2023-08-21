@@ -1,6 +1,7 @@
 package directory
 
 import (
+	"Builder/spinner"
 	"os"
 	"os/user"
 	"runtime"
@@ -20,7 +21,7 @@ func BuilderDir(path string) (bool, error) {
 		errDir := os.Mkdir(path, 0755)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
-			BuilderLog.Fatal("failed to make directory", path, err)
+			spinner.LogMessage("failed to make directory at "+path+": "+err.Error(), "fatal")
 		}
 	}
 

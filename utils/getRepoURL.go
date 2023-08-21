@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"Builder/spinner"
 	"os"
 )
 
@@ -13,7 +14,7 @@ func GetRepoURL() string {
 		if v == "init" || v == "config" {
 			if len(args) <= i+1 {
 				// logger.ErrorLogger.Println("No Repo Url Provided")
-				BuilderLog.Fatal("No Repo Url Provided")
+				spinner.LogMessage("No Repo Url Provided", "fatal")
 
 			} else {
 				repo = args[i+1]
@@ -22,7 +23,7 @@ func GetRepoURL() string {
 	}
 	if repo == "" {
 		// logger.ErrorLogger.Println("No Repo Url Provided")
-		BuilderLog.Fatal("No Repo Url Provided")
+		spinner.LogMessage("No Repo Url Provided", "fatal")
 	}
 	return repo
 }
