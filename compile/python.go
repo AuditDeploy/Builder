@@ -198,12 +198,13 @@ func packagePythonArtifact(fullPath string) {
 
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 	//find artifact by extension
-	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
+	_, extName := artifact.ExtExistsFunction(workspaceDir, ".zip")
 	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
 	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
-	exec.Command("rm", fullPath+"/"+extName).Run()
+	exec.Command("cp", "-a", workspaceDir+"/"+extName, artifactDir).Run()
+	exec.Command("rm", workspaceDir+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
 	utils.Metadata(artifactDir)
