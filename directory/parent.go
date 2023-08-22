@@ -85,6 +85,8 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 	}
 
 	os.Setenv("BUILDER_PARENT_DIR", newName)
+	os.Setenv("BUILDER_WORKSPACE_DIR", newName+"/workspace")
+	os.Setenv("BUILDER_LOGS_DIR", newName+"/logs")
 
 	// Return new path with new parent directory name
 	newPath := strings.Replace(pathWithWrongParentName, oldName[2:], newName[2:], 1)

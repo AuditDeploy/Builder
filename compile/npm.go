@@ -128,6 +128,11 @@ func Npm() {
 	// Update parent dir name to include start time and send back new full path
 	fullPath = directory.UpdateParentDirName(fullPath)
 
+	// Update vars because of parent dir name change
+	hiddenDir = os.Getenv("BUILDER_HIDDEN_DIR")
+	workspaceDir = os.Getenv("BUILDER_WORKSPACE_DIR")
+	tempWorkspace = workspaceDir + "/temp/"
+
 	yaml.CreateBuilderYaml(fullPath)
 
 	//sets path for metadata, and addFiles (covers when wrkspace dir env doesn't exist)
