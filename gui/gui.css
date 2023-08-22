@@ -250,7 +250,7 @@ table {
 #logsContent {
     background-color: black;
     margin-top: 2px;
-    height: 400px;
+    height: 40vh;
     overflow-x: scroll;
     overflow-y: auto;
     border: 2px solid black;
