@@ -137,15 +137,15 @@ func Ruby() {
 	yaml.CreateBuilderYaml(fullPath)
 
 	//sets path for metadata, and addFiles (covers when workspace dir env doesn't exist)
-	var addPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
-		path, _ := os.Getwd()
-		addPath = path + "/"
-	} else {
-		addPath = tempWorkspace
-	}
+	// var addPath string
+	// if os.Getenv("BUILDER_COMMAND") == "true" {
+	// 	path, _ := os.Getwd()
+	// 	addPath = path + "/"
+	// } else {
+	// 	addPath = tempWorkspace
+	// }
 
-	utils.Metadata(addPath)
+	//utils.Metadata(addPath)
 
 	//sets path for zip creation
 	var dirPath string

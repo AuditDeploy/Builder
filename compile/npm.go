@@ -144,7 +144,7 @@ func Npm() {
 		addPath = tempWorkspace
 	}
 
-	utils.Metadata(addPath)
+	//utils.Metadata(addPath)
 
 	//sets path for zip creation
 	var dirPath string

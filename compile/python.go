@@ -174,9 +174,9 @@ func Python() {
 	// Add files from temp dir to the archive.
 	addPythonFiles(w, addPath, "")
 
-	err = w.Close()
-	if err != nil {
-		spinner.LogMessage("Python project failed to compile: "+err.Error(), "fatal")
+	wErr := w.Close()
+	if wErr != nil {
+		spinner.LogMessage("Python project failed to compile: "+wErr.Error(), "fatal")
 	}
 	packagePythonArtifact(fullPath)
 
