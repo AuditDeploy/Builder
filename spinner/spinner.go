@@ -15,7 +15,7 @@ var BuilderLog = zap.S()
 
 var cfg = yacspin.Config{
 	Frequency:     100 * time.Millisecond,
-	CharSet:       yacspin.CharSets[11],
+	CharSet:       []string{"⣧", "⣇", "⡇", "⠇", "⠃", "⠁", "⠃", "⠇", "⡇", "⣇", "⣧", "⣧"},
 	StopCharacter: "",
 }
 var Spinner, err = yacspin.New(cfg)
