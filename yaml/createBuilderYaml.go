@@ -2,7 +2,6 @@ package yaml
 
 import (
 	"Builder/spinner"
-	"io/ioutil"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -68,7 +67,7 @@ func CreateBuilderYaml(fullPath string) {
 
 func OutputData(fullPath string, allData *BuilderYaml) {
 	yamlData, _ := yaml.Marshal(allData)
-	err := ioutil.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
+	err := os.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
 
 	if err != nil {
 		spinner.LogMessage("builder.yaml creation failed ⛔️", "fatal")
