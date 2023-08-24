@@ -28,16 +28,16 @@ func Metadata(path string) {
 
 	artifactName := os.Getenv("BUILDER_ARTIFACT_NAMES")
 	artifactChecksum := GetArtifactChecksum()
+	builderPath, _ := os.Getwd()
+	artifactRelativePath := os.Getenv("BUILDER_ARTIFACT_DIR")
+	artifactDir := artifactRelativePath[1:]
 	var artifactLocation string
 	if os.Getenv("BUILDER_OUTPUT_PATH") != "" {
 		artifactLocation = os.Getenv("BUILDER_OUTPUT_PATH")
 	} else {
-		builderPath, _ := os.Getwd()
-		artifactRelativePath := os.Getenv("BUILDER_ARTIFACT_DIR")
-		artifactDir := artifactRelativePath[1:]
-
 		artifactLocation = builderPath + artifactDir
 	}
+	logsLocation := builderPath + artifactDir
 
 	ip := GetIPAdress().String()
 
@@ -68,6 +68,7 @@ func Metadata(path string) {
 		ArtifactName:     artifactName,
 		ArtifactChecksum: artifactChecksum,
 		ArtifactLocation: artifactLocation,
+		LogsLocation:     logsLocation,
 		UserName:         userName,
 		HomeDir:          homeDir,
 		IP:               ip,
@@ -87,6 +88,7 @@ type AllMetaData struct {
 	ArtifactName     string
 	ArtifactChecksum string
 	ArtifactLocation string
+	LogsLocation     string
 	UserName         string
 	HomeDir          string
 	IP               string

@@ -140,13 +140,37 @@ func packageCSharpArtifact(fullPath string) {
 
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	outputPath := os.Getenv("BUUILDER_OUTPUT_PATH")
+
 	//find artifact by extension
 	artifactsArray, _ := WalkMatch(fullPath, "*.dll")
 	os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactsArray), ","))
 
-	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", artifactsArray[0], artifactDir).Run()
-	exec.Command("rm", artifactsArray[0]).Run()
+	var artifactNames []string
+
+	//copy artifact(s), then remove artifact(s) from workspace
+	for i := 0; i < len(artifactsArray); i++ {
+		artifactNames = append(artifactNames, filepath.Base(artifactsArray[i]))
+		exec.Command("cp", artifactsArray[i], artifactDir).Run()
+
+		// If outputpath provided also cp artifacts to that location
+		if outputPath != "" {
+			// Check if outputPath exists.  If not, create it
+			if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+				if err := os.Mkdir(outputPath, 0755); err != nil {
+					spinner.LogMessage("Could not create output path", "fatal")
+				}
+			}
+
+			exec.Command("cp", artifactsArray[i], outputPath).Run()
+
+			spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+		}
+
+		exec.Command("rm", artifactsArray[i]).Run()
+	}
+
+	os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactNames), ","))
 
 	//create metadata, then copy contents to zip dir
 	utils.Metadata(artifactDir)

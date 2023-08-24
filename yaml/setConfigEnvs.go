@@ -99,7 +99,7 @@ func ConfigEnvs(byi interface{}) {
 		}
 	}
 
-	//check for build type
+	//check for output path
 	if val, ok := bldyml["outputpath"]; ok {
 		_, present := os.LookupEnv("BUILDER_OUTPUT_PATH")
 		if !present {

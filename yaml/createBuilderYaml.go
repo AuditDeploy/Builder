@@ -14,8 +14,9 @@ type BuilderYaml struct {
 	ProjectType   string
 	BuildTool     string
 	BuildFile     string
-	BuildCmd      string
+	PreBuildCmd   string
 	ConfigCmd     string
+	BuildCmd      string
 	ArtifactList  string
 	OutputPath    string
 	GlobalLogs    string
@@ -31,8 +32,9 @@ func CreateBuilderYaml(fullPath string) {
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
 	buildTool := os.Getenv("BUILDER_BUILD_TOOL")
 	buildFile := os.Getenv("BUILDER_BUILD_FILE")
-	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+	preBuildCmd := os.Getenv("BUILDER_PREBUILD_COMMAND")
 	configCmd := os.Getenv("BUILDER_CONFIG_COMMAND")
+	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 	artifactList := os.Getenv("BUILDER_ARTIFACT_LIST")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	globalLogs := os.Getenv("GLOBAL_LOGS_PATH")
@@ -46,8 +48,9 @@ func CreateBuilderYaml(fullPath string) {
 		ProjectType:   projectType,
 		BuildTool:     buildTool,
 		BuildFile:     buildFile,
-		BuildCmd:      buildCmd,
+		PreBuildCmd:   preBuildCmd,
 		ConfigCmd:     configCmd,
+		BuildCmd:      buildCmd,
 		ArtifactList:  artifactList,
 		OutputPath:    outputPath,
 		GlobalLogs:    globalLogs,

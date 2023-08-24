@@ -255,6 +255,7 @@ func packageCArtifact(fullPath string) {
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	artifactList := os.Getenv("BUILDER_ARTIFACT_LIST")
+	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 
 	// If we were given an artifacts list, handle it
 	if artifactList != "" {
@@ -263,7 +264,22 @@ func packageCArtifact(fullPath string) {
 
 		//copy artifact(s), then remove artifact(s) from workspace
 		for _, artifact := range artifactArray {
-			exec.Command("cp", "-a", fullPath+"/"+artifact, artifactDir).Run()
+			exec.Command("cp", fullPath+"/"+artifact, artifactDir).Run()
+
+			// If outputpath provided also cp artifacts to that location
+			if outputPath != "" {
+				// Check if outputPath exists.  If not, create it
+				if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+					if err := os.Mkdir(outputPath, 0755); err != nil {
+						spinner.LogMessage("Could not create output path", "fatal")
+					}
+				}
+
+				exec.Command("cp", fullPath+"/"+artifact, outputPath).Run()
+
+				spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+			}
+
 			exec.Command("rm", fullPath+"/"+artifact).Run()
 		}
 
@@ -298,7 +314,22 @@ func packageCArtifact(fullPath string) {
 		//copy artifact(s), then remove artifact(s) from workspace
 		for i := 0; i < len(artifactArray); i++ {
 			artifactNames = append(artifactNames, filepath.Base(artifactArray[i]))
-			exec.Command("cp", "-a", artifactArray[i], artifactDir).Run()
+			exec.Command("cp", artifactArray[i], artifactDir).Run()
+
+			// If outputpath provided also cp artifacts to that location
+			if outputPath != "" {
+				// Check if outputPath exists.  If not, create it
+				if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+					if err := os.Mkdir(outputPath, 0755); err != nil {
+						spinner.LogMessage("Could not create output path", "fatal")
+					}
+				}
+
+				exec.Command("cp", artifactArray[i], outputPath).Run()
+
+				spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+			}
+
 			exec.Command("rm", artifactArray[i]).Run()
 		}
 
@@ -321,6 +352,7 @@ func packageCArtifact(fullPath string) {
 		// send artifact to user specified path or send to parent directory
 		artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
 		outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+
 		if outputPath != "" {
 			exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, outputPath).Run()
 		} else {

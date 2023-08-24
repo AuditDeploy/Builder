@@ -262,7 +262,7 @@ async function displayDetailsData(buildID) {
     document.getElementById("artifactsLocation").innerHTML = build.ArtifactLocation;
 
     // Get logs
-    let path = build.ArtifactLocation;
+    let path = build.LogsLocation;
     path = path.substring(0, path.lastIndexOf('/')) + '/logs/logs.json';
     displayLogs(path);
 }

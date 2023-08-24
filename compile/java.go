@@ -141,11 +141,28 @@ func packageJavaArtifact(fullPath string) {
 
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, ".jar")
 	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
 	//copy artifact, then remove artifact in workspace
 	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
+
+	// If outputpath provided also cp artifacts to that location
+	if outputPath != "" {
+		// Check if outputPath exists.  If not, create it
+		if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+			if err := os.Mkdir(outputPath, 0755); err != nil {
+				spinner.LogMessage("Could not create output path", "fatal")
+			}
+		}
+
+		exec.Command("cp", "-a", fullPath+"/"+extName, outputPath).Run()
+
+		spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+	}
+
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
