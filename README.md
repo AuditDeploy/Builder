@@ -75,6 +75,9 @@ You must have the language or package manager previously installed in order to b
   - As of now, a requirements.txt is necessary to build default python projects.
 - Ruby
   - Uses `bundle install --path vendor/bundle` as default command.
+- C/C++
+  - Looks for `Makefile` and runs `make` as default command.
+  - To run autotools or a `./configure` command please specify these in the builder.yaml
 
 To use other buildtools, buildcommands, or custome buildfiles you must create builder.yaml and run `config`.
 
@@ -84,27 +87,27 @@ If you are specifying a buildfile, buildtool, or buildcmd within the builder.yam
 
 At this point in time, please include ALL builder.yaml parameters (all keys must be lowercase), even if they are empty. (This will be addressed in the next update)
 
-- projectpath: provide path for project to be built
+- `projectpath`: provide path for project to be built
   - ("/Users/Name/Projects", etc)
-- projecttype: provide language/framework being used
+- `projecttype`: provide language/framework being used
   - ("Node", "Java", "Go", "Ruby", "Python", "C#", "Ruby", "C", "C++")
-- buildtool: provide tool used to install dependencies/build project
+- `buildtool`: provide tool used to install dependencies/build project
   - ("maven", "npm", "bundler", "pipenv", etc)
   - for C/C++ project, please provide a build specific build tool from the following:
     - "make-rpm", "make-deb", "make-tar", "make-lib", "make-dll", or default "make" to build .exe files
-- buildfile: provide file name needed to install dep/build project
+- `buildfile`: provide file name needed to install dep/build project
   - Can be any user specified file. ("myCoolProject.go", "package.json", etc)
-- prebuildcmd: for C/C++ projects only.  Provide command to run before buildcmd / configcmd and buildcmd ("autoreconf -vfi", "./autogen.sh", etc)
-- configcmd: for C/C++ projects only. provide full command to configure C/C++ project before running buildcmd ("./configure")
-- buildcmd: provide full command to build/compile project
-- artifactlist: provide comma seperated list of artifact names as string
+- `prebuildcmd`: for C/C++ projects only.  Provide command to run before buildcmd / configcmd and buildcmd ("autoreconf -vfi", "./autogen.sh", etc)
+- `configcmd`: for C/C++ projects only. provide full command to configure C/C++ project before running buildcmd ("./configure")
+- `buildcmd`: provide full command to build/compile project
+- `artifactlist`: provide comma seperated list of artifact names as string
   - ("artifact", "artifact.exe", "artifact.rpm,artifact2.rpm,artifact3.rpm", etc)
   - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
-- outputpath: provide path for artifact to be sent
+- `outputpath`: provide path for artifact to be sent
   - ("/Users/Name/Artifacts", etc)
-- dockercmd: specify docker command, if building a container
+- `dockercmd`: specify docker command, if building a container
   - ("docker build -t my-project:1.3 .")
-- repoBranch: specify repo branch name
+- `repoBranch`: specify repo branch name
   - (“feature/“new-branch”)
 
 ## Builder ENV Vars
