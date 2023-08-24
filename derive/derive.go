@@ -11,10 +11,7 @@ import (
 	"strings"
 
 	"github.com/manifoldco/promptui"
-	"go.uber.org/zap"
 )
-
-var BuilderLog = zap.S()
 
 // ProjectType will derive the project type and execute its compiler
 func ProjectType() {
@@ -29,7 +26,7 @@ func ProjectType() {
 		files = utils.ConfigDerive()
 	} else {
 		//default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt", "Makefile.am"}
+		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt", "Makefile"}
 	}
 
 	//look for those files inside hidden dir
@@ -40,8 +37,9 @@ func ProjectType() {
 		//double check it exists
 		fileExists, err := fileExistsInDir(filePath)
 		if err != nil {
-			BuilderLog.Fatalf("No Go, Npm, Ruby, Python, C/C++ or Java File Exists", err)
+			spinner.LogMessage("No Go, Npm, Ruby, Python, C/C++ or Java File Exists: "+err.Error(), "fatal")
 		}
+
 		//if file exists and filePath isn't empty, run conditional to find correct compiler
 		if fileExists && filePath != "" && filePath != "./" {
 			if file == "main.go" || configType == "go" {
@@ -75,7 +73,7 @@ func ProjectType() {
 				spinner.LogMessage("Python project detected", "info")
 				compile.Python()
 				return
-			} else if file == "Makefile.am" || configType == "c" {
+			} else if file == "Makefile" || configType == "c" {
 				//executes c compiler
 				finalPath := createFinalPath(filePath, file)
 
@@ -161,15 +159,35 @@ func findPath(file string) string {
 
 	// if f.Name is == to file passed in "coolProject.go", filePath becomes the path that file exists in
 	var filePath string
-	err := filepath.Walk(dirPath, func(path string, f os.FileInfo, err error) error {
+	// Check top level dir for file first before checking subdirs
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	for _, f := range files {
 		if strings.EqualFold(f.Name(), file) {
-			filePath = path
+			filePath = dirPath
 		}
-		return err
-	})
+	}
+
+	// If file not found in top level dir check subdirs
+	if filePath == "" {
+		err = filepath.Walk(dirPath, func(path string, f os.FileInfo, err error) error {
+			if strings.EqualFold(f.Name(), file) {
+				filePath = path
+			}
+			return err
+		})
+	}
 
 	if err != nil {
-		BuilderLog.Fatalf("failed to findpath", err)
+		spinner.LogMessage("Could not find build file.  Please specify build file and project type in the builder.yaml: "+err.Error(), "fatal")
+	}
+
+	// If filePath not returned file was not found, let user know
+	if filePath == "" {
+		spinner.LogMessage("Could not find build file.  Please specify build file and project type in the builder.yaml", "fatal")
 	}
 
 	configPath := os.Getenv("BUILDER_DIR_PATH")
@@ -241,7 +259,7 @@ func selectPathToCompileFrom(filePaths []string) string {
 	}
 	_, result, err := prompt.Run()
 	if err != nil {
-		BuilderLog.Fatalf("Prompt failed %v\n", err)
+		spinner.LogMessage("Prompt failed "+err.Error()+"\n", "fatal")
 	}
 
 	return result

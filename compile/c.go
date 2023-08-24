@@ -10,6 +10,7 @@ import (
 	"bufio"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -50,63 +51,63 @@ func C(filePath string) {
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	//find 'Makefile' to be built
 	buildFile := strings.ToLower(os.Getenv("BUILDER_BUILD_FILE"))
-	configCmd := os.Getenv("BUILDER_CONFIG_COMMAND")
+	//configCmd := os.Getenv("BUILDER_CONFIG_COMMAND")
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 
 	var cmd *exec.Cmd
 
-	if configCmd != "" {
-		//user specified cmd
-		configCmdArray := strings.Fields(configCmd)
-		cmd = exec.Command(configCmdArray[0], configCmdArray[1:]...)
-		cmd.Dir = fullPath // or whatever directory it's in
-	} else {
-		//default
-		cmd = exec.Command("./configure")
-		cmd.Dir = fullPath // or whatever directory it's in
-		os.Setenv("BUILDER_CONFIG_COMMAND", "./configure")
-	}
+	// if configCmd != "" {
+	// 	//user specified cmd
+	// 	configCmdArray := strings.Fields(configCmd)
+	// 	cmd = exec.Command(configCmdArray[0], configCmdArray[1:]...)
+	// 	cmd.Dir = fullPath // or whatever directory it's in
+	// } else {
+	// 	//default
+	// 	cmd = exec.Command("./configure")
+	// 	cmd.Dir = fullPath // or whatever directory it's in
+	// 	os.Setenv("BUILDER_CONFIG_COMMAND", "./configure")
+	// }
 
-	//run config cmd, check for err, log config cmd
-	spinner.LogMessage("running command: "+cmd.String(), "info")
+	// //run config cmd, check for err, log config cmd
+	// spinner.LogMessage("running command: "+cmd.String(), "info")
 
-	configStdout, pipeErr := cmd.StdoutPipe()
-	if pipeErr != nil {
-		spinner.LogMessage(pipeErr.Error(), "fatal")
-	}
+	// configStdout, pipeErr := cmd.StdoutPipe()
+	// if pipeErr != nil {
+	// 	spinner.LogMessage(pipeErr.Error(), "fatal")
+	// }
 
-	cmd.Stderr = cmd.Stdout
+	// cmd.Stderr = cmd.Stdout
 
-	// Make a new channel which will be used to ensure we get all output
-	configDone := make(chan struct{})
+	// // Make a new channel which will be used to ensure we get all output
+	// configDone := make(chan struct{})
 
-	configScanner := bufio.NewScanner(configStdout)
+	// configScanner := bufio.NewScanner(configStdout)
 
-	// Use the scanner to scan the output line by line and log it
-	// It's running in a goroutine so that it doesn't block
-	go func() {
-		// Read line by line and process it
-		for configScanner.Scan() {
-			line := configScanner.Text()
-			locallogger.Info(line)
-		}
+	// // Use the scanner to scan the output line by line and log it
+	// // It's running in a goroutine so that it doesn't block
+	// go func() {
+	// 	// Read line by line and process it
+	// 	for configScanner.Scan() {
+	// 		line := configScanner.Text()
+	// 		locallogger.Info(line)
+	// 	}
 
-		// We're all done, unblock the channel
-		configDone <- struct{}{}
+	// 	// We're all done, unblock the channel
+	// 	configDone <- struct{}{}
 
-	}()
+	// }()
 
-	if err := cmd.Start(); err != nil {
-		spinner.LogMessage(err.Error(), "fatal")
-	}
+	// if err := cmd.Start(); err != nil {
+	// 	spinner.LogMessage(err.Error(), "fatal")
+	// }
 
-	// Wait for all output to be processed
-	<-configDone
+	// // Wait for all output to be processed
+	// <-configDone
 
-	// Wait for cmd to finish
-	if err := cmd.Wait(); err != nil {
-		spinner.LogMessage(err.Error(), "fatal")
-	}
+	// // Wait for cmd to finish
+	// if err := cmd.Wait(); err != nil {
+	// 	spinner.LogMessage(err.Error(), "fatal")
+	// }
 
 	// Build command
 	if buildCmd != "" {
@@ -185,7 +186,7 @@ func C(filePath string) {
 	//creates default builder.yaml if it doesn't exist
 	yaml.CreateBuilderYaml(fullPath)
 
-	packageCArtifact(fullPath + "/build")
+	packageCArtifact(fullPath)
 
 	spinner.LogMessage("C/C++ project compiled successfully.", "info")
 }
@@ -210,8 +211,8 @@ func packageCArtifact(fullPath string) {
 
 		//copy artifact(s), then remove artifact(s) from workspace
 		for _, artifact := range artifactArray {
-			exec.Command("cp", "-a", artifact, artifactDir).Run()
-			exec.Command("rm", artifact).Run()
+			exec.Command("cp", "-a", fullPath+"/"+artifact, artifactDir).Run()
+			exec.Command("rm", fullPath+"/"+artifact).Run()
 		}
 
 	} else {
@@ -236,13 +237,20 @@ func packageCArtifact(fullPath string) {
 		//find artifact(s) by extension
 		// WalkMatch function defined in compile/c#.go
 		artifactArray, _ := WalkMatch(fullPath, artifactExt)
-		os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactArray), ","))
+		if len(artifactArray) == 0 {
+			spinner.LogMessage("Could not find artifact(s).  Please specify the name(s) in the artifactlist of the builder.yaml", "fatal")
+		}
+
+		var artifactNames []string
 
 		//copy artifact(s), then remove artifact(s) from workspace
 		for i := 0; i < len(artifactArray); i++ {
+			artifactNames = append(artifactNames, filepath.Base(artifactArray[i]))
 			exec.Command("cp", "-a", artifactArray[i], artifactDir).Run()
 			exec.Command("rm", artifactArray[i]).Run()
 		}
+
+		os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactNames), ","))
 	}
 
 	//create metadata, then copy contents to zip dir
