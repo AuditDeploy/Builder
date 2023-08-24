@@ -220,15 +220,15 @@ func packageCArtifact(fullPath string) {
 		buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 		//Determine artifact extension
 		switch buildTool {
-		case "Make-rpm":
+		case "make-rpm":
 			artifactExt = "*.rpm"
-		case "Make-deb":
+		case "make-deb":
 			artifactExt = "*.deb"
-		case "Make-tar":
+		case "make-tar":
 			artifactExt = "*.tar.gz"
-		case "Make-lib":
+		case "make-lib":
 			archiveExt = "*.lib"
-		case "Make-dll":
+		case "make-dll":
 			archiveExt = "*.dll"
 		default:
 			artifactExt = "*.exe"
