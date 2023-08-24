@@ -73,7 +73,7 @@ func ProjectType() {
 				spinner.LogMessage("Python project detected", "info")
 				compile.Python()
 				return
-			} else if file == "Makefile" || configType == "c" {
+			} else if file == "Makefile" || configType == "c" || configType == "c++" {
 				//executes c compiler
 				finalPath := createFinalPath(filePath, file)
 

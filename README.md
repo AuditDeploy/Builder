@@ -87,17 +87,19 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - projectpath: provide path for project to be built
   - ("/Users/Name/Projects", etc)
 - projecttype: provide language/framework being used
-  - (Node, Java, Go, Ruby, Python, C#, Ruby)
+  - ("Node", "Java", "Go", "Ruby", "Python", "C#", "Ruby", "C", "C++")
 - buildtool: provide tool used to install dependencies/build project
-  - (maven, npm, bundler, pipenv, etc)
+  - ("maven", "npm", "bundler", "pipenv", etc)
+  - for C/C++ project, please provide a build specific build tool from the following:
+    - "make-rpm", "make-deb", "make-tar", "make-lib", "make-dll", or default "make" to build .exe files
 - buildfile: provide file name needed to install dep/build project
-  - Can be any user specified file. (myCoolProject.go, package.json etc)
+  - Can be any user specified file. ("myCoolProject.go", "package.json", etc)
 - buildcmd: provide full command to build/compile project
+- artifactlist: provide comma seperated list of artifact names as string
+  - ("artifact", "artifact.exe", "artifact.rpm,artifact2.rpm,artifact3.rpm", etc)
   - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
 - outputpath: provide path for artifact to be sent
   - ("/Users/Name/Artifacts", etc)
-- globallogs: specify path to global logs
-  - ("var/logs/global-logs/logs.txt")
 - dockercmd: specify docker command, if building a container
   - ("docker build -t my-project:1.3 .")
 - repoBranch: specify repo branch name
@@ -108,6 +110,7 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 ### Native env vars:
 
 - "BUILDER_PARENT_DIR": parent dir path
+- "BUILDER_ARTIFACT_DIR": parent dir path
 - "BUILDER_HIDDEN_DIR": hidden dir path
 - "BUILDER_LOGS_DIR": logs dir path
 - "BUILDER_COMMAND": bool if builder cmd is running
@@ -115,10 +118,11 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 ### Envs set by builder.config:
 
 - "BUILDER_DIR_PATH": user defined parent dir path for specific build
-- "BUILDER_PROJECT_TYPE": user defined project type (go, java, etc)
-- "BUILDER_BUILD_TOOL": user defined build tool (maven, gradle, npm, yarn, etc)
-- "BUILDER_BUILD_FILE": user defined build file (myCoolProject.go)
-- "BUILDER_BUILD_COMMAND": user defined build commmand (yarn install)
+- "BUILDER_PROJECT_TYPE": user defined project type ("go", "java", etc)
+- "BUILDER_BUILD_TOOL": user defined build tool ("maven", "gradle", "npm", "yarn", etc)
+- "BUILDER_BUILD_FILE": user defined build file ("myCoolProject.go")
+- "BUILDER_BUILD_COMMAND": user defined build commmand ("yarn install")
+- "BUILDER_ARTIFACT_LIST": user defined list of produced artifacts ("myProject.exe", "artifact.rpm,artifact2.rpm", etc)
 - "BUILDER_OUTPUT_PATH": user defined output path for artifact
 
 ## Builder Funcionalty Layout
