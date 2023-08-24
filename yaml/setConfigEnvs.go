@@ -1,8 +1,11 @@
 package yaml
 
 import (
+	"Builder/utils"
 	"fmt"
 	"os"
+	"runtime"
+	"strings"
 )
 
 func ConfigEnvs(byi interface{}) {
@@ -29,7 +32,14 @@ func ConfigEnvs(byi interface{}) {
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_DIR_PATH", valStr)
+
+			// If on windows and they specify a path that begins with '/' append to home dir
+			if runtime.GOOS == "windows" && strings.HasPrefix(valStr, "/") == true {
+				homeDir := utils.GetUserData().HomeDir
+				os.Setenv("BUILDER_DIR_PATH", homeDir+valStr)
+			} else {
+				os.Setenv("BUILDER_DIR_PATH", valStr)
+			}
 		}
 	} else {
 		os.Setenv("BUILDER_DIR_PATH", "")
@@ -105,7 +115,14 @@ func ConfigEnvs(byi interface{}) {
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("BUILDER_OUTPUT_PATH", valStr)
+
+			// If on windows and they specify a path that begins with '/' append to home dir
+			if runtime.GOOS == "windows" && strings.HasPrefix(valStr, "/") == true {
+				homeDir := utils.GetUserData().HomeDir
+				os.Setenv("BUILDER_OUTPUT_PATH", homeDir+valStr)
+			} else {
+				os.Setenv("BUILDER_OUTPUT_PATH", valStr)
+			}
 		}
 	}
 
