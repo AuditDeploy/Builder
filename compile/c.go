@@ -51,63 +51,115 @@ func C(filePath string) {
 	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
 	//find 'Makefile' to be built
 	buildFile := strings.ToLower(os.Getenv("BUILDER_BUILD_FILE"))
-	//configCmd := os.Getenv("BUILDER_CONFIG_COMMAND")
+	preBuildCmd := os.Getenv("BUILDER_PREBUILD_COMMAND")
+	configCmd := os.Getenv("BUILDER_CONFIG_COMMAND")
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 
 	var cmd *exec.Cmd
 
-	// if configCmd != "" {
-	// 	//user specified cmd
-	// 	configCmdArray := strings.Fields(configCmd)
-	// 	cmd = exec.Command(configCmdArray[0], configCmdArray[1:]...)
-	// 	cmd.Dir = fullPath // or whatever directory it's in
-	// } else {
-	// 	//default
-	// 	cmd = exec.Command("./configure")
-	// 	cmd.Dir = fullPath // or whatever directory it's in
-	// 	os.Setenv("BUILDER_CONFIG_COMMAND", "./configure")
-	// }
+	// If a pre-build command is provided execute it
+	if preBuildCmd != "" {
+		//user specified cmd
+		preBuildCmdArray := strings.Fields(preBuildCmd)
+		cmd = exec.Command(preBuildCmdArray[0], preBuildCmdArray[1:]...)
+		cmd.Dir = fullPath // or whatever directory it's in
 
-	// //run config cmd, check for err, log config cmd
-	// spinner.LogMessage("running command: "+cmd.String(), "info")
+		//run pre-build cmd, check for err, log pre-build cmd
+		spinner.LogMessage("running command: "+cmd.String(), "info")
 
-	// configStdout, pipeErr := cmd.StdoutPipe()
-	// if pipeErr != nil {
-	// 	spinner.LogMessage(pipeErr.Error(), "fatal")
-	// }
+		preBuildStdout, pipeErr := cmd.StdoutPipe()
+		if pipeErr != nil {
+			spinner.LogMessage(pipeErr.Error(), "fatal")
+		}
 
-	// cmd.Stderr = cmd.Stdout
+		cmd.Stderr = cmd.Stdout
 
-	// // Make a new channel which will be used to ensure we get all output
-	// configDone := make(chan struct{})
+		// Make a new channel which will be used to ensure we get all output
+		preBuildDone := make(chan struct{})
 
-	// configScanner := bufio.NewScanner(configStdout)
+		preBuildScanner := bufio.NewScanner(preBuildStdout)
 
-	// // Use the scanner to scan the output line by line and log it
-	// // It's running in a goroutine so that it doesn't block
-	// go func() {
-	// 	// Read line by line and process it
-	// 	for configScanner.Scan() {
-	// 		line := configScanner.Text()
-	// 		locallogger.Info(line)
-	// 	}
+		// Use the scanner to scan the output line by line and log it
+		// It's running in a goroutine so that it doesn't block
+		go func() {
+			// Read line by line and process it
+			for preBuildScanner.Scan() {
+				line := preBuildScanner.Text()
+				// Have to stop spinner or it will get printed with log to console
+				spinner.Spinner.Stop()
+				locallogger.Info(line)
+				spinner.Spinner.Start()
+			}
 
-	// 	// We're all done, unblock the channel
-	// 	configDone <- struct{}{}
+			// We're all done, unblock the channel
+			preBuildDone <- struct{}{}
 
-	// }()
+		}()
 
-	// if err := cmd.Start(); err != nil {
-	// 	spinner.LogMessage(err.Error(), "fatal")
-	// }
+		if err := cmd.Start(); err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
+		}
 
-	// // Wait for all output to be processed
-	// <-configDone
+		// Wait for all output to be processed
+		<-preBuildDone
 
-	// // Wait for cmd to finish
-	// if err := cmd.Wait(); err != nil {
-	// 	spinner.LogMessage(err.Error(), "fatal")
-	// }
+		// Wait for cmd to finish
+		if err := cmd.Wait(); err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
+		}
+	}
+
+	// If a configure command is provided execute it
+	if configCmd != "" {
+		//user specified cmd
+		configCmdArray := strings.Fields(configCmd)
+		cmd = exec.Command(configCmdArray[0], configCmdArray[1:]...)
+		cmd.Dir = fullPath // or whatever directory it's in
+
+		//run config cmd, check for err, log config cmd
+		spinner.LogMessage("running command: "+cmd.String(), "info")
+
+		configStdout, pipeErr := cmd.StdoutPipe()
+		if pipeErr != nil {
+			spinner.LogMessage(pipeErr.Error(), "fatal")
+		}
+
+		cmd.Stderr = cmd.Stdout
+
+		// Make a new channel which will be used to ensure we get all output
+		configDone := make(chan struct{})
+
+		configScanner := bufio.NewScanner(configStdout)
+
+		// Use the scanner to scan the output line by line and log it
+		// It's running in a goroutine so that it doesn't block
+		go func() {
+			// Read line by line and process it
+			for configScanner.Scan() {
+				line := configScanner.Text()
+				// Have to stop spinner or it will get printed with log to console
+				spinner.Spinner.Stop()
+				locallogger.Info(line)
+				spinner.Spinner.Start()
+			}
+
+			// We're all done, unblock the channel
+			configDone <- struct{}{}
+
+		}()
+
+		if err := cmd.Start(); err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
+		}
+
+		// Wait for all output to be processed
+		<-configDone
+
+		// Wait for cmd to finish
+		if err := cmd.Wait(); err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
+		}
+	}
 
 	// Build command
 	if buildCmd != "" {

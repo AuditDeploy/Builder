@@ -70,6 +70,16 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	//check for config cmd
+	if val, ok := bldyml["prebuildcmd"]; ok {
+		_, present := os.LookupEnv("BUILDER_PREBUILD_COMMAND")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("BUILDER_PREBUILD_COMMAND", valStr)
+		}
+	}
+
+	//check for config cmd
 	if val, ok := bldyml["configcmd"]; ok {
 		_, present := os.LookupEnv("BUILDER_CONFIG_COMMAND")
 		if !present {

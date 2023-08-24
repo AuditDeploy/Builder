@@ -94,6 +94,8 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
     - "make-rpm", "make-deb", "make-tar", "make-lib", "make-dll", or default "make" to build .exe files
 - buildfile: provide file name needed to install dep/build project
   - Can be any user specified file. ("myCoolProject.go", "package.json", etc)
+- prebuildcmd: for C/C++ projects only.  Provide command to run before buildcmd / configcmd and buildcmd ("autoreconf -vfi", "./autogen.sh", etc)
+- configcmd: for C/C++ projects only. provide full command to configure C/C++ project before running buildcmd ("./configure")
 - buildcmd: provide full command to build/compile project
 - artifactlist: provide comma seperated list of artifact names as string
   - ("artifact", "artifact.exe", "artifact.rpm,artifact2.rpm,artifact3.rpm", etc)

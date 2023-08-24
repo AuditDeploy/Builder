@@ -26,14 +26,16 @@ func ProjectType() {
 		files = utils.ConfigDerive()
 	} else {
 		//default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt", "Makefile"}
+		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt", "Makefile", "Makefile.am"}
 	}
+
+	var filePath string
 
 	//look for those files inside hidden dir
 	for _, file := range files {
 
 		//recursively check for file in hidden dir, return path if found
-		filePath := findPath(file)
+		filePath = findPath(file)
 		//double check it exists
 		fileExists, err := fileExistsInDir(filePath)
 		if err != nil {
@@ -73,7 +75,7 @@ func ProjectType() {
 				spinner.LogMessage("Python project detected", "info")
 				compile.Python()
 				return
-			} else if file == "Makefile" || configType == "c" || configType == "c++" {
+			} else if file == "Makefile" || file == "Makefile.am" || configType == "c" || configType == "c++" {
 				//executes c compiler
 				finalPath := createFinalPath(filePath, file)
 
@@ -86,6 +88,11 @@ func ProjectType() {
 		}
 	}
 	deriveProjectByExtension()
+
+	// If filePath not returned file was not found, let user know
+	if filePath == "" {
+		spinner.LogMessage("Could not find build file.  Please specify build file and project type in the builder.yaml", "fatal")
+	}
 }
 
 // derive projects by Extensions
@@ -183,11 +190,6 @@ func findPath(file string) string {
 
 	if err != nil {
 		spinner.LogMessage("Could not find build file.  Please specify build file and project type in the builder.yaml: "+err.Error(), "fatal")
-	}
-
-	// If filePath not returned file was not found, let user know
-	if filePath == "" {
-		spinner.LogMessage("Could not find build file.  Please specify build file and project type in the builder.yaml", "fatal")
 	}
 
 	configPath := os.Getenv("BUILDER_DIR_PATH")
