@@ -87,6 +87,8 @@ If you are specifying a buildfile, buildtool, or buildcmd within the builder.yam
 
 At this point in time, please include ALL builder.yaml parameters (all keys must be lowercase), even if they are empty. (This will be addressed in the next update)
 
+- `projectname`: provide name for project
+  - ("helloworld", etc)
 - `projectpath`: provide path for project to be built
   - ("/Users/Name/Projects", etc)
 - `projecttype`: provide language/framework being used
@@ -97,8 +99,10 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
     - "make-rpm", "make-deb", "make-tar", "make-lib", "make-dll", or default "make" to build .exe files
 - `buildfile`: provide file name needed to install dep/build project
   - Can be any user specified file. ("myCoolProject.go", "package.json", etc)
-- `prebuildcmd`: for C/C++ projects only.  Provide command to run before buildcmd / configcmd and buildcmd ("autoreconf -vfi", "./autogen.sh", etc)
-- `configcmd`: for C/C++ projects only. provide full command to configure C/C++ project before running buildcmd ("./configure")
+- `prebuildcmd`: for C/C++ projects only.  Provide command to run before configcmd and buildcmd
+  - ("autoreconf -vfi", "./autogen.sh", etc)
+- `configcmd`: for C/C++ projects only. provide full command to configure C/C++ project before running buildcmd
+  - ("./configure")
 - `buildcmd`: provide full command to build/compile project
   - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
 - `artifactlist`: provide comma seperated list of artifact names as string
@@ -107,7 +111,7 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - ('/Users/Name/Artifacts', 'C:\Users\Name\Artifacts' etc)
 - `dockercmd`: specify docker command, if building a container
   - ("docker build -t my-project:1.3 .")
-- `repoBranch`: specify repo branch name
+- `repobranch`: specify repo branch name
   - (“feature/“new-branch”)
 
 ## Builder ENV Vars
