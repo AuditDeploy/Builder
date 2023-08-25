@@ -100,9 +100,9 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - `prebuildcmd`: for C/C++ projects only.  Provide command to run before buildcmd / configcmd and buildcmd ("autoreconf -vfi", "./autogen.sh", etc)
 - `configcmd`: for C/C++ projects only. provide full command to configure C/C++ project before running buildcmd ("./configure")
 - `buildcmd`: provide full command to build/compile project
+  - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
 - `artifactlist`: provide comma seperated list of artifact names as string
   - ("artifact", "artifact.exe", "artifact.rpm,artifact2.rpm,artifact3.rpm", etc)
-  - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
 - `outputpath`: provide path for artifact to be sent.  Please put the path in single quotes (')
   - ('/Users/Name/Artifacts', 'C:\Users\Name\Artifacts' etc)
 - `dockercmd`: specify docker command, if building a container
