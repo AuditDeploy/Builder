@@ -32,7 +32,6 @@ func Metadata(path string) {
 	artifactPath := os.Getenv("BUILDER_ARTIFACT_DIR")
 	var artifactLocation string
 	if os.Getenv("BUILDER_OUTPUT_PATH") != "" {
-		fmt.Println("output path given")
 		artifactLocation = os.Getenv("BUILDER_OUTPUT_PATH")
 	} else {
 		if os.Getenv("BUILDER_DIR_PATH") != "" {
