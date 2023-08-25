@@ -263,7 +263,7 @@ async function displayDetailsData(buildID) {
 
     // Get logs
     let path = build.LogsLocation;
-    path = path.substring(0, path.lastIndexOf('/')) + '/logs/logs.json';
+    //path = path.substring(0, path.lastIndexOf('/')) + '/logs/logs.json';
     displayLogs(path);
 }
 

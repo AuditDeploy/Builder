@@ -29,15 +29,32 @@ func Metadata(path string) {
 	artifactName := os.Getenv("BUILDER_ARTIFACT_NAMES")
 	artifactChecksum := GetArtifactChecksum()
 	builderPath, _ := os.Getwd()
-	artifactRelativePath := os.Getenv("BUILDER_ARTIFACT_DIR")
-	artifactDir := artifactRelativePath[1:]
+	artifactPath := os.Getenv("BUILDER_ARTIFACT_DIR")
 	var artifactLocation string
 	if os.Getenv("BUILDER_OUTPUT_PATH") != "" {
+		fmt.Println("output path given")
 		artifactLocation = os.Getenv("BUILDER_OUTPUT_PATH")
 	} else {
-		artifactLocation = builderPath + artifactDir
+		if os.Getenv("BUILDER_DIR_PATH") != "" {
+			if artifactPath[0:1] == "." {
+				artifactPath = artifactPath[1:]
+				artifactLocation = builderPath + artifactPath
+			} else {
+				artifactLocation = artifactPath
+			}
+		} else {
+			artifactPath = artifactPath[1:]
+			artifactLocation = builderPath + artifactPath
+		}
 	}
-	logsLocation := builderPath + artifactDir
+
+	logsPath := os.Getenv("BUILDER_LOGS_DIR")
+	var logsLocation string
+	if strings.HasPrefix(logsPath, "./") {
+		logsLocation = builderPath + "/" + logsPath[2:] + "/logs.json"
+	} else {
+		logsLocation = logsPath + "/logs.json"
+	}
 
 	ip := GetIPAdress().String()
 
