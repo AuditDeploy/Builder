@@ -42,6 +42,11 @@ func GetName() string {
 			//if init or config and no --name flag, use repo name
 			repoURL := os.Args[2]
 			name = repoURL[strings.LastIndex(repoURL, "/")+1:]
+
+			//if .git still in the name, remove it
+			if strings.HasSuffix(name, ".git") {
+				name = strings.TrimSuffix(name, ".git")
+			}
 		}
 		os.Setenv("BUILDER_DIR_NAME", name)
 	}
