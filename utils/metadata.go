@@ -27,7 +27,7 @@ func Metadata(path string) {
 	projectType := caser.String(os.Getenv("BUILDER_PROJECT_TYPE"))
 
 	artifactName := os.Getenv("BUILDER_ARTIFACT_NAMES")
-	artifactChecksum := GetArtifactChecksum()
+	artifactChecksums := GetArtifactChecksum()
 	builderPath, _ := os.Getwd()
 	artifactPath := os.Getenv("BUILDER_ARTIFACT_DIR")
 	var artifactLocation string
@@ -79,40 +79,40 @@ func Metadata(path string) {
 
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
-		ProjectName:      projectName,
-		ProjectType:      projectType,
-		ArtifactName:     artifactName,
-		ArtifactChecksum: artifactChecksum,
-		ArtifactLocation: artifactLocation,
-		LogsLocation:     logsLocation,
-		UserName:         userName,
-		HomeDir:          homeDir,
-		IP:               ip,
-		StartTime:        startTime,
-		EndTime:          endTime,
-		GitURL:           gitURL,
-		MasterGitHash:    masterGitHash,
-		BranchName:       branchName}
+		ProjectName:       projectName,
+		ProjectType:       projectType,
+		ArtifactName:      artifactName,
+		ArtifactChecksums: artifactChecksums,
+		ArtifactLocation:  artifactLocation,
+		LogsLocation:      logsLocation,
+		UserName:          userName,
+		HomeDir:           homeDir,
+		IP:                ip,
+		StartTime:         startTime,
+		EndTime:           endTime,
+		GitURL:            gitURL,
+		MasterGitHash:     masterGitHash,
+		BranchName:        branchName}
 
 	OutputMetadata(path, &userMetaData)
 }
 
 // AllMetaData holds the stuct of all the arguments
 type AllMetaData struct {
-	ProjectName      string
-	ProjectType      string
-	ArtifactName     string
-	ArtifactChecksum string
-	ArtifactLocation string
-	LogsLocation     string
-	UserName         string
-	HomeDir          string
-	IP               string
-	StartTime        string
-	EndTime          string
-	GitURL           string
-	MasterGitHash    string
-	BranchName       string
+	ProjectName       string
+	ProjectType       string
+	ArtifactName      string
+	ArtifactChecksums string
+	ArtifactLocation  string
+	LogsLocation      string
+	UserName          string
+	HomeDir           string
+	IP                string
+	StartTime         string
+	EndTime           string
+	GitURL            string
+	MasterGitHash     string
+	BranchName        string
 }
 
 // GetUserData return username and userdir
@@ -179,6 +179,11 @@ func GitHashAndName() ([]string, string) {
 	return arrayGitHashAndName, masterHash[0:7]
 }
 
+type Artifacts struct {
+	name     string
+	checksum string
+}
+
 func GetArtifactChecksum() string {
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 
@@ -187,6 +192,7 @@ func GetArtifactChecksum() string {
 		spinner.LogMessage(err.Error(), "fatal")
 	}
 
+	var checksumsArray []Artifacts
 	var checksum string
 	for _, file := range files {
 		if file.Name() != "metadata.json" && file.Name() != "metadata.yaml" {
@@ -198,10 +204,17 @@ func GetArtifactChecksum() string {
 
 			sum := sha256.Sum256(artifact)
 			checksum = fmt.Sprintf("%x", sum)
+
+			var artifactObj Artifacts
+			artifactObj.name = file.Name()
+			artifactObj.checksum = checksum
+
+			checksumsArray = append(checksumsArray, artifactObj)
 		}
 	}
+	checksums := fmt.Sprintf("%+v", checksumsArray)
 
-	return checksum
+	return checksums
 }
 
 func GetBuildID() string {
