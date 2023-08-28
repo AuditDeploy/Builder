@@ -27,6 +27,8 @@ IF you know your project has a specific buildFile name or you would like to use 
 
 Important to note: at this time, if you create your own builder.yaml and initialize a project with config, you should include all of the builder parameters (even if they are empty) in order for the `builder` command to work properly. This will be address in the next version.
 
+Important note for Windows users: at this time, please use Git Bash when running any Builder command
+
 ## Builder CLI Exec Commands & Flags
 
 ### Commands:
