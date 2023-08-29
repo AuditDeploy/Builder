@@ -1,7 +1,7 @@
 package directory
 
 import (
-	"Builder/utils/log"
+	"Builder/spinner"
 	"Builder/utils"
 	"fmt"
 	"os"
@@ -14,15 +14,14 @@ func hiddenDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
-		log.Warn("Path already exists")
-
+		spinner.LogMessage("Path already exists", "warn")
 	}
 
 	// should return true if file doesn't exist
 	if os.IsNotExist(err) {
 		errDir := os.Mkdir(path, 0755)
 		if errDir != nil {
-			log.Fatal("failed to create hidden directory", err)
+			spinner.LogMessage("failed to create hidden directory: "+err.Error(), "fatal")
 		}
 	}
 
@@ -45,7 +44,14 @@ func MakeHiddenDir(path string) {
 	} else {
 		repo := utils.GetRepoURL()
 		repoName := strings.TrimSuffix(repo[strings.LastIndex(repo, "/"):], ".git")
-		visiblePath := path + "/" + repoName
+		// Don't add extra slash if one exists
+		var visiblePath string
+		if strings.Contains(repoName, "/") {
+			visiblePath = path + repoName
+		} else {
+			visiblePath = path + "/" + repoName
+		}
+
 		hiddenDir(visiblePath)
 	}
 }

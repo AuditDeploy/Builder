@@ -2,16 +2,19 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
-	"bytes"
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 )
 
 func CSharp(filePath string) {
@@ -21,6 +24,10 @@ func CSharp(filePath string) {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "c#")
 	}
+
+	//Set up local logger
+	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+	locallogger, closeLocalLogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -52,6 +59,7 @@ func CSharp(filePath string) {
 	} else if buildTool == "dotnet" {
 		cmd = exec.Command("dotnet", "build", fullPath)
 		cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_COMMAND", "dotnet build "+fullPath)
 	} else {
 		//default
 		cmd = exec.Command("dotnet", "build", fullPath)
@@ -62,23 +70,63 @@ func CSharp(filePath string) {
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("running command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("csharp project failed to compile", err)
+	spinner.LogMessage("running command: "+cmd.String(), "info")
+
+	stdout, pipeErr := cmd.StdoutPipe()
+	if pipeErr != nil {
+		spinner.LogMessage(pipeErr.Error(), "fatal")
 	}
 
-	fullPath = fullPath[:strings.LastIndex(fullPath, "/")+1]
+	cmd.Stderr = cmd.Stdout
+
+	// Make a new channel which will be used to ensure we get all output
+	done := make(chan struct{})
+
+	scanner := bufio.NewScanner(stdout)
+
+	// Use the scanner to scan the output line by line and log it
+	// It's running in a goroutine so that it doesn't block
+	go func() {
+		// Read line by line and process it
+		for scanner.Scan() {
+			line := scanner.Text()
+			spinner.Spinner.Stop()
+			locallogger.Info(line)
+			spinner.Spinner.Start()
+		}
+
+		// We're all done, unblock the channel
+		done <- struct{}{}
+
+	}()
+
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
+
+	if err := cmd.Start(); err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	// Wait for all output to be processed
+	<-done
+
+	// Wait for cmd to finish
+	if err := cmd.Wait(); err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
+
+	// Close log file
+	closeLocalLogger()
+
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
 
 	yaml.CreateBuilderYaml(fullPath)
 
 	packageCSharpArtifact(fullPath)
 
-	log.Info("csharp project compiled successfully.")
+	spinner.LogMessage("csharp project compiled successfully.", "info")
 }
 
 func packageCSharpArtifact(fullPath string) {
@@ -92,12 +140,37 @@ func packageCSharpArtifact(fullPath string) {
 
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	outputPath := os.Getenv("BUUILDER_OUTPUT_PATH")
+
 	//find artifact by extension
 	artifactsArray, _ := WalkMatch(fullPath, "*.dll")
+	os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactsArray), ","))
 
-	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", artifactsArray[0], artifactDir).Run()
-	exec.Command("rm", artifactsArray[0]).Run()
+	var artifactNames []string
+
+	//copy artifact(s), then remove artifact(s) from workspace
+	for i := 0; i < len(artifactsArray); i++ {
+		artifactNames = append(artifactNames, filepath.Base(artifactsArray[i]))
+		exec.Command("cp", artifactsArray[i], artifactDir).Run()
+
+		// If outputpath provided also cp artifacts to that location
+		if outputPath != "" {
+			// Check if outputPath exists.  If not, create it
+			if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+				if err := os.Mkdir(outputPath, 0755); err != nil {
+					spinner.LogMessage("Could not create output path", "fatal")
+				}
+			}
+
+			exec.Command("cp", artifactsArray[i], outputPath).Run()
+
+			spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+		}
+
+		exec.Command("rm", artifactsArray[i]).Run()
+	}
+
+	os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactNames), ","))
 
 	//create metadata, then copy contents to zip dir
 	utils.Metadata(artifactDir)

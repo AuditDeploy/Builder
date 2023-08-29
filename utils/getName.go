@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"Builder/utils/log"
+	"Builder/spinner"
 	"os"
 	"strings"
 )
@@ -21,10 +21,10 @@ func GetName() string {
 			for i, v := range args {
 				if v == "--name" || v == "-n" {
 					if len(args) <= i+1 {
-						log.Fatal("Please provide a name")
+						spinner.LogMessage("Please provide a name", "fatal")
 					} else {
 						if specialChar(args[i+1]) {
-							log.Fatal("Special Characters Not Allowed In Names")
+							spinner.LogMessage("Special Characters Not Allowed In Names", "fatal")
 						}
 						name = args[i+1]
 					}
@@ -34,7 +34,7 @@ func GetName() string {
 			//use current dir name if no --name flag and using builder cmd
 			path, err := os.Getwd()
 			if err != nil {
-				log.Error("error getting builder command directory", err)
+				spinner.LogMessage("error getting builder command directory", "error")
 			}
 			name = path[strings.LastIndex(path, "/")+1:]
 
@@ -42,6 +42,11 @@ func GetName() string {
 			//if init or config and no --name flag, use repo name
 			repoURL := os.Args[2]
 			name = repoURL[strings.LastIndex(repoURL, "/")+1:]
+
+			//if .git still in the name, remove it
+			if strings.HasSuffix(name, ".git") {
+				name = strings.TrimSuffix(name, ".git")
+			}
 		}
 		os.Setenv("BUILDER_DIR_NAME", name)
 	}

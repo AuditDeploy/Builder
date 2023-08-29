@@ -1,0 +1,140 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Builder</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <style>
+            cssgoeshere
+        </style>
+    </head>
+<body onload="onPageLoad()">
+  <div id="container">
+    <div id="header">
+        <span id="headerBackBtn" onclick="displayHomePage()"></span>
+        <img src="logo.png" alt="Builder Logo" id="logo" width="100.2" height="28.9">
+    </div>
+    <div id="homepage">
+        <div id="searchBarContainer">
+            <input 
+                type="text" 
+                id="searchBar" 
+                name="searchBar"
+                placeholder="Find..."
+                oninput="search()"
+            >
+            <button 
+                type="button" 
+                class="input-group-addon" 
+                id="clearIcon"
+                onclick="clearSearch()"
+            >
+                X
+            </button>
+        </div>
+        <div id="buildsListContainer">
+        <table id="buildsListTable">
+            <thead>
+            <tr>
+                <th class="buildsListTableHeader"></th>
+                <th class="buildsListTableHeader">Time</th>
+                <th class="buildsListTableHeader">User</th>
+                <th class="buildsListTableHeader">Artifact(s)</th>
+                <th class="buildsListTableHeader">Project</th>
+                <th class="buildsListTableHeader">Git Hash</th>
+            </tr>
+            </thead>
+            <tbody id="buildsListTableBody">
+                <tr></tr>
+            </tbody>
+        </table>
+        <div id="noBuildsPresentContainer">
+            <p id="noBuildsPresent">No builds to display</p>
+        </div>
+        </div>
+    </div>
+    <div id="detailspage">
+        <div id="detailspageContentContainer">
+            <div id="projectHeader">
+                <p id="projectName">
+                </p>
+                <p id="timestamp">
+                </p>
+            </div>
+            <div id="detailsContainer">
+                <div id="metadataContainer">
+                <table id="metadataTable">
+                    <tbody>
+                    <tr>
+                        <td class="metadataTag">Project Type:</td>
+                        <td class="metadataData" id="projectType"></td>
+                    </tr>
+                    <tr>
+                        <td class="metadataTag">Username:</td>
+                        <td class="metadataData" id="username"></td>
+                    </tr>
+                    <tr>
+                        <td class="metadataTag">Home Directory:</td>
+                        <td class="metadataData" id="homeDir"></td>
+                    </tr>
+                    <tr>
+                        <td class="metadataTag">IP Address:</td>
+                        <td class="metadataData" id="ipAddr"></td>
+                    </tr>
+                    <tr>
+                        <td class="metadataTag">Git URL:</td>
+                        <td class="metadataData" id="gitURL"></td>
+                    </tr>
+                    <tr>
+                        <td class="metadataTag">Git Hash:</td>
+                        <td class="metadataData" id="gitHash"></td>
+                    </tr>
+                    <tr>
+                        <td class="metadataTag">Branch Name:</td>
+                        <td class="metadataData" id="branchName"></td>
+                    </tr>
+                    <tr>
+                        <td class="metadataTag">Build ID:</td>
+                        <td class="metadataData" id="buildID"></td>
+                    </tr>
+                    </tbody>
+                </table>
+                </div>
+                <div id="artifactsContainer">
+                <table id="artifactsTable">
+                    <thead>
+                    <tr>
+                        <th id="artifactsTableHeader">Artifact(s)</th>
+                    </tr>
+                    </thead>
+                    <tbody id="artifactsTableBody">
+                    </tbody>
+                </table>
+                <div id="fileLocationContainer">
+                    <span 
+                    class="fa fa-folder" 
+                    id="folderIcon"
+                    ></span>
+                    <p id="artifactsLocation">
+                    </p>
+                </div>
+                </div>
+            </div>
+            <div id="logsContainer">
+                <div id="logsHeader">
+                    <p id="logsHeaderText">
+                    Build Log
+                    </p>
+                </div>
+                <div id="logsContent">
+                    <table id="logsTable">
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+    <script>
+        jsgoeshere
+    </script>
+</body>
+</html>

@@ -1,7 +1,7 @@
 package directory
 
 import (
-	"Builder/utils/log"
+	"Builder/spinner"
 	"fmt"
 	"os"
 )
@@ -12,7 +12,7 @@ func logDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
-		log.Error("Path already exists")
+		spinner.LogMessage("Path already exists", "info")
 	}
 
 	// should return true if file doesn't exist
@@ -21,7 +21,7 @@ func logDir(path string) (bool, error) {
 		errDir := os.Mkdir(path, 0755)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
-			log.Fatal("failed to make directory", err)
+			spinner.LogMessage("failed to make directory: "+err.Error(), "fatal")
 		}
 
 	}
@@ -34,4 +34,10 @@ func logDir(path string) (bool, error) {
 		fmt.Println("BUILDER_LOGS_DIR", val)
 	}
 	return true, err
+}
+
+// MakeLogsDir does...
+func MakeLogsDir(path string) {
+	visiblePath := path + "/logs"
+	logDir(visiblePath)
 }

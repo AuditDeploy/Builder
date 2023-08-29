@@ -27,6 +27,8 @@ IF you know your project has a specific buildFile name or you would like to use 
 
 Important to note: at this time, if you create your own builder.yaml and initialize a project with config, you should include all of the builder parameters (even if they are empty) in order for the `builder` command to work properly. This will be address in the next version.
 
+Important note for Windows users: at this time, please use Git Bash when running any Builder command
+
 ## Builder CLI Exec Commands & Flags
 
 ### Commands:
@@ -40,14 +42,17 @@ Builder is great at guessing what to do with most repos it's given, for the othe
 - `builder`: user cds into a project path with a builder.yaml, it then pulls changes, creates new artifact and new metadata
   - no arguments accepted at this time
   - if you would like the new artifact sent to a specified dir, make sure your output path is specified in the builder.yaml
+- `builder gui`: display the Builder GUI.  Requires Chrome for use
 
 ### Flags:
 
 - '--help' or '-h': provide info for Builder
 - '--output' or '-o': user defined output path for artifact
 - '--name' or '-n': user defined project name
-- '--yes' or '-y': bypass prompts
 - '--branch' or '-b': specify repo branch
+- '--debug' or '-d': show Builder log output
+- '--verbose' or '-v': show log output for project being built
+- '--docker' or '-D': build Docker image
 
 ## Builder Compatibility
 
@@ -72,6 +77,9 @@ You must have the language or package manager previously installed in order to b
   - As of now, a requirements.txt is necessary to build default python projects.
 - Ruby
   - Uses `bundle install --path vendor/bundle` as default command.
+- C/C++
+  - Looks for `Makefile` and runs `make` as default command.
+  - To run autotools or a `./configure` command please specify these in the builder.yaml
 
 To use other buildtools, buildcommands, or custome buildfiles you must create builder.yaml and run `config`.
 
@@ -81,32 +89,39 @@ If you are specifying a buildfile, buildtool, or buildcmd within the builder.yam
 
 At this point in time, please include ALL builder.yaml parameters (all keys must be lowercase), even if they are empty. (This will be addressed in the next update)
 
-- projectpath: provide path for project to be built
+- `projectname`: provide name for project
+  - ("helloworld", etc)
+- `projectpath`: provide path for project to be built
   - ("/Users/Name/Projects", etc)
-- projecttype: provide language/framework being used
-  - (Node, Java, Go, Ruby, Python, C#, Ruby)
-- buildtool: provide tool used to install dependencies/build project
-  - (maven, npm, bundler, pipenv, etc)
-- buildfile: provide file name needed to install dep/build project
-  - Can be any user specified file. (myCoolProject.go, package.json etc)
-- buildcmd: provide full command to build/compile project
+- `projecttype`: provide language/framework being used
+  - ("Node", "Java", "Go", "Ruby", "Python", "C#", "Ruby", "C", "C++")
+- `buildtool`: provide tool used to install dependencies/build project
+  - ("maven", "npm", "bundler", "pipenv", etc)
+  - for C/C++ project, please provide a build specific build tool from the following:
+    - "make-rpm", "make-deb", "make-tar", "make-lib", "make-dll", or default "make" to build .exe files
+- `buildfile`: provide file name needed to install dep/build project
+  - Can be any user specified file. ("myCoolProject.go", "package.json", etc)
+- `prebuildcmd`: for C/C++ projects only.  Provide command to run before configcmd and buildcmd
+  - ("autoreconf -vfi", "./autogen.sh", etc)
+- `configcmd`: for C/C++ projects only. provide full command to configure C/C++ project before running buildcmd
+  - ("./configure")
+- `buildcmd`: provide full command to build/compile project
   - ("npm install --silent", "mvn -o package", anything not provided by the Builder as a default)
-- outputpath: provide path for artifact to be sent
-  - ("/Users/Name/Artifacts", etc)
-- globallogs: specify path to global logs
-  - ("var/logs/global-logs/logs.txt")
-- dockercmd: specify docker command, if building a container
+- `artifactlist`: provide comma seperated list of artifact names as string
+  - ("artifact", "artifact.exe", "artifact.rpm,artifact2.rpm,artifact3.rpm", etc)
+- `outputpath`: provide path for artifact to be sent.  Please put the path in single quotes (')
+  - ('/Users/Name/Artifacts', 'C:\Users\Name\Artifacts' etc)
+- `dockercmd`: specify docker command, if building a container
   - ("docker build -t my-project:1.3 .")
-- repoBranch: specify repo branch name
+- `repobranch`: specify repo branch name
   - (“feature/“new-branch”)
-- bypassPrompts: bypass prompts
-  - (true)
 
 ## Builder ENV Vars
 
 ### Native env vars:
 
 - "BUILDER_PARENT_DIR": parent dir path
+- "BUILDER_ARTIFACT_DIR": parent dir path
 - "BUILDER_HIDDEN_DIR": hidden dir path
 - "BUILDER_LOGS_DIR": logs dir path
 - "BUILDER_COMMAND": bool if builder cmd is running
@@ -114,10 +129,11 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 ### Envs set by builder.config:
 
 - "BUILDER_DIR_PATH": user defined parent dir path for specific build
-- "BUILDER_PROJECT_TYPE": user defined project type (go, java, etc)
-- "BUILDER_BUILD_TOOL": user defined build tool (maven, gradle, npm, yarn, etc)
-- "BUILDER_BUILD_FILE": user defined build file (myCoolProject.go)
-- "BUILDER_BUILD_COMMAND": user defined build commmand (yarn install)
+- "BUILDER_PROJECT_TYPE": user defined project type ("go", "java", etc)
+- "BUILDER_BUILD_TOOL": user defined build tool ("maven", "gradle", "npm", "yarn", etc)
+- "BUILDER_BUILD_FILE": user defined build file ("myCoolProject.go")
+- "BUILDER_BUILD_COMMAND": user defined build commmand ("yarn install")
+- "BUILDER_ARTIFACT_LIST": user defined list of produced artifacts ("myProject.exe", "artifact.rpm,artifact2.rpm", etc)
 - "BUILDER_OUTPUT_PATH": user defined output path for artifact
 
 ## Builder Funcionalty Layout
@@ -145,7 +161,6 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - create 'path' var either locally or with configPath + name + timestamp
 - call MakeParentDir:
   - check if path already exists
-  - check for '-y' flag to bypassPrompt
   - make entire parentDir path
   - set 'BUILDER_PARENT_DIR' env var
 - call MakeHiddenDir:
@@ -210,11 +225,19 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 #### 5. Metadata:
 
 - create a yaml & json inside parent dir with:
-  - UserName
-  - HomeDir
-  - IP
-  - Timestamp
-  - GitHash
+  - ProjectName
+	- ProjectType
+	- ArtifactName
+	- ArtifactChecksum
+	- ArtifactLocation
+	- UserName
+	- HomeDir
+	- IP
+	- StartTime
+	- EndTime
+	- GitURL
+	- MasterGitHash
+	- BranchName
 
 #### 6. MakeHidden:
 

@@ -3,42 +3,41 @@ package directory
 import (
 	"fmt"
 	"os"
-	"strconv"
+	"strings"
 	"time"
 
+	"Builder/spinner"
 	"Builder/utils"
-	"Builder/utils/log"
 
-	"github.com/manifoldco/promptui"
+	"go.uber.org/zap"
 )
+
+var BuilderLog = zap.S()
 
 // MakeDirs does...
 func MakeDirs() {
 	//handles -n flag
 	name := utils.GetName()
 
-	//add Unix timestamp to dir name
-	currentTime := time.Now().Unix()
-
 	//check for projectPath env from builder.yaml
 	configPath := os.Getenv("BUILDER_DIR_PATH")
-
-	unixTime := strconv.FormatInt(currentTime, 10)
-	os.Setenv("BUILDER_TIMESTAMP", unixTime)
 
 	var path string
 	if configPath != "" {
 		// used for 'config' cmd, set by builder.yaml
-		path = configPath + "/" + name + "_" + unixTime
+		path = configPath + "/" + name + "_" + name
 	} else {
 		// local path, used for 'init' cmd/default
-		path = "./" + name + "_" + unixTime
+		path = "./" + name + "_" + name
 	}
 
 	MakeParentDir(path)
 
 	MakeHiddenDir(path)
 	MakeWorkspaceDir(path)
+
+	MakeLogsDir(path)
+	MakeBuilderDir()
 }
 
 func MakeParentDir(path string) (bool, error) {
@@ -47,34 +46,15 @@ func MakeParentDir(path string) (bool, error) {
 
 	if err == nil {
 		fmt.Println("Path already exists")
-		log.Info("Path already exists")
+		spinner.LogMessage("Path already exists", "info")
 	}
 
 	// should return true if file doesn't exist
 	if os.IsNotExist(err) {
-		//bypass Prompt msg
-		if bypassPrompt() {
-			errDir := os.MkdirAll(path, 0755)
-			//should return nil once directory is made, if not, throw err
-			if errDir != nil {
-				log.Fatal("failed to create directory", path, err)
-			}
-		} else {
-			//prompt user if they'd like dir to be created
-			mk := yesNo()
-
-			if mk {
-				errDir := os.MkdirAll(path, 0755)
-				//should return nil once directory is made, if not, throw err
-				if errDir != nil {
-					log.Fatal("failed to create directory", path, err)
-				}
-
-			} else {
-				//logger.ErrorLogger.Println("Please create a directory for the Builder")
-				log.Fatal("Please create a directory for the Builder")
-				return true, err
-			}
+		errDir := os.MkdirAll(path, 0755)
+		//should return nil once directory is made, if not, throw err
+		if errDir != nil {
+			spinner.LogMessage("failed to create directory at "+path+": "+err.Error(), "fatal")
 		}
 	}
 
@@ -89,32 +69,35 @@ func MakeParentDir(path string) (bool, error) {
 	return true, err
 }
 
-func yesNo() bool {
-	prompt := promptui.Select{
-		Label: "Create A Directory? [Yes/No]",
-		Items: []string{"Yes", "No"},
-	}
-	_, result, err := prompt.Run()
-	if err != nil {
-		log.Fatal("Prompt failed %v\n", err)
-	}
-	return result == "Yes"
-}
+func UpdateParentDirName(pathWithWrongParentName string) string {
+	oldName, _ := os.LookupEnv("BUILDER_PARENT_DIR")
+	projectName := utils.GetName()
+	startTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
+	unixTimestamp := startTime.Unix()
+	newName := strings.TrimSuffix(oldName, projectName) + fmt.Sprint(unixTimestamp)
 
-func bypassPrompt() bool {
-	args := os.Args[1:]
+	path := os.Getenv("BUILDER_DIR_PATH")
 
-	yesFlag := false
-
-	val := os.Getenv("BYPASS_PROMPTS")
-	if val == "true" {
-		yesFlag = true
-	}
-	for _, val := range args {
-		if val == "--yes" || val == "-y" {
-			yesFlag = true
+	if oldName[0:2] == "./" {
+		err := os.Rename(path+"/"+oldName[2:], path+"/"+newName[2:])
+		if err != nil {
+			fmt.Println(err.(*os.LinkError).Err)
+			spinner.LogMessage("could not rename parent dir", "fatal")
+		}
+	} else {
+		err := os.Rename(oldName, newName)
+		if err != nil {
+			fmt.Println(err.(*os.LinkError).Err)
+			spinner.LogMessage("could not rename parent dir", "fatal")
 		}
 	}
 
-	return yesFlag
+	os.Setenv("BUILDER_PARENT_DIR", newName)
+	os.Setenv("BUILDER_WORKSPACE_DIR", newName+"/workspace")
+	os.Setenv("BUILDER_LOGS_DIR", newName+"/logs")
+
+	// Return new path with new parent directory name
+	newPath := strings.Replace(pathWithWrongParentName, oldName[2:], newName[2:], 1)
+
+	return newPath
 }

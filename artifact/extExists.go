@@ -1,8 +1,8 @@
 package artifact
 
 import (
+	"Builder/spinner"
 	"Builder/utils"
-  "Builder/utils/log"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,7 +15,7 @@ func ExtExistsFunction(dirPath string, ext string) (bool, string) {
 	d, err := os.Open(dirPath)
 	if err != nil {
 		fmt.Println(err)
-		log.Fatal("could not find dirpath %v", dirPath, err)
+		spinner.LogMessage("could not find dirpath "+dirPath+": "+err.Error(), "fatal")
 		os.Exit(1)
 	}
 	defer d.Close()
@@ -23,7 +23,7 @@ func ExtExistsFunction(dirPath string, ext string) (bool, string) {
 	files, err := d.Readdir(-1)
 	if err != nil {
 		fmt.Println(err)
-		log.Fatal("could not read directory", err)
+		spinner.LogMessage("could not read directory: "+err.Error(), "fatal")
 		os.Exit(1)
 	}
 	var fileName string

@@ -2,8 +2,8 @@ package derive
 
 import (
 	"Builder/compile"
+	"Builder/spinner"
 	"Builder/utils"
-	"Builder/utils/log"
 	"fmt"
 	"os"
 	"os/exec"
@@ -26,31 +26,34 @@ func ProjectType() {
 		files = utils.ConfigDerive()
 	} else {
 		//default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt"}
+		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt", "Makefile", "Makefile.am"}
 	}
+
+	var filePath string
 
 	//look for those files inside hidden dir
 	for _, file := range files {
 
 		//recursively check for file in hidden dir, return path if found
-		filePath := findPath(file)
+		filePath = findPath(file)
 		//double check it exists
 		fileExists, err := fileExistsInDir(filePath)
 		if err != nil {
-			log.Fatal("No Go, Npm, Ruby, Python or Java File Exists", err)
+			spinner.LogMessage("No Go, Npm, Ruby, Python, C/C++ or Java File Exists: "+err.Error(), "fatal")
 		}
+
 		//if file exists and filePath isn't empty, run conditional to find correct compiler
 		if fileExists && filePath != "" && filePath != "./" {
 			if file == "main.go" || configType == "go" {
 				//executes go compiler
 				finalPath := createFinalPath(filePath, file)
 				utils.CopyDir()
-				log.Info("Go project detected")
+				spinner.LogMessage("Go project detected", "info")
 				compile.Go(finalPath)
 				return
 			} else if file == "package.json" || configType == "node" || configType == "npm" {
 				//executes node compiler
-				log.Info("Npm project detected")
+				spinner.LogMessage("Npm project detected", "info")
 				compile.Npm()
 				return
 			} else if file == "pom.xml" || configType == "java" {
@@ -58,24 +61,38 @@ func ProjectType() {
 				finalPath := createFinalPath(filePath, file)
 
 				utils.CopyDir()
-				log.Info("Java project detected")
+				spinner.LogMessage("Java project detected", "info")
 
 				compile.Java(finalPath)
 				return
 			} else if file == "gemfile.lock" || file == "gemfile" || configType == "ruby" {
 				//executes ruby compiler
-				log.Info("Ruby project detected")
+				spinner.LogMessage("Ruby project detected", "info")
 				compile.Ruby()
 				return
 			} else if file == "requirements.txt" || configType == "python" {
 				//executes python compiler
-				log.Info("Python project detected")
+				spinner.LogMessage("Python project detected", "info")
 				compile.Python()
+				return
+			} else if file == "Makefile" || file == "Makefile.am" || configType == "c" || configType == "c++" {
+				//executes c compiler
+				finalPath := createFinalPath(filePath, file)
+
+				utils.CopyDir()
+				spinner.LogMessage("C/C++ project detected", "info")
+
+				compile.C(finalPath)
 				return
 			}
 		}
 	}
 	deriveProjectByExtension()
+
+	// If filePath not returned file was not found, let user know
+	if filePath == "" {
+		spinner.LogMessage("Could not find build file.  Please specify build file and project type in the builder.yaml", "fatal")
+	}
 }
 
 // derive projects by Extensions
@@ -101,7 +118,7 @@ func deriveProjectByExtension() {
 				if os.Getenv("BUILDER_COMMAND") != "true" {
 					utils.CopyDir()
 				}
-				log.Info("C# project detected, Ext .csproj")
+				spinner.LogMessage("C# project detected, Ext .csproj", "info")
 				compile.CSharp(filePath)
 
 			//if it's .sln, it will find all the project path in the solution(repo)
@@ -111,14 +128,14 @@ func deriveProjectByExtension() {
 				listOfProjects, err := exec.Command("dotnet", "sln", filePath, "list").Output()
 
 				if err != nil {
-					log.Fatal("dotnet sln failed", err)
+					spinner.LogMessage("dotnet sln failed: "+err.Error(), "fatal")
 				}
 
 				stringifyListOfProjects := string(listOfProjects)
 				listOfProjectsArray := strings.Split(stringifyListOfProjects, "\n")[2:]
 				//if there's more than 5 projects in solution(repo), user will be asked to use builder config instead
 				if len(listOfProjectsArray) > 5 {
-					log.Fatal("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml")
+					spinner.LogMessage("There is more than 5 projects in this solution, please use Builder Config and specify the path of your file you wish to compile in the builder.yml", "fatal")
 				} else {
 					// < 5 projects in solution(repo), user will be prompt to choose a project path.
 					pathToCompileFrom := selectPathToCompileFrom(listOfProjectsArray)
@@ -126,7 +143,7 @@ func deriveProjectByExtension() {
 					pathToCompileFrom = workspace + "/" + pathToCompileFrom
 
 					utils.CopyDir()
-					log.Info("C# project detected, Ext .sln")
+					spinner.LogMessage("C# project detected, Ext .sln", "info")
 					compile.CSharp(pathToCompileFrom)
 
 				}
@@ -149,15 +166,30 @@ func findPath(file string) string {
 
 	// if f.Name is == to file passed in "coolProject.go", filePath becomes the path that file exists in
 	var filePath string
-	err := filepath.Walk(dirPath, func(path string, f os.FileInfo, err error) error {
+	// Check top level dir for file first before checking subdirs
+	files, err := os.ReadDir(dirPath)
+	if err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	for _, f := range files {
 		if strings.EqualFold(f.Name(), file) {
-			filePath = path
+			filePath = dirPath
 		}
-		return err
-	})
+	}
+
+	// If file not found in top level dir check subdirs
+	if filePath == "" {
+		err = filepath.Walk(dirPath, func(path string, f os.FileInfo, err error) error {
+			if strings.EqualFold(f.Name(), file) {
+				filePath = path
+			}
+			return err
+		})
+	}
 
 	if err != nil {
-		log.Fatal("failed to findpath", err)
+		spinner.LogMessage("Could not find build file.  Please specify build file and project type in the builder.yaml: "+err.Error(), "fatal")
 	}
 
 	configPath := os.Getenv("BUILDER_DIR_PATH")
@@ -229,7 +261,7 @@ func selectPathToCompileFrom(filePaths []string) string {
 	}
 	_, result, err := prompt.Run()
 	if err != nil {
-		log.Fatal("Prompt failed %v\n", err)
+		spinner.LogMessage("Prompt failed "+err.Error()+"\n", "fatal")
 	}
 
 	return result

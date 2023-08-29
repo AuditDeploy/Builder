@@ -1,7 +1,7 @@
 package artifact
 
 import (
-	"Builder/utils/log"
+	"Builder/spinner"
 	"archive/tar"
 	"archive/zip"
 	"compress/gzip"
@@ -22,7 +22,7 @@ func ZipArtifactDir() {
 		// CreateZip temp dir.
 		outFile, err := os.Create(artifactZip)
 		if err != nil {
-			log.Fatal("failed to create artifact directory", err)
+			spinner.LogMessage("failed to create artifact directory: "+err.Error(), "fatal")
 		}
 
 		defer outFile.Close()
@@ -35,7 +35,7 @@ func ZipArtifactDir() {
 
 		err = w.Close()
 		if err != nil {
-			log.Fatal("failed to create artifact directory", err)
+			spinner.LogMessage("failed to create artifact directory: "+err.Error(), "fatal")
 		}
 	} else {
 
@@ -43,7 +43,7 @@ func ZipArtifactDir() {
 
 		outFile, err := os.Create(artifactTar)
 		if err != nil {
-			log.Fatal("failed to create artifact directory", err)
+			spinner.LogMessage("failed to create artifact directory: "+err.Error(), "fatal")
 		}
 
 		defer outFile.Close()
@@ -58,7 +58,7 @@ func ZipArtifactDir() {
 
 		err = tw.Close()
 		if err != nil {
-			log.Fatal("failed to create artifact", err)
+			spinner.LogMessage("failed to create artifact: "+err.Error(), "fatal")
 		}
 	}
 
@@ -69,7 +69,7 @@ func addFilesZip(w *zip.Writer, basePath, baseInZip string) {
 	// Open the Directory
 	files, err := ioutil.ReadDir(basePath)
 	if err != nil {
-		log.Error("failed to read zip directory", err)
+		spinner.LogMessage("failed to read zip directory: "+err.Error(), "fatal")
 	}
 
 	for _, file := range files {
@@ -82,11 +82,11 @@ func addFilesZip(w *zip.Writer, basePath, baseInZip string) {
 			// Add some files to the archive.
 			f, err := w.Create(baseInZip + file.Name())
 			if err != nil {
-				log.Error("failed to create zip", err)
+				spinner.LogMessage("failed to create zip: "+err.Error(), "error")
 			}
 			_, err = f.Write(dat)
 			if err != nil {
-				log.Error("failed to add files to zip", err)
+				spinner.LogMessage("failed to add files to zip: "+err.Error(), "error")
 			}
 		} else if file.IsDir() {
 			// Recurse

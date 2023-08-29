@@ -5,16 +5,22 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
-	"bytes"
-	"fmt"
+	"bufio"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
+	"time"
+
+	"go.uber.org/zap"
 )
+
+var locallogger *zap.Logger
 
 // Go creates exe from file passed in as arg
 func Go(filePath string) {
@@ -24,6 +30,10 @@ func Go(filePath string) {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "go")
 	}
+
+	//Set up local logger
+	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+	locallogger, closeLocalLogger = log.NewLogger("logs", localPath)
 
 	//define dir path for command to run in
 	var fullPath string
@@ -60,30 +70,80 @@ func Go(filePath string) {
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else if buildTool == "go" {
-		cmd = exec.Command("go", "build", buildFile)
+		cmd = exec.Command("go", "build", "-v", "-x", buildFile)
 		cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x "+buildFile)
 	} else {
 		//default
-		cmd = exec.Command("go", "build", "-o", strings.TrimSuffix(utils.GetName(), ".git"))
-		cmd.Dir = fullPath // or whatever directory it's in
-		os.Setenv("BUILDER_BUILD_COMMAND", "go build -o "+strings.TrimSuffix(utils.GetName(), ".git"))
+		if runtime.GOOS != "windows" {
+			cmd = exec.Command("go", "build", "-v", "-x", "-o", strings.TrimSuffix(utils.GetName(), ".git"))
+			cmd.Dir = fullPath // or whatever directory it's in
+			os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x -o "+strings.TrimSuffix(utils.GetName(), ".git"))
+		} else {
+			cmd = exec.Command("go", "build", "-v", "-x", "-o", strings.TrimSuffix(utils.GetName(), ".git")+".exe")
+			cmd.Dir = fullPath // or whatever directory it's in
+			os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x -o "+strings.TrimSuffix(utils.GetName(), ".git")+".exe")
+		}
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("run command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("GO project failed to build", err)
+	spinner.LogMessage("running command: "+cmd.String(), "info")
+
+	stdout, pipeErr := cmd.StdoutPipe()
+	if pipeErr != nil {
+		spinner.LogMessage(pipeErr.Error(), "fatal")
 	}
+
+	cmd.Stderr = cmd.Stdout
+
+	// Make a new channel which will be used to ensure we get all output
+	done := make(chan struct{})
+
+	scanner := bufio.NewScanner(stdout)
+
+	// Use the scanner to scan the output line by line and log it
+	// It's running in a goroutine so that it doesn't block
+	go func() {
+		// Read line by line and process it
+		for scanner.Scan() {
+			line := scanner.Text()
+			spinner.Spinner.Stop()
+			locallogger.Info(line)
+			spinner.Spinner.Start()
+		}
+
+		// We're all done, unblock the channel
+		done <- struct{}{}
+
+	}()
+
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
+
+	if err := cmd.Start(); err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	// Wait for all output to be processed
+	<-done
+
+	// Wait for cmd to finish
+	if err := cmd.Wait(); err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
+
+	// Close log file
+	closeLocalLogger()
+
+	// Update parent dir name to include start time
+	fullPath = directory.UpdateParentDirName(fullPath)
+
 	yaml.CreateBuilderYaml(fullPath)
 
 	packageGoArtifact(fullPath)
 
-	log.Info("Go project built successfully.")
+	spinner.LogMessage("Go project built successfully.", "info")
 }
 
 func packageGoArtifact(fullPath string) {
@@ -100,10 +160,28 @@ func packageGoArtifact(fullPath string) {
 
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, artifactExt)
+	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
 	//copy artifact, then remove artifact in workspace
 	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
+
+	// If outputpath provided also cp artifacts to that location
+	if outputPath != "" {
+		// Check if outputPath exists.  If not, create it
+		if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+			if err := os.Mkdir(outputPath, 0755); err != nil {
+				spinner.LogMessage("Could not create output path", "fatal")
+			}
+		}
+
+		exec.Command("cp", "-a", fullPath+"/"+extName, outputPath).Run()
+
+		spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+	}
+
 	exec.Command("rm", fullPath+"/"+extName).Run()
 
 	//create metadata

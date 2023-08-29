@@ -4,11 +4,14 @@ import (
 	"Builder/derive"
 	"Builder/directory"
 	"Builder/utils"
-	"Builder/utils/log"
 	"Builder/yaml"
 	"os"
 	"os/exec"
+
+	"go.uber.org/zap"
 )
+
+var BuilderLog = zap.S()
 
 func Builder() {
 	os.Setenv("BUILDER_COMMAND", "true")
@@ -24,24 +27,24 @@ func Builder() {
 		//append logs
 		//logger.CreateLogs(os.Getenv("BUILDER_LOGS_DIR"))
 		directory.MakeDirs()
-		log.Info("Directories successfully created.")
+		BuilderLog.Info("Directories successfully created.")
 
 		// clone repo into hidden
 		utils.CloneRepo()
-		log.Info("Repo cloned successfully.")
+		BuilderLog.Info("Repo cloned successfully.")
 
 		//creates a new artifact
 		derive.ProjectType()
 
 		//Get build metadata (deprecated, func moved inside compiler)
-		log.Info("Metadata created successfully.")
+		BuilderLog.Info("Metadata created successfully.")
 
 		//Check for Dockerfile, then build image
 		utils.Docker()
 
 		//makes hidden dir read-only
 		utils.MakeHidden()
-		log.Info("Hidden Dir is now read-only.")
+		BuilderLog.Info("Hidden Dir is now read-only.")
 
 	} else {
 		utils.Help()

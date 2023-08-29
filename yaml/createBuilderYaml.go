@@ -1,8 +1,7 @@
 package yaml
 
 import (
-	"Builder/utils/log"
-	"io/ioutil"
+	"Builder/spinner"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -14,7 +13,10 @@ type BuilderYaml struct {
 	ProjectType   string
 	BuildTool     string
 	BuildFile     string
+	PreBuildCmd   string
+	ConfigCmd     string
 	BuildCmd      string
+	ArtifactList  string
 	OutputPath    string
 	GlobalLogs    string
 	DockerCmd     string
@@ -29,7 +31,10 @@ func CreateBuilderYaml(fullPath string) {
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
 	buildTool := os.Getenv("BUILDER_BUILD_TOOL")
 	buildFile := os.Getenv("BUILDER_BUILD_FILE")
+	preBuildCmd := os.Getenv("BUILDER_PREBUILD_COMMAND")
+	configCmd := os.Getenv("BUILDER_CONFIG_COMMAND")
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
+	artifactList := os.Getenv("BUILDER_ARTIFACT_LIST")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 	globalLogs := os.Getenv("GLOBAL_LOGS_PATH")
 	dockerCmd := os.Getenv("BUILDER_DOCKER_CMD")
@@ -42,7 +47,10 @@ func CreateBuilderYaml(fullPath string) {
 		ProjectType:   projectType,
 		BuildTool:     buildTool,
 		BuildFile:     buildFile,
+		PreBuildCmd:   preBuildCmd,
+		ConfigCmd:     configCmd,
 		BuildCmd:      buildCmd,
+		ArtifactList:  artifactList,
 		OutputPath:    outputPath,
 		GlobalLogs:    globalLogs,
 		DockerCmd:     dockerCmd,
@@ -51,19 +59,17 @@ func CreateBuilderYaml(fullPath string) {
 	}
 
 	_, err := os.Stat(fullPath + "/builder.yaml")
-	if err == nil {
-		log.Warn("builder.yaml already exists ⛔️")
-	} else {
+	if err != nil {
 		OutputData(fullPath, &builderData)
-		log.Info("builder.yaml created ✅")
+		spinner.LogMessage("builder.yaml created ✅", "info")
 	}
 }
 
 func OutputData(fullPath string, allData *BuilderYaml) {
 	yamlData, _ := yaml.Marshal(allData)
-	err := ioutil.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
+	err := os.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
 
 	if err != nil {
-		log.Fatal("builder.yaml creation failed ⛔️")
+		spinner.LogMessage("builder.yaml creation failed ⛔️", "fatal")
 	}
 }

@@ -1,7 +1,7 @@
 package artifact
 
 import (
-	"Builder/utils/log"
+	"Builder/spinner"
 	"fmt"
 	"os"
 	"strconv"
@@ -22,16 +22,18 @@ func ArtifactDir() {
 	dirPath = os.Getenv("BUILDER_PARENT_DIR")
 	dirName := os.Getenv("BUILDER_DIR_NAME")
 	// }
+	startTime := os.Getenv("BUILD_START_TIME")
 
-	currentTime := time.Now().Unix()
-	artifactStamp := dirName + "_artifact_" + strconv.FormatInt(currentTime, 10)
+	parsedStartTime, _ := time.Parse(time.RFC850, startTime)
+	timeBuildStarted := parsedStartTime.Unix()
+	artifactStamp := dirName + "_artifact_" + strconv.FormatInt(timeBuildStarted, 10)
 	os.Setenv("BUILDER_ARTIFACT_STAMP", artifactStamp)
 	artifactDir := dirPath + "/" + artifactStamp
 
 	err := os.Mkdir(artifactDir, 0755)
 	//should return nil once directory is made, if not, throw err
 	if err != nil {
-		log.Fatal("failed to make artifact directory", err)
+		spinner.LogMessage("failed to make artifact directory", "fatal")
 	}
 
 	//check workspace env exists, if not, create it

@@ -1,89 +1,82 @@
 package log
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-func init() {
-	defaultLogLevel := zapcore.Level(logLevel)
+var logger *zap.Logger
 
-	layout := "01-02-2006"
+func NewLogger(logFileName string, path string) (*zap.Logger, func()) {
+	defaultLogLevel := zapcore.Level(logLevel)
 
 	config := zap.NewProductionEncoderConfig()
 	config.TimeKey = "timestamp"
 	config.EncodeTime = zapcore.ISO8601TimeEncoder
 
-	globalPath, _ := os.LookupEnv("GLOBAL_LOGS_PATH")
+	//logfile, _ := os.OpenFile(filepath.Join(path, logFileName+".json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 
-	t := time.Now()
-	logfile, _ := os.OpenFile(filepath.Join(globalPath, t.Format(layout), ".json"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	writer, closeFile, err := zap.Open(filepath.Join(path, logFileName+".json"))
+	if err != nil {
+		fmt.Println("logger err")
+	}
 
-	writer := zapcore.AddSync(logfile)
-	fileEncoder := zapcore.NewJSONEncoder(config)
-	core := zapcore.NewTee(
-		zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
-	)
-
-	logger := zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
-
-	zap.ReplaceGlobals(logger)
-}
-
-func Debug(msg string, args ...interface{}) {
-	if logLevel <= DEBUG {
-		if len(args) > 0 {
-			zap.S().Debugf(msg, args...)
-		} else {
-			zap.S().Debug(msg)
+	// If debug flag given display caller in log and print build logs to console
+	args := os.Args[1:]
+	verboseFlag := false
+	debugFlag := false
+	for i := 0; i < len(args); i++ {
+		if args[i] == "-v" || args[i] == "--verbose" {
+			verboseFlag = true
+		}
+		if args[i] == "-d" || args[i] == "--debug" {
+			debugFlag = true
 		}
 	}
-}
 
-func Info(msg string, args ...interface{}) {
-	if logLevel <= INFO {
-		if len(args) > 0 {
-			zap.S().Infof(msg, args...)
-		} else {
-			zap.S().Info(msg)
-		}
-	}
-}
+	var core zapcore.Core
 
-func Warn(msg string, args ...interface{}) {
-	if logLevel <= WARNING {
-		if len(args) > 0 {
-			zap.S().Warnf(msg, args...)
-		} else {
-			zap.S().Warn(msg)
-		}
-	}
-}
-
-func Error(msg string, args ...interface{}) {
-	if logLevel <= ERROR {
-		if len(args) > 0 {
-			zap.S().Errorf(msg, args...)
-		} else {
-			zap.S().Error(msg)
-		}
-	}
-}
-
-func Fatal(msg string, args ...interface{}) {
-	if len(args) > 0 {
-		zap.S().Fatalf(msg, args...)
+	// If verbose flag given display build logs to console as well as to file
+	if verboseFlag {
+		fileEncoder := zapcore.NewJSONEncoder(config)
+		consoleEncoder := zapcore.NewConsoleEncoder(config)
+		core = zapcore.NewTee(
+			zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
+			zapcore.NewCore(consoleEncoder, zapcore.AddSync(os.Stdout), defaultLogLevel),
+		)
 	} else {
-		zap.S().Fatal(msg)
+		fileEncoder := zapcore.NewJSONEncoder(config)
+		core = zapcore.NewTee(
+			zapcore.NewCore(fileEncoder, writer, defaultLogLevel),
+		)
 	}
+
+	// If debug flag given add Builder caller to build logs
+	if debugFlag {
+		logger = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
+	} else {
+		logger = zap.New(core, zap.AddStacktrace(zapcore.ErrorLevel))
+	}
+
+	return logger, closeFile
 }
 
-func SetLevel(level Level) {
-	level = level
+func init() {
+	args := os.Args[1:]
+
+	// If debug flag given display Builder logs to console
+	for i := 0; i < len(args); i++ {
+		if args[i] == "-d" || args[i] == "--debug" {
+			logger, _ := zap.NewDevelopment()
+			defer logger.Sync()
+
+			zap.ReplaceGlobals(logger)
+		}
+	}
 }
 
 type Level int

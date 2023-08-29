@@ -1,0 +1,323 @@
+body {
+    background-color: #1E1E1E;
+    font-family: Arial, sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+#container {
+    margin: 0;
+    padding: 0;
+    display:flex;
+    flex-direction: column;
+}
+
+#header {
+    background-color: black;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#headerBackBtn {
+    position: absolute;
+    left: 3.8%;
+    color: white;
+    font-size: 30px;
+
+    cursor: pointer;
+
+    display: none;
+    visibility: hidden;
+}
+
+#searchBarContainer {
+    text-align: center;
+    position: relative;
+}
+
+#searchBar {
+    display: inline-block;
+    background-color: #36373A;
+    width: 90%;
+    margin-top: 15px;
+    padding: 5px 5px 5px 25px;
+    border: 0px #36373A solid;
+    border-radius: 15px;
+    color: lightgray;
+}
+
+#searchBar:focus {
+    outline: none;
+}
+
+#clearIcon {
+    all: unset;
+    cursor: pointer;
+    color: lightgray;
+    position: absolute;
+    right: 5%;
+    top: 48%;
+}
+
+#buildsListContainer {
+    position: relative;
+    width: 92.5%;
+    margin-top: 15px;
+    margin-left: 3.8%;
+}
+
+#buildsListTable {
+    width: 100%;
+}
+
+.buildsListTableHeader {
+    background-color: black;
+    height: 30px;
+    color: lightgray;
+    font-weight: normal;
+    position: sticky;
+    top: 0;
+}
+
+.buildsListTableCell {
+    background-color: #2F2F2F;
+    height: 43px;
+    padding: 0 10px 0 10px;
+    text-align: center;
+    color: lightgray;
+    border-bottom: 4px solid #1E1E1E;
+}
+
+.buildsListTableCell:nth-child(1) {
+    padding: 2px 10px 0 10px;
+}
+
+.buildsListTableCell:nth-child(5) {
+    color: #F16522;
+}
+
+#noBuildsPresentContainer {
+    display: none;
+    visibility: hidden;
+    text-align: center;
+}
+
+#noBuildsPresent {
+    color: rgb(167, 166, 166);
+    font-style: italic;
+}
+
+/* Details page */
+
+#detailspage {
+    display: none;
+    visibility: hidden;
+}
+
+#detailspageContentContainer {
+    position: relative;
+    width: 92.5%;
+    margin-top: 8px;
+    margin-left: 3.8%;
+}
+
+#projectHeader {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#projectName {
+    color: #F16522;
+    font-size: 24px;
+}
+
+#timestamp {
+    color: lightgray;
+    font-size: 15px;
+}
+
+#artifactsTableHeader {
+    background-color: black;
+    height: 30px;
+    color: lightgray;
+    font-weight: normal;
+}
+
+#detailsContainer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+#metadataContainer {
+    display: flex;
+    flex-direction: row;
+    width: 50%;
+}
+
+#metadataDataContainer {
+    margin-left: 40px;
+}
+
+#metadataTable {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+.metadataTag {
+    color: #F16522;
+    font-size: 15px;
+}
+
+.metadataData {
+    color: lightgray;
+    font-size: 15px;
+    padding-left: 8px;
+    padding-right: 8px;
+    height: 32px;
+}
+
+#artifactsContainer {
+    float: right;
+    width: 500px;
+}
+
+#artifactsTable {
+    width: 100%;
+}
+
+.artifact {
+    padding-left: 10px;
+    padding-right: 10px;
+    background-color: #2F2F2F;
+    height: 43px;
+    margin-bottom: 2px;
+    text-align: center;
+    color: lightgray;
+    border-bottom: 4px solid #1E1E1E;
+}
+
+#fileLocationContainer {
+    background-color: black;
+    opacity: 50%;
+    min-height: 30px;
+    margin-top: -4px;
+    display: flex;
+    align-items: center;
+}
+
+#folderIcon {
+    color: lightgray;
+    margin-left: 8px;
+}
+
+#artifactsLocation {
+    color: lightgray;
+    margin-left: 8px;
+    margin-right: 8px;
+    font-size: 14px;
+    word-break: break-word;
+}
+
+#logsContainer {
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+#logsHeader {
+    background-color: black;
+    height: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#logsHeaderText {
+    color: lightgray;
+    font-weight: normal;
+}
+
+#logsContent {
+    background-color: black;
+    margin-top: 2px;
+    height: 40vh;
+    overflow-x: scroll;
+    overflow-y: auto;
+    border: 2px solid black;
+}
+
+#logsTable {
+    width: 100%;
+}
+
+.logTime {
+    padding-left: 8px;
+    color: #A1FF9F;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.logTypeInfo {
+    padding-left: 5px;
+    color: #70A9FF;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.logTypeWarn {
+    padding-left: 5px;
+    color: #FFCE70;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.logTypeError {
+    padding-left: 5px;
+    color: #FF7070;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.logCaller {
+    padding-left: 5px;
+    color: #a1a1a1;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.logMessage {
+    padding-left: 8px;
+    color: lightgray;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* scrollbar styling */
+
+::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1E1E1E;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #474747;
+    opacity: 80%; 
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+}

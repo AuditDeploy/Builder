@@ -2,11 +2,13 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
 	"archive/zip"
-	"bytes"
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -24,6 +26,10 @@ func Npm() {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "node")
 	}
+
+	//Set up local logger
+	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+	locallogger, closeLocalLogger = log.NewLogger("logs", localPath)
 
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
@@ -60,6 +66,7 @@ func Npm() {
 	} else if buildTool == "npm" {
 		cmd = exec.Command("npm", "install")
 		cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_COMMAND", "npm install")
 	} else {
 		//default
 		cmd = exec.Command("npm", "install")
@@ -69,15 +76,62 @@ func Npm() {
 	}
 
 	//run cmd, check for err, log cmd
-	log.Info("run command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("node-npm failed to build", err)
+	spinner.LogMessage("running command: "+cmd.String(), "info")
+
+	stdout, pipeErr := cmd.StdoutPipe()
+	if pipeErr != nil {
+		spinner.LogMessage(pipeErr.Error(), "fatal")
 	}
+
+	cmd.Stderr = cmd.Stdout
+
+	// Make a new channel which will be used to ensure we get all output
+	done := make(chan struct{})
+
+	scanner := bufio.NewScanner(stdout)
+
+	// Use the scanner to scan the output line by line and log it
+	// It's running in a goroutine so that it doesn't block
+	go func() {
+		// Read line by line and process it
+		for scanner.Scan() {
+			line := scanner.Text()
+			spinner.Spinner.Stop()
+			locallogger.Info(line)
+			spinner.Spinner.Start()
+		}
+
+		// We're all done, unblock the channel
+		done <- struct{}{}
+
+	}()
+
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
+
+	if err := cmd.Start(); err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	// Wait for all output to be processed
+	<-done
+
+	// Wait for cmd to finish
+	if err := cmd.Wait(); err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
+
+	// Close log file
+	closeLocalLogger()
+
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
+
+	// Update vars because of parent dir name change
+	hiddenDir = os.Getenv("BUILDER_HIDDEN_DIR")
+	workspaceDir = os.Getenv("BUILDER_WORKSPACE_DIR")
+	tempWorkspace = workspaceDir + "/temp/"
 
 	yaml.CreateBuilderYaml(fullPath)
 
@@ -90,7 +144,7 @@ func Npm() {
 		addPath = tempWorkspace
 	}
 
-	utils.Metadata(addPath)
+	//utils.Metadata(addPath)
 
 	//sets path for zip creation
 	var dirPath string
@@ -102,11 +156,12 @@ func Npm() {
 	}
 
 	// CreateZip artifact dir with timestamp
-	currentTime := time.Now().Unix()
+	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
+	timeBuildStarted := parsedStartTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
+	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
 	if err != nil {
-		log.Fatal("node-npm failed to get arfiact", err)
+		spinner.LogMessage("node-npm failed to get artifact: "+err.Error(), "fatal")
 	}
 
 	defer outFile.Close()
@@ -119,7 +174,7 @@ func Npm() {
 
 	err = w.Close()
 	if err != nil {
-		log.Fatal("node-npm project failed to compile", err)
+		spinner.LogMessage("node-npm project failed to compile: "+err.Error(), "fatal")
 	}
 
 	packageNpmArtifact(fullPath)
@@ -130,7 +185,7 @@ func Npm() {
 	// 	fmt.Print(artifactZip)
 	// 	exec.Command("cp", "-a", artifactZip+".zip", artifactPath).Run()
 	// }
-	log.Info("node-npm project compiled successfully")
+	spinner.LogMessage("node-npm project compiled successfully", "info")
 }
 
 func packageNpmArtifact(fullPath string) {
@@ -144,11 +199,30 @@ func packageNpmArtifact(fullPath string) {
 
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
+	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+
 	//find artifact by extension
-	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
+	_, extName := artifact.ExtExistsFunction(workspaceDir, ".zip")
+	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
 	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
-	exec.Command("rm", fullPath+"/"+extName).Run()
+	exec.Command("cp", "-a", workspaceDir+"/"+extName, artifactDir).Run()
+
+	// If outputpath provided also cp artifacts to that location
+	if outputPath != "" {
+		// Check if outputPath exists.  If not, create it
+		if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+			if err := os.Mkdir(outputPath, 0755); err != nil {
+				spinner.LogMessage("Could not create output path", "fatal")
+			}
+		}
+
+		exec.Command("cp", "-a", workspaceDir+"/"+extName, outputPath).Run()
+
+		spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+	}
+
+	exec.Command("rm", workspaceDir+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
 	utils.Metadata(artifactDir)

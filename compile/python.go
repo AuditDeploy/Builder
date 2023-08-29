@@ -2,11 +2,13 @@ package compile
 
 import (
 	"Builder/artifact"
+	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
 	"archive/zip"
-	"bytes"
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -24,6 +26,10 @@ func Python() {
 	if projectType == "" {
 		os.Setenv("BUILDER_PROJECT_TYPE", "python")
 	}
+
+	//Set up local logger
+	localPath, _ := os.LookupEnv("BUILDER_LOGS_DIR")
+	locallogger, closeLocalLogger = log.NewLogger("logs", localPath)
 
 	//copies contents of .hidden to workspace
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
@@ -62,6 +68,7 @@ func Python() {
 		fmt.Println(buildTool)
 		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements")
 		cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_COMMAND", "pip3 install -r requirements.txt -t "+fullPath+"/requirements")
 	} else {
 		//default
 		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements")
@@ -69,16 +76,64 @@ func Python() {
 		os.Setenv("BUILDER_BUILD_TOOL", "pip")
 		os.Setenv("BUILDER_BUILD_COMMAND", "pip3 install -r requirements.txt -t "+fullPath+"/requirements")
 	}
+
 	//run cmd, check for err, log cmd
-	log.Info("run command", cmd)
-	err := cmd.Run()
-	if err != nil {
-		var outb, errb bytes.Buffer
-		cmd.Stdout = &outb
-		cmd.Stderr = &errb
-		fmt.Println("out:", outb.String(), "err:", errb.String())
-		log.Fatal("Python project failed to compile.", err)
+	spinner.LogMessage("running command: "+cmd.String(), "info")
+
+	stdout, pipeErr := cmd.StdoutPipe()
+	if pipeErr != nil {
+		spinner.LogMessage(pipeErr.Error(), "fatal")
 	}
+
+	cmd.Stderr = cmd.Stdout
+
+	// Make a new channel which will be used to ensure we get all output
+	done := make(chan struct{})
+
+	scanner := bufio.NewScanner(stdout)
+
+	// Use the scanner to scan the output line by line and log it
+	// It's running in a goroutine so that it doesn't block
+	go func() {
+		// Read line by line and process it
+		for scanner.Scan() {
+			line := scanner.Text()
+			spinner.Spinner.Stop()
+			locallogger.Info(line)
+			spinner.Spinner.Start()
+		}
+
+		// We're all done, unblock the channel
+		done <- struct{}{}
+
+	}()
+
+	os.Setenv("BUILD_START_TIME", time.Now().Format(time.RFC850))
+
+	if err := cmd.Start(); err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	// Wait for all output to be processed
+	<-done
+
+	// Wait for cmd to finish
+	if err := cmd.Wait(); err != nil {
+		spinner.LogMessage(err.Error(), "fatal")
+	}
+
+	os.Setenv("BUILD_END_TIME", time.Now().Format(time.RFC850))
+
+	// Close log file
+	closeLocalLogger()
+
+	// Update parent dir name to include start time and send back new full path
+	fullPath = directory.UpdateParentDirName(fullPath)
+
+	// Update vars because of parent dir name change
+	hiddenDir = os.Getenv("BUILDER_HIDDEN_DIR")
+	workspaceDir = os.Getenv("BUILDER_WORKSPACE_DIR")
+	tempWorkspace = workspaceDir + "/temp/"
 
 	yaml.CreateBuilderYaml(fullPath)
 
@@ -91,7 +146,7 @@ func Python() {
 		addPath = tempWorkspace
 	}
 
-	utils.Metadata(addPath)
+	//utils.Metadata(addPath)
 
 	//sets path for zip creation
 	var dirPath string
@@ -103,11 +158,12 @@ func Python() {
 	}
 
 	// CreateZip artifact dir with timestamp
-	currentTime := time.Now().Unix()
+	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
+	timeBuildStarted := parsedStartTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(currentTime, 10) + ".zip")
+	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
 	if err != nil {
-		log.Fatal("Python failed to get artifact", err)
+		spinner.LogMessage("Python failed to get artifact: "+err.Error(), "fatal")
 	}
 
 	defer outFile.Close()
@@ -118,9 +174,9 @@ func Python() {
 	// Add files from temp dir to the archive.
 	addPythonFiles(w, addPath, "")
 
-	err = w.Close()
-	if err != nil {
-		log.Fatal("Python project failed to compile", err)
+	wErr := w.Close()
+	if wErr != nil {
+		spinner.LogMessage("Python project failed to compile: "+wErr.Error(), "fatal")
 	}
 	packagePythonArtifact(fullPath)
 
@@ -128,7 +184,7 @@ func Python() {
 	// if artifactPath != "" {
 	// 	exec.Command("cp", "-a", workspaceDir+"/temp.zip", artifactPath).Run()
 	// }
-	log.Info("Python project compiled successfully.")
+	spinner.LogMessage("Python project compiled successfully.", "info")
 }
 
 func packagePythonArtifact(fullPath string) {
@@ -142,11 +198,30 @@ func packagePythonArtifact(fullPath string) {
 
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
+	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
+	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+
 	//find artifact by extension
-	_, extName := artifact.ExtExistsFunction(fullPath, ".exe")
+	_, extName := artifact.ExtExistsFunction(workspaceDir, ".zip")
+	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
 	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
-	exec.Command("rm", fullPath+"/"+extName).Run()
+	exec.Command("cp", "-a", workspaceDir+"/"+extName, artifactDir).Run()
+
+	// If outputpath provided also cp artifacts to that location
+	if outputPath != "" {
+		// Check if outputPath exists.  If not, create it
+		if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+			if err := os.Mkdir(outputPath, 0755); err != nil {
+				spinner.LogMessage("Could not create output path", "fatal")
+			}
+		}
+
+		exec.Command("cp", "-a", workspaceDir+"/"+extName, outputPath).Run()
+
+		spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+	}
+
+	exec.Command("rm", workspaceDir+"/"+extName).Run()
 
 	//create metadata, then copy contents to zip dir
 	utils.Metadata(artifactDir)
