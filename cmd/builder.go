@@ -6,7 +6,6 @@ import (
 	"Builder/utils"
 	"Builder/yaml"
 	"os"
-	"os/exec"
 
 	"go.uber.org/zap"
 )
@@ -19,19 +18,17 @@ func Builder() {
 
 	//checks if yaml file exists in path
 	if _, err := os.Stat(path + "/" + "builder.yaml"); err == nil {
-		exec.Command("git", "pull").Run()
 
-		//pareses builder.yaml
+		//parse builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
 
-		//append logs
-		//logger.CreateLogs(os.Getenv("BUILDER_LOGS_DIR"))
+		// Create directories
 		directory.MakeDirs()
 		BuilderLog.Info("Directories successfully created.")
 
 		// clone repo into hidden
-		utils.CloneRepo()
-		BuilderLog.Info("Repo cloned successfully.")
+		//utils.CloneRepo()
+		//BuilderLog.Info("Repo cloned successfully.")
 
 		//creates a new artifact
 		derive.ProjectType()

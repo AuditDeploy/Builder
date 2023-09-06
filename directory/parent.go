@@ -78,6 +78,16 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 
 	path := os.Getenv("BUILDER_DIR_PATH")
 
+	// user using builder command and did not provide a path to build in
+	if os.Getenv("BUILDER_COMMAND") == "true" && path == "" {
+		wdPath, err := os.Getwd()
+		if err != nil {
+			spinner.LogMessage("error getting builder working directory", "error")
+		}
+
+		path = wdPath
+	}
+
 	if oldName[0:2] == "./" {
 		err := os.Rename(path+"/"+oldName[2:], path+"/"+newName[2:])
 		if err != nil {

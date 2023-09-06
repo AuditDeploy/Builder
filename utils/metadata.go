@@ -70,12 +70,21 @@ func Metadata(path string) {
 	endTime := os.Getenv("BUILD_END_TIME")
 
 	var gitURL = GetRepoURL()
-	var masterGitHash string
-	if os.Getenv("BUILDER_COMMAND") != "true" {
-		_, masterGitHash = GitHashAndName()
-	}
+	_, masterGitHash := GitHashAndName()
 
-	branchName := os.Getenv("REPO_BRANCH_NAME")
+	var branchName string
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		out, err := exec.Command("git", "branch", "--show-current").Output()
+		if err != nil {
+			spinner.LogMessage("Can't get current branch name: "+err.Error(), "fatal")
+		}
+
+		// remove \n at end of returned branch name before returning
+		branchName = strings.TrimSuffix(string(out), "\n")
+
+	} else {
+		branchName = os.Getenv("REPO_BRANCH_NAME")
+	}
 
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{

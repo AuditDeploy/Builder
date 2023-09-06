@@ -3,6 +3,7 @@ package utils
 import (
 	"Builder/spinner"
 	"os"
+	"os/exec"
 )
 
 func GetRepoURL() string {
@@ -22,8 +23,18 @@ func GetRepoURL() string {
 		}
 	}
 	if repo == "" {
-		// logger.ErrorLogger.Println("No Repo Url Provided")
-		spinner.LogMessage("No Repo Url Provided", "fatal")
+		// Get repo name from git config file
+		out, err := exec.Command("git", "config", "--get", "remote.origin.url").Output()
+		if err != nil {
+			spinner.LogMessage("Can't get repo url from .git/config file: "+err.Error(), "fatal")
+		}
+
+		repo = string(out[:len(out)-1]) // Get rid of last char because it is a newline char
+
+		if repo == "" {
+			spinner.LogMessage("Can't get repo url from .git/config file", "fatal")
+		}
+
 	}
 	return repo
 }

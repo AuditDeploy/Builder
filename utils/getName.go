@@ -38,6 +38,11 @@ func GetName() string {
 			}
 			name = path[strings.LastIndex(path, "/")+1:]
 
+			// if includes '\' instead, remove them
+			if strings.Contains(name, "\\") {
+				name = path[strings.LastIndex(path, "\\")+1:]
+			}
+
 		} else {
 			//if init or config and no --name flag, use repo name
 			repoURL := os.Args[2]
