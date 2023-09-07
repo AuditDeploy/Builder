@@ -39,7 +39,10 @@ func Go(filePath string) {
 	var fullPath string
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 	//if user defined path in builder.yaml, full path is included already, else add curren dir + local path
-	if configPath != "" {
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
+		fullPath = filePath
+	} else if configPath != "" {
 		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
 		fullPath = filePath
 	} else {

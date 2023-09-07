@@ -19,10 +19,23 @@ func CloneRepo() {
 		//pwd
 		path, err := os.Getwd()
 		if err != nil {
-			spinner.LogMessage("failed to get repository: "+err.Error(), "error")
+			spinner.LogMessage("failed to get current working dir: "+err.Error(), "error")
 		}
-		fmt.Println(path)
-		exec.Command("cp", "-a", path+"/.", hiddenDir).Run()
+
+		files, err := os.ReadDir(path)
+		if err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
+		}
+
+		var parentDirName = os.Getenv("BUILDER_PARENT_DIR")[strings.LastIndex(os.Getenv("BUILDER_PARENT_DIR"), "/")+1:]
+
+		// Copy all but Builder created dir
+		for _, file := range files {
+			if file.Name() != parentDirName {
+				//copy file to temp workspace dir
+				exec.Command("cp", "-r", file.Name(), hiddenDir).Run()
+			}
+		}
 	} else {
 		repo := GetRepoURL()
 		//if config cmd clone to temp dir on first go

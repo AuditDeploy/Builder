@@ -10,7 +10,6 @@ import (
 	"archive/zip"
 	"bufio"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"runtime"
@@ -44,7 +43,10 @@ func Npm() {
 	var fullPath string
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 	//if user defined path in builder.yaml, full path is included in tempWorkspace, else add the local path
-	if configPath != "" {
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
+		fullPath = tempWorkspace
+	} else if configPath != "" {
 		fullPath = tempWorkspace
 	} else {
 		path, _ := os.Getwd()
@@ -129,37 +131,16 @@ func Npm() {
 	fullPath = directory.UpdateParentDirName(fullPath)
 
 	// Update vars because of parent dir name change
-	hiddenDir = os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir = os.Getenv("BUILDER_WORKSPACE_DIR")
 	tempWorkspace = workspaceDir + "/temp/"
 
 	yaml.CreateBuilderYaml(fullPath)
 
-	//sets path for metadata, and addFiles (covers when wrkspace dir env doesn't exist)
-	var addPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
-		path, _ := os.Getwd()
-		addPath = path + "/"
-	} else {
-		addPath = tempWorkspace
-	}
-
-	//utils.Metadata(addPath)
-
-	//sets path for zip creation
-	var dirPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
-		path, _ := os.Getwd()
-		dirPath = strings.Replace(path, "\\temp", "", 1)
-	} else {
-		dirPath = workspaceDir
-	}
-
 	// CreateZip artifact dir with timestamp
 	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
 	timeBuildStarted := parsedStartTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
+	outFile, err := os.Create(workspaceDir + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
 	if err != nil {
 		spinner.LogMessage("node-npm failed to get artifact: "+err.Error(), "fatal")
 	}
@@ -170,7 +151,7 @@ func Npm() {
 	w := zip.NewWriter(outFile)
 
 	// Add files from temp dir to the archive.
-	addNpmFiles(w, addPath, "")
+	addNpmFiles(w, tempWorkspace, "")
 
 	err = w.Close()
 	if err != nil {
@@ -253,17 +234,35 @@ func packageNpmArtifact(fullPath string) {
 
 // recursively add files
 func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
+	// If basePath includes old parent folder name, fix it before we start (necessary for symlinks)
+	projectName := utils.GetName()
+	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
+	timeBuildStarted := parsedStartTime.Unix()
+	oldParentName := projectName + "_" + projectName
+	newParentName := projectName + "_" + strconv.FormatInt(timeBuildStarted, 10)
+	if strings.Contains(basePath, oldParentName) {
+		basePath = strings.Replace(basePath, oldParentName, newParentName, 1)
+	}
+
 	// Open the Directory
-	files, err := ioutil.ReadDir(basePath)
+	files, err := os.ReadDir(basePath)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("ReadDir err: " + err.Error())
 	}
 
 	for _, file := range files {
 		if !file.IsDir() {
-			dat, err := ioutil.ReadFile(basePath + file.Name())
+			dat, err := os.ReadFile(basePath + file.Name())
 			if err != nil {
-				fmt.Println(err)
+				// Check if file is symlink
+				linkedFolder, erro := os.Readlink(basePath + file.Name())
+				if erro != nil {
+					// can't read file or symlink
+					fmt.Println("ReadFile err: " + erro.Error())
+				}
+
+				// If symlink, copy all contents from symlinked directory to folder named after symlink
+				addNpmFiles(w, linkedFolder, baseInZip+file.Name()+"/")
 			}
 
 			// Add some files to the archive.

@@ -3,14 +3,11 @@ package cmd
 import (
 	"Builder/derive"
 	"Builder/directory"
+	"Builder/spinner"
 	"Builder/utils"
 	"Builder/yaml"
 	"os"
-
-	"go.uber.org/zap"
 )
-
-var BuilderLog = zap.S()
 
 func Builder() {
 	os.Setenv("BUILDER_COMMAND", "true")
@@ -18,31 +15,38 @@ func Builder() {
 
 	//checks if yaml file exists in path
 	if _, err := os.Stat(path + "/" + "builder.yaml"); err == nil {
+		// Start loading spinner
+		spinner.Spinner.Start()
 
 		//parse builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
 
 		// Create directories
 		directory.MakeDirs()
-		BuilderLog.Info("Directories successfully created.")
+		spinner.LogMessage("Directories successfully created.", "info")
 
-		// clone repo into hidden
-		//utils.CloneRepo()
-		//BuilderLog.Info("Repo cloned successfully.")
+		// clone files from current dir into hidden
+		utils.CloneRepo()
+		spinner.LogMessage("Files copied to hidden dir successfully.", "info")
 
 		//creates a new artifact
 		derive.ProjectType()
 
 		//Get build metadata (deprecated, func moved inside compiler)
-		BuilderLog.Info("Metadata created successfully.")
+		spinner.LogMessage("Metadata created successfully.", "info")
+
+		// Store build metadata to hidden builder dir
+		utils.StoreBuildMetadataLocally()
 
 		//Check for Dockerfile, then build image
 		utils.Docker()
 
 		//makes hidden dir read-only
 		utils.MakeHidden()
-		BuilderLog.Info("Hidden Dir is now read-only.")
+		spinner.LogMessage("Hidden Dir is now read-only.", "info")
 
+		// Stop loading spinner
+		spinner.Spinner.Stop()
 	} else {
 		utils.Help()
 	}
