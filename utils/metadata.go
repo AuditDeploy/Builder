@@ -70,11 +70,13 @@ func Metadata(path string) {
 	endTime := os.Getenv("BUILD_END_TIME")
 
 	var gitURL = GetRepoURL()
-	_, masterGitHash := GitHashAndName()
+	_, masterGitHash := GitMasterNameAndHash()
+
+	fmt.Println("Got master git hash")
 
 	var branchName string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
-		out, err := exec.Command("git", "branch", "--show-current").Output()
+		out, err := exec.Command("git", "symbolic-ref", "--short", "HEAD").Output()
 		if err != nil {
 			spinner.LogMessage("Can't get current branch name: "+err.Error(), "fatal")
 		}
@@ -166,26 +168,24 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	}
 }
 
-// GitHas gets the latest git commit id in a repo
-func GitHashAndName() ([]string, string) {
-	//Get repoURL
-	repo := GetRepoURL()
+// Gets the name of the repo's master branch and its hash
+func GitMasterNameAndHash() (string, string) {
+	//outputs the name of the master branch
+	output, err := exec.Command("git", "symbolic-ref", "refs/remotes/origin/HEAD", "--short").Output()
+	if err != nil {
+		spinner.LogMessage("Could not find master branch name at .git/refs/remotes/origin/HEAD", "fatal")
+	}
+	formattedOutput := strings.TrimSuffix(string(output), "\n")
+	masterBranchName := formattedOutput[strings.LastIndex(formattedOutput, "/")+1:]
 
-	//outputs all the commits of the clone repo
-	output, _ := exec.Command("git", "ls-remote", repo).Output()
+	//outputs the hash of the provided branch
+	hashOutput, hashErr  := exec.Command("git", "rev-parse", masterBranchName).Output()
+	if hashErr != nil {
+		spinner.LogMessage("Could not get hash for branch " + masterBranchName, "fatal")
+	}
+	masterBranchHash := strings.TrimSuffix(string(hashOutput), "\n")
 
-	//stringify output - []byte to string
-	stringGitHashAndName := string(output)
-	// fmt.Println(stringGitHash)
-
-	//return an array with all the git commit hashs
-	arrayGitHashAndName := strings.Split(stringGitHashAndName, "\n")
-
-	//gets the hash of type []string of master branch
-	masterHashStringArray := strings.Fields(arrayGitHashAndName[0])
-	masterHash := masterHashStringArray[0]
-
-	return arrayGitHashAndName, masterHash[0:7]
+	return masterBranchName, masterBranchHash
 }
 
 type Artifacts struct {
