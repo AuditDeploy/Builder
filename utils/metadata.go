@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"os/user"
 	"strings"
+	"path/filepath"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -71,8 +72,6 @@ func Metadata(path string) {
 
 	var gitURL = GetRepoURL()
 	_, masterGitHash := GitMasterNameAndHash()
-
-	fmt.Println("Got master git hash")
 
 	var branchName string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
@@ -170,18 +169,30 @@ func OutputMetadata(path string, allData *AllMetaData) {
 
 // Gets the name of the repo's master branch and its hash
 func GitMasterNameAndHash() (string, string) {
+	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+	dirToRunIn, _ := filepath.Abs(hiddenDir)
+
 	//outputs the name of the master branch
-	output, err := exec.Command("git", "symbolic-ref", "refs/remotes/origin/HEAD", "--short").Output()
+	cmd := exec.Command("git", "symbolic-ref", "refs/remotes/origin/HEAD", "--short")
+	if os.Getenv("BUILDER_COMMAND") != "true" {
+		cmd.Dir = dirToRunIn
+	}
+	output, err := cmd.Output()
 	if err != nil {
-		spinner.LogMessage("Could not find master branch name at .git/refs/remotes/origin/HEAD", "fatal")
+		// Can't find master branch name so return undefined
+		return "undefined", "undefined"
 	}
 	formattedOutput := strings.TrimSuffix(string(output), "\n")
 	masterBranchName := formattedOutput[strings.LastIndex(formattedOutput, "/")+1:]
 
 	//outputs the hash of the provided branch
-	hashOutput, hashErr  := exec.Command("git", "rev-parse", masterBranchName).Output()
+	cmd = exec.Command("git", "rev-parse", masterBranchName)
+	if os.Getenv("BUILDER_COMMAND") != "true" {
+                cmd.Dir = dirToRunIn
+        }
+	hashOutput, hashErr  := cmd.Output()
 	if hashErr != nil {
-		spinner.LogMessage("Could not get hash for branch " + masterBranchName, "fatal")
+		return "undefined", "undefined"
 	}
 	masterBranchHash := strings.TrimSuffix(string(hashOutput), "\n")
 

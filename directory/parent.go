@@ -102,7 +102,10 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 		}
 	}
 
+	// Update env vars to include new parent folder name
+	name := utils.GetName()
 	os.Setenv("BUILDER_PARENT_DIR", newName)
+	os.Setenv("BUILDER_HIDDEN_DIR", newName+"/"+name)
 	os.Setenv("BUILDER_WORKSPACE_DIR", newName+"/workspace")
 	os.Setenv("BUILDER_LOGS_DIR", newName+"/logs")
 
