@@ -26,13 +26,18 @@ func GetRepoURL() string {
 		// Get repo name from git config file
 		out, err := exec.Command("git", "config", "--get", "remote.origin.url").Output()
 		if err != nil {
-			spinner.LogMessage("Can't get repo url from .git/config file: "+err.Error(), "fatal")
+			spinner.LogMessage("Can't find git URL.  Please provide it in the builder.yaml", "info")
+			return ""
 		}
 
 		repo = string(out[:len(out)-1]) // Get rid of last char because it is a newline char
 
 		if repo == "" {
-			spinner.LogMessage("Can't get repo url from .git/config file", "fatal")
+			if os.Getenv("GIT_URL") != "" {
+				repo = os.Getenv("GIT_URL")
+			} else {
+				spinner.LogMessage("Can't find git URL.  Please provide it in the builder.yaml", "info")
+			}
 		}
 
 	}

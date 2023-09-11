@@ -12,8 +12,8 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
-	"strings"
 	"path/filepath"
+	"strings"
 
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -75,14 +75,18 @@ func Metadata(path string) {
 
 	var branchName string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
-		out, err := exec.Command("git", "symbolic-ref", "--short", "HEAD").Output()
-		if err != nil {
-			spinner.LogMessage("Can't get current branch name: "+err.Error(), "fatal")
+		if os.Getenv("REPO_BRANCH_NAME") != "" {
+			branchName = os.Getenv("REPO_BRANCH_NAME")
+		} else {
+			out, err := exec.Command("git", "symbolic-ref", "--short", "HEAD").Output()
+			if err != nil {
+				spinner.LogMessage("Can't get current branch name.  Please provide it in the builder.yaml.", "info")
+				branchName = ""
+			} else {
+				// remove \n at end of returned branch name before returning
+				branchName = strings.TrimSuffix(string(out), "\n")
+			}
 		}
-
-		// remove \n at end of returned branch name before returning
-		branchName = strings.TrimSuffix(string(out), "\n")
-
 	} else {
 		branchName = os.Getenv("REPO_BRANCH_NAME")
 	}
@@ -188,9 +192,9 @@ func GitMasterNameAndHash() (string, string) {
 	//outputs the hash of the provided branch
 	cmd = exec.Command("git", "rev-parse", masterBranchName)
 	if os.Getenv("BUILDER_COMMAND") != "true" {
-                cmd.Dir = dirToRunIn
-        }
-	hashOutput, hashErr  := cmd.Output()
+		cmd.Dir = dirToRunIn
+	}
+	hashOutput, hashErr := cmd.Output()
 	if hashErr != nil {
 		return "undefined", "undefined"
 	}
