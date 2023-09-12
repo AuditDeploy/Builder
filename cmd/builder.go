@@ -26,7 +26,9 @@ func Builder() {
 		spinner.LogMessage("Directories successfully created.", "info")
 
 		// clone files from current dir into hidden
-		utils.CloneRepo()
+		currentDir, _ := os.Getwd()
+		hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+		utils.CloneRepoFiles(currentDir, hiddenDir)
 		spinner.LogMessage("Files copied to hidden dir successfully.", "info")
 
 		//creates a new artifact

@@ -5,6 +5,8 @@ import (
 	"Builder/directory"
 	"Builder/spinner"
 	"Builder/utils"
+
+	"os"
 )
 
 func Init() {
@@ -14,13 +16,20 @@ func Init() {
 	// Start loading spinner
 	spinner.Spinner.Start()
 
+	// clone repo into folder named after project name and keep track of its path
+	projectName := utils.GetName()
+	os.Setenv("BUILDER_REPO_DIR", "./"+projectName)
+	utils.CloneRepo("./" + projectName)
+	spinner.LogMessage("Repo cloned successfully.", "info")
+
 	// make dirs
 	directory.MakeDirs()
 	spinner.LogMessage("Directories successfully created.", "info")
 
-	// clone repo into hidden
-	utils.CloneRepo()
-	spinner.LogMessage("Repo cloned successfully.", "info")
+	// copy repo files we just cloned to hidden dir
+	repoDir := os.Getenv("BUILDER_REPO_DIR")
+	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+	utils.CloneRepoFiles(repoDir, hiddenDir)
 
 	// compile logic to derive project type
 	derive.ProjectType()

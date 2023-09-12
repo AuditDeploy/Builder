@@ -12,7 +12,7 @@ func BuilderDir(path string) (bool, error) {
 	_, err := os.Stat(path)
 
 	if err == nil {
-		BuilderLog.Error(".builder dir already exists")
+		spinner.LogMessage(".builder dir already exists", "info")
 	}
 
 	// should return true if dir doesn't exist
