@@ -98,7 +98,7 @@ function createBuildsListTable(buildsJSON) {
         text += tdString + builds[build].UserName + "</td>"
         text += tdString + builds[build].ArtifactName + "</td>"
         text += tdString + builds[build].ProjectName + "</td>"
-        text += tdString + builds[build].MasterGitHash + "</td>"
+        text += tdString + builds[build].MasterGitHash.slice(0,7) + "</td>"
 
         text += "</tr>"
     }
