@@ -88,6 +88,9 @@ function createBuildsListTable(buildsJSON) {
             case "ruby":
                 image = "<img src='' alt='Ruby Logo' class='ruby_logo' width='30' height='30'>"
                 break;
+            case "rust":
+                image = "<img src='' alt='Rust Logo' class='rust_logo' width='30' height='30'>"
+                break;
             default:
                 image = ""
         }
@@ -170,6 +173,14 @@ const renderBuildsList = async () => {
     for (let i = 0; i < ruby_logos.length; i++) {
         ruby_logos[i].src = "data:image/png;base64," + ruby_logo_img;
     }
+
+    //Rust
+    let rust_logo_img = await getRustLogoImage();
+    const rust_logos = document.getElementsByClassName("rust_logo");
+    for (let i = 0; i < rust_logos.length; i++) {
+        rust_logos[i].src = "data:image/png;base64," + rust_logo_img;
+    }
+    
 };
 
 function displayHomePage() {

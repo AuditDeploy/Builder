@@ -69,6 +69,11 @@ var PythonLogo []byte
 //go:embed RubyLogo.png
 var RubyLogo []byte
 
+// Embed Rust logo
+//
+//go:embed RustLogo.png
+var RustLogo []byte
+
 type Build struct {
 	ProjectName      string `json:"ProjectName"`
 	ProjectType      string `json:"ProjectType"`
@@ -187,6 +192,12 @@ func Gui() {
 		return image
 	}
 
+	getRustLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(RustLogo)
+
+		return image
+	}
+
 	// Combine html, css, and js files for gui
 	cssRegex := regexp.MustCompile(`cssgoeshere`)
 	jsRegex := regexp.MustCompile(`jsgoeshere`)
@@ -215,6 +226,7 @@ func Gui() {
 	ui.Bind("getNodeLogoImage", getNodeLogoImage)
 	ui.Bind("getPythonLogoImage", getPythonLogoImage)
 	ui.Bind("getRubyLogoImage", getRubyLogoImage)
+	ui.Bind("getRustLogoImage", getRustLogoImage)
 
 	ui.Load("data:text/html," + url.PathEscape(finalHTMLContent))
 
