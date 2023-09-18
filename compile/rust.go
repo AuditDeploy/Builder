@@ -133,7 +133,7 @@ func Rust(filePath string) {
 
 	packageRustArtifact(fullPath)
 
-	spinner.LogMessage("Go project built successfully.", "info")
+	spinner.LogMessage("Rust project built successfully.", "info")
 }
 
 func packageRustArtifact(fullPath string) {
@@ -147,42 +147,53 @@ func packageRustArtifact(fullPath string) {
 		artifactExt = ""
 	}
 
-	extName := ""
-
-	tomlfile, _ := os.Open(fullPath+"/" + os.Getenv("BUILDER_BUILD_FILE"))
-	scanner := bufio.NewScanner(tomlfile)
-	for scanner.Scan() {
-        line:= scanner.Text()
-		if strings.HasPrefix(line, "name = ") == true {
-			extName = strings.Trim(line[7:]+artifactExt, "\"")
-		 } 
-    }
-	defer tomlfile.Close()
-
 	artifact.ArtifactDir()
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	artifactList := os.Getenv("BUILDER_ARTIFACT_LIST")
 
-	//find artifact by extension
-	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
-	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", fullPath+"/target/release/"+extName, artifactDir).Run()
-
-	// If outputpath provided also cp artifacts to that location
-	if outputPath != "" {
-		// Check if outputPath exists.  If not, create it
-		if _, err := os.Stat(outputPath); os.IsNotExist(err) {
-			if err := os.Mkdir(outputPath, 0755); err != nil {
-				spinner.LogMessage("Could not create output path", "fatal")
+	if artifactList != "" {
+		os.Setenv("BUILDER_ARTIFACT_NAMES", artifactList)
+	} else {
+		extName := ""
+		tomlfile, _ := os.Open(fullPath + "/" + os.Getenv("BUILDER_BUILD_FILE"))
+		scanner := bufio.NewScanner(tomlfile)
+		for scanner.Scan() {
+			line := scanner.Text()
+			if strings.HasPrefix(line, "name = ") == true {
+				extName = strings.ReplaceAll(line[7:]+artifactExt, "\"", "")
 			}
 		}
+		defer tomlfile.Close()
+		os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
+		artifactList = extName
 
-		exec.Command("cp", "-a", fullPath+"/target/release/"+extName, outputPath).Run()
-
-		spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+	}
+	artifactArray := strings.Split(artifactList, ",")
+	if len(artifactArray) == 0 {
+		spinner.LogMessage("Could not find artifact(s).  Please specify the name(s) in the artifactlist of the builder.yaml", "fatal")
 	}
 
-	exec.Command("rm", fullPath+"/target/release/"+extName).Run()
+	//copy artifact(s), then remove artifact(s) from workspace
+	for _, artifact := range artifactArray {
+		exec.Command("cp", "-a", fullPath+"/target/release/"+artifact, artifactDir).Run()
+
+		// If outputpath provided also cp artifacts to that location
+		if outputPath != "" {
+			// Check if outputPath exists.  If not, create it
+			if _, err := os.Stat(outputPath); os.IsNotExist(err) {
+				if err := os.Mkdir(outputPath, 0755); err != nil {
+					spinner.LogMessage("Could not create output path", "fatal")
+				}
+			}
+
+			exec.Command("cp", "-a", fullPath+"/target/release/"+artifact, outputPath).Run()
+
+			spinner.LogMessage("Artifact(s) copied to output path provided", "info")
+		}
+
+		exec.Command("rm", fullPath+"/target/release/"+artifact).Run()
+	}
 
 	//create metadata
 	utils.Metadata(artifactDir)
@@ -194,8 +205,6 @@ func packageRustArtifact(fullPath string) {
 		//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
 		exec.Command("cp", "-a", artifactDir+archiveExt, artifactDir).Run()
 		exec.Command("rm", artifactDir+archiveExt).Run()
-
-		// artifactName := artifact.NameArtifact(fullPath, extName)
 
 		// send artifact to user specified path or send to parent directory
 		artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
