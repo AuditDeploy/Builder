@@ -33,7 +33,6 @@ func ProjectType() {
 
 	//look for those files inside hidden dir
 	for _, file := range files {
-
 		//recursively check for file in hidden dir, return path if found
 		filePath = findPath(file)
 		//double check it exists
@@ -194,7 +193,9 @@ func findPath(file string) string {
 
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 	//if user defined path in builder.yaml, filePath has fullPath included, if not, run it locally
-	if configPath != "" {
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		return filePath
+	} else if configPath != "" {
 		return filePath
 	} else {
 		return "./" + filePath

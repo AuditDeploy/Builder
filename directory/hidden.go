@@ -43,7 +43,12 @@ func MakeHiddenDir(path string) {
 		hiddenDir(hiddenPath)
 	} else {
 		repo := utils.GetRepoURL()
-		repoName := strings.TrimSuffix(repo[strings.LastIndex(repo, "/"):], ".git")
+		var repoName string
+		if repo == "" {
+			repoName = ".hidden"
+		} else {
+			repoName = strings.TrimSuffix(repo[strings.LastIndex(repo, "/"):], ".git")
+		}
 		// Don't add extra slash if one exists
 		var visiblePath string
 		if strings.Contains(repoName, "/") {

@@ -2,70 +2,60 @@ package utils
 
 import (
 	"Builder/spinner"
-	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
-// CloneRepo grabs url and clones the repo/copies current dir
-func CloneRepo() {
+// CloneRepo grabs url and clones the repo
+func CloneRepo(to string) {
+	// Get absolute path if a relative path was given
+	toPath, _ := filepath.Abs(to)
 
-	//clone repo with url from args
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+	repo := GetRepoURL()
 
-	//if builder cmd, copy current dir to hidden instead of clone
-	if os.Getenv("BUILDER_COMMAND") == "true" {
-		//pwd
-		path, err := os.Getwd()
-		if err != nil {
-			spinner.LogMessage("failed to get repository: "+err.Error(), "error")
+	// Stat path, if it doesn't exist, create it
+	_, err := os.Stat(toPath)
+	if err != nil {
+		errDir := os.MkdirAll(toPath, 0755)
+		if errDir != nil {
+			spinner.LogMessage("Could not create new repo directory: "+errDir.Error(), "fatal")
 		}
-		fmt.Println(path)
-		exec.Command("cp", "-a", path+"/.", hiddenDir).Run()
+
+		cmd := exec.Command("git", "clone", repo, toPath)
+		cmd.Run()
+
+		// Get branch name
+		os.Setenv("REPO_BRANCH_NAME", GetBranchName(toPath))
 	} else {
-		repo := GetRepoURL()
-		//if config cmd clone to temp dir on first go
-		if hiddenDir == "" {
-			errDir := os.Mkdir("./tempRepo", 0755)
-			if errDir != nil {
-				fmt.Println(errDir)
-			}
+		bFlagExists, branchExists, branchName := bFlagAndBranchExists()
 
-			cmd := exec.Command("git", "clone", repo, "./tempRepo")
-			cmd.Run()
-
-			// Get branch name
-			os.Setenv("REPO_BRANCH_NAME", GetBranchName())
-		} else {
-			bFlagExists, branchExists, branchName := bFlagAndBranchExists()
-
-			if bFlagExists {
-				if branchExists {
-					cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
-					cmd.Run()
-					spinner.LogMessage("git clone -b "+branchName+" --single-branch "+repo+" "+hiddenDir, "info")
-
-					// Get branch name
-					os.Setenv("REPO_BRANCH_NAME", branchName)
-				} else {
-					spinner.LogMessage("Branch does not exists", "fatal")
-				}
-			} else if branchExists { // Repo branch given in builder.yaml not by -b flag
-				cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, hiddenDir)
+		if bFlagExists {
+			if branchExists {
+				cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, toPath)
 				cmd.Run()
-				spinner.LogMessage("git clone -b "+branchName+" --single-branch "+repo+" "+hiddenDir, "info")
+				spinner.LogMessage("git clone -b "+branchName+" --single-branch "+repo, "info")
 
 				// Get branch name
 				os.Setenv("REPO_BRANCH_NAME", branchName)
 			} else {
-				cmd := exec.Command("git", "clone", repo, hiddenDir)
-				cmd.Run()
-				spinner.LogMessage("git clone "+repo+" "+hiddenDir, "info")
-
-				// Get branch name
-				os.Setenv("REPO_BRANCH_NAME", GetBranchName())
+				spinner.LogMessage("Branch does not exists", "fatal")
 			}
+		} else if branchExists { // Repo branch given in builder.yaml not by -b flag
+			cmd := exec.Command("git", "clone", "-b", branchName, "--single-branch", repo, toPath)
+			cmd.Run()
+			spinner.LogMessage("git clone -b "+branchName+" --single-branch "+repo, "info")
+
+			// Get branch name
+			os.Setenv("REPO_BRANCH_NAME", branchName)
+		} else {
+			cmd := exec.Command("git", "clone", repo, toPath)
+			cmd.Run()
+			spinner.LogMessage("git clone "+repo, "info")
+
+			// Get branch name
+			os.Setenv("REPO_BRANCH_NAME", GetBranchName(toPath))
 		}
 	}
 }
@@ -95,12 +85,12 @@ func bFlagAndBranchExists() (bool, bool, string) {
 	return bFlagExists, branchExists, branchName
 }
 
-func GetBranchName() string {
-	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
-
-	branchCmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
-	branchCmd.Dir = hiddenDir
+func GetBranchName(path string) string {
+	branchCmd := exec.Command("git", "branch")
+	branchCmd.Dir = path
 	branch, _ := branchCmd.Output()
 
-	return strings.TrimSuffix(string(branch), "\n")
+	formatName := strings.TrimSuffix(string(branch), "\n")
+
+	return formatName[2:]
 }

@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"os/user"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/text/cases"
@@ -70,12 +71,25 @@ func Metadata(path string) {
 	endTime := os.Getenv("BUILD_END_TIME")
 
 	var gitURL = GetRepoURL()
-	var masterGitHash string
-	if os.Getenv("BUILDER_COMMAND") != "true" {
-		_, masterGitHash = GitHashAndName()
-	}
+	_, masterGitHash := GitMasterNameAndHash()
 
-	branchName := os.Getenv("REPO_BRANCH_NAME")
+	var branchName string
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		if os.Getenv("REPO_BRANCH_NAME") != "" {
+			branchName = os.Getenv("REPO_BRANCH_NAME")
+		} else {
+			out, err := exec.Command("git", "symbolic-ref", "--short", "HEAD").Output()
+			if err != nil {
+				spinner.LogMessage("Can't get current branch name.  Please provide it in the builder.yaml.", "info")
+				branchName = ""
+			} else {
+				// remove \n at end of returned branch name before returning
+				branchName = strings.TrimSuffix(string(out), "\n")
+			}
+		}
+	} else {
+		branchName = os.Getenv("REPO_BRANCH_NAME")
+	}
 
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
@@ -157,26 +171,36 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	}
 }
 
-// GitHas gets the latest git commit id in a repo
-func GitHashAndName() ([]string, string) {
-	//Get repoURL
-	repo := GetRepoURL()
+// Gets the name of the repo's master branch and its hash
+func GitMasterNameAndHash() (string, string) {
+	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
+	dirToRunIn, _ := filepath.Abs(hiddenDir)
 
-	//outputs all the commits of the clone repo
-	output, _ := exec.Command("git", "ls-remote", repo).Output()
+	//outputs the name of the master branch
+	cmd := exec.Command("git", "symbolic-ref", "refs/remotes/origin/HEAD", "--short")
+	if os.Getenv("BUILDER_COMMAND") != "true" {
+		cmd.Dir = dirToRunIn
+	}
+	output, err := cmd.Output()
+	if err != nil {
+		// Can't find master branch name so return undefined
+		return "undefined", "undefined"
+	}
+	formattedOutput := strings.TrimSuffix(string(output), "\n")
+	masterBranchName := formattedOutput[strings.LastIndex(formattedOutput, "/")+1:]
 
-	//stringify output - []byte to string
-	stringGitHashAndName := string(output)
-	// fmt.Println(stringGitHash)
+	//outputs the hash of the provided branch
+	cmd = exec.Command("git", "rev-parse", masterBranchName)
+	if os.Getenv("BUILDER_COMMAND") != "true" {
+		cmd.Dir = dirToRunIn
+	}
+	hashOutput, hashErr := cmd.Output()
+	if hashErr != nil {
+		return "undefined", "undefined"
+	}
+	masterBranchHash := strings.TrimSuffix(string(hashOutput), "\n")
 
-	//return an array with all the git commit hashs
-	arrayGitHashAndName := strings.Split(stringGitHashAndName, "\n")
-
-	//gets the hash of type []string of master branch
-	masterHashStringArray := strings.Fields(arrayGitHashAndName[0])
-	masterHash := masterHashStringArray[0]
-
-	return arrayGitHashAndName, masterHash[0:7]
+	return masterBranchName, masterBranchHash
 }
 
 type Artifacts struct {

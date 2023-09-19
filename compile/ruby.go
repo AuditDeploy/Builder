@@ -44,7 +44,10 @@ func Ruby() {
 	var fullPath string
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 	//if user defined path in builder.yaml, full path is included in tempWorkspace, else add the local path
-	if configPath != "" {
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
+		fullPath = tempWorkspace
+	} else if configPath != "" {
 		fullPath = tempWorkspace
 	} else {
 		path, _ := os.Getwd()
@@ -136,31 +139,11 @@ func Ruby() {
 
 	yaml.CreateBuilderYaml(fullPath)
 
-	//sets path for metadata, and addFiles (covers when workspace dir env doesn't exist)
-	// var addPath string
-	// if os.Getenv("BUILDER_COMMAND") == "true" {
-	// 	path, _ := os.Getwd()
-	// 	addPath = path + "/"
-	// } else {
-	// 	addPath = tempWorkspace
-	// }
-
-	//utils.Metadata(addPath)
-
-	//sets path for zip creation
-	var dirPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
-		path, _ := os.Getwd()
-		dirPath = strings.Replace(path, "\\temp", "", 1)
-	} else {
-		dirPath = workspaceDir
-	}
-
 	//CreateZip artifact dir with timestamp
 	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
 	timeBuildStarted := parsedStartTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
+	outFile, err := os.Create(workspaceDir + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
 	if err != nil {
 		spinner.LogMessage("Ruby failed to get artifact: "+err.Error(), "fatal")
 	}

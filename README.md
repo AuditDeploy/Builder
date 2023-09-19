@@ -95,6 +95,8 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - ("/Users/Name/Projects", etc)
 - `projecttype`: provide language/framework being used
   - ("Node", "Java", "Go", "Ruby", "Python", "C#", "Ruby", "C", "C++")
+- `buildsdir`: provide name of folder to store builder build data
+  - ("Builds", "BuilderBuilds", etc.)
 - `buildtool`: provide tool used to install dependencies/build project
   - ("maven", "npm", "bundler", "pipenv", etc)
   - for C/C++ project, please provide a build specific build tool from the following:

@@ -8,11 +8,7 @@ import (
 
 	"Builder/spinner"
 	"Builder/utils"
-
-	"go.uber.org/zap"
 )
-
-var BuilderLog = zap.S()
 
 // MakeDirs does...
 func MakeDirs() {
@@ -23,12 +19,33 @@ func MakeDirs() {
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 
 	var path string
-	if configPath != "" {
-		// used for 'config' cmd, set by builder.yaml
-		path = configPath + "/" + name + "_" + name
-	} else {
-		// local path, used for 'init' cmd/default
-		path = "./" + name + "_" + name
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		if configPath != "" {
+			path = configPath + "/" + name + "_" + name
+		} else { // Place builds in builder folder in repo
+			// Check if user wants to name builder folder a different name
+			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
+				path = "./" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
+			} else {
+				path = "./builder/" + name + "_" + name
+			}
+		}
+	} else { // builder init so create an initial repo dir
+		if configPath != "" {
+			// Check if user wants to name builder folder a different name
+			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
+				path = configPath + "/" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
+			} else {
+				path = configPath + "/" + name + "/builder/" + name + "_" + name
+			}
+		} else {
+			// Check if user wants to name builder folder a different name
+			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
+				path = "./" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
+			} else {
+				path = "./" + name + "/builder/" + name + "_" + name
+			}
+		}
 	}
 
 	MakeParentDir(path)
@@ -78,6 +95,16 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 
 	path := os.Getenv("BUILDER_DIR_PATH")
 
+	// user using builder command and did not provide a path to build in
+	if os.Getenv("BUILDER_COMMAND") == "true" && path == "" {
+		wdPath, err := os.Getwd()
+		if err != nil {
+			spinner.LogMessage("error getting builder working directory", "error")
+		}
+
+		path = wdPath
+	}
+
 	if oldName[0:2] == "./" {
 		err := os.Rename(path+"/"+oldName[2:], path+"/"+newName[2:])
 		if err != nil {
@@ -92,7 +119,10 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 		}
 	}
 
+	// Update env vars to include new parent folder name
+	name := utils.GetName()
 	os.Setenv("BUILDER_PARENT_DIR", newName)
+	os.Setenv("BUILDER_HIDDEN_DIR", newName+"/"+name)
 	os.Setenv("BUILDER_WORKSPACE_DIR", newName+"/workspace")
 	os.Setenv("BUILDER_LOGS_DIR", newName+"/logs")
 

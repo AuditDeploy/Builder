@@ -45,7 +45,10 @@ func Python() {
 	var fullPath string
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 	//if user defined path in builder.yaml, full path is included in tempWorkspace, else add the local path
-	if configPath != "" {
+	if os.Getenv("BUILDER_COMMAND") == "true" {
+		// ex: C:/Users/Name/Projects/helloworld_19293/workspace/dir
+		fullPath = tempWorkspace
+	} else if configPath != "" {
 		fullPath = tempWorkspace
 	} else {
 		path, _ := os.Getwd()
@@ -66,15 +69,15 @@ func Python() {
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else if buildTool == "pip" {
 		fmt.Println(buildTool)
-		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements")
+		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", "requirements")
 		cmd.Dir = fullPath // or whatever directory it's in
-		os.Setenv("BUILDER_BUILD_COMMAND", "pip3 install -r requirements.txt -t "+fullPath+"/requirements")
+		os.Setenv("BUILDER_BUILD_COMMAND", "pip3 install -r requirements.txt -t requirements")
 	} else {
 		//default
-		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", fullPath+"/requirements")
+		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", "requirements")
 		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_TOOL", "pip")
-		os.Setenv("BUILDER_BUILD_COMMAND", "pip3 install -r requirements.txt -t "+fullPath+"/requirements")
+		os.Setenv("BUILDER_BUILD_COMMAND", "pip3 install -r requirements.txt -t requirements")
 	}
 
 	//run cmd, check for err, log cmd
@@ -131,37 +134,16 @@ func Python() {
 	fullPath = directory.UpdateParentDirName(fullPath)
 
 	// Update vars because of parent dir name change
-	hiddenDir = os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir = os.Getenv("BUILDER_WORKSPACE_DIR")
 	tempWorkspace = workspaceDir + "/temp/"
 
 	yaml.CreateBuilderYaml(fullPath)
 
-	//sets path for metadata, and addFiles (covers when workspace dir env doesn't exist)
-	var addPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
-		path, _ := os.Getwd()
-		addPath = path + "/"
-	} else {
-		addPath = tempWorkspace
-	}
-
-	//utils.Metadata(addPath)
-
-	//sets path for zip creation
-	var dirPath string
-	if os.Getenv("BUILDER_COMMAND") == "true" {
-		path, _ := os.Getwd()
-		dirPath = strings.Replace(path, "\\temp", "", 1)
-	} else {
-		dirPath = workspaceDir
-	}
-
 	// CreateZip artifact dir with timestamp
 	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
 	timeBuildStarted := parsedStartTime.Unix()
 
-	outFile, err := os.Create(dirPath + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
+	outFile, err := os.Create(workspaceDir + "/artifact_" + strconv.FormatInt(timeBuildStarted, 10) + ".zip")
 	if err != nil {
 		spinner.LogMessage("Python failed to get artifact: "+err.Error(), "fatal")
 	}
@@ -172,7 +154,7 @@ func Python() {
 	w := zip.NewWriter(outFile)
 
 	// Add files from temp dir to the archive.
-	addPythonFiles(w, addPath, "")
+	addPythonFiles(w, tempWorkspace, "")
 
 	wErr := w.Close()
 	if wErr != nil {
