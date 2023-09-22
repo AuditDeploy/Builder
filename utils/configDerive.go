@@ -57,6 +57,12 @@ func ConfigDerive() []string {
 		} else {
 			files = []string{"Makefile.am"}
 		}
+	} else if configType == "c++" {
+		if buildFile != "" {
+			files = []string{buildFile}
+		} else {
+			files = []string{"Makefile.am"}
+		}
 	}
 
 	return files
