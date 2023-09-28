@@ -32,7 +32,7 @@ func Docker() {
 
 		//DETERMINE PATH
 		//determine projectType to top level Dockerfile path
-		compType := []string{"go", "c#", "java"}
+		compType := []string{"go", "rust", "c#", "java"}
 		nonCompType := []string{"node", "npm", "python", "ruby"}
 		workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 		projectType := os.Getenv("BUILDER_PROJECT_TYPE")

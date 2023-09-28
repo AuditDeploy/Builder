@@ -26,7 +26,7 @@ func ProjectType() {
 		files = utils.ConfigDerive()
 	} else {
 		//default
-		files = []string{"main.go", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt", "Makefile", "Makefile.am"}
+		files = []string{"main.go", "Cargo.toml", "package.json", "pom.xml", "gemfile.lock", "gemfile", "requirements.txt", "Makefile", "Makefile.am"}
 	}
 
 	var filePath string
@@ -38,7 +38,7 @@ func ProjectType() {
 		//double check it exists
 		fileExists, err := fileExistsInDir(filePath)
 		if err != nil {
-			spinner.LogMessage("No Go, Npm, Ruby, Python, C/C++ or Java File Exists: "+err.Error(), "fatal")
+			spinner.LogMessage("No Go, Rust, Npm, Ruby, Python, C/C++ or Java File Exists: "+err.Error(), "fatal")
 		}
 
 		//if file exists and filePath isn't empty, run conditional to find correct compiler
@@ -49,6 +49,13 @@ func ProjectType() {
 				utils.CopyDir()
 				spinner.LogMessage("Go project detected", "info")
 				compile.Go(finalPath)
+				return
+			} else if file == "Cargo.toml" || configType == "rust" {
+				//executes go compiler
+				finalPath := createFinalPath(filePath, file)
+				utils.CopyDir()
+				spinner.LogMessage("Rust project detected", "info")
+				compile.Rust(finalPath)
 				return
 			} else if file == "package.json" || configType == "node" || configType == "npm" {
 				//executes node compiler

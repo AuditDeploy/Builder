@@ -21,6 +21,14 @@ func ConfigDerive() []string {
 			//default
 			files = []string{"main.go"}
 		}
+	} else if configType == "rust" {
+		if buildFile != "" {
+			//custom build file from builder.yaml
+			files = []string{buildFile}
+		} else {
+			//default
+			files = []string{"Cargo.toml"}
+		}
 	} else if configType == "node" || configType == "npm" {
 		if buildFile != "" {
 			files = []string{buildFile}

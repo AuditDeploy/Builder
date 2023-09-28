@@ -62,7 +62,7 @@ func Help() {
 * projectpath: provide path for project to be built
   - ("/Users/Name/Projects", etc)
 * projecttype: provide language/framework being used
-  - ("Node", "Java", "Go", "Ruby", "Python", "C#", "Ruby")
+  - ("Node", "Java", "Go", "Rust", "Python", "C#", "Ruby")
 * buildtool: provide tool used to install dependencies/build project
   - ("maven", "npm", "bundler", "pipenv", etc)
 * buildfile: provide file name needed to install dep/build project
