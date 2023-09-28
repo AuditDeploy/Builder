@@ -59,7 +59,7 @@ func ConfigDerive() []string {
 		} else {
 			files = []string{"requirements.txt"}
 		}
-	} else if configType == "c" {
+	} else if configType == "c" || configType == "c++" {
 		if buildFile != "" {
 			files = []string{buildFile}
 		} else {

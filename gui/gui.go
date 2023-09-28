@@ -39,6 +39,11 @@ var logo []byte
 //go:embed CLogo.png
 var CLogo []byte
 
+// Embed C++ logo
+//
+//go:embed C++Logo.png
+var CPPLogo []byte
+
 // Embed CSharp logo
 //
 //go:embed CSharpLogo.png
@@ -156,6 +161,12 @@ func Gui() {
 		return image
 	}
 
+	getCPPLogoImage := func() string {
+		image := base64.StdEncoding.EncodeToString(CPPLogo)
+
+		return image
+	}
+
 	getCSharpLogoImage := func() string {
 		image := base64.StdEncoding.EncodeToString(CSharpLogo)
 
@@ -220,6 +231,7 @@ func Gui() {
 	ui.Bind("getLogsJSON", getLogsJSON)
 	ui.Bind("getImage", getImage)
 	ui.Bind("getCLogoImage", getCLogoImage)
+	ui.Bind("getCPPLogoImage", getCPPLogoImage)
 	ui.Bind("getCSharpLogoImage", getCSharpLogoImage)
 	ui.Bind("getGoLogoImage", getGoLogoImage)
 	ui.Bind("getJavaLogoImage", getJavaLogoImage)

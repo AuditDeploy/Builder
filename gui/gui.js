@@ -70,6 +70,10 @@ function createBuildsListTable(buildsJSON) {
             case "c":
                 image = "<img src='' alt='C Logo' class='c_logo' width='30' height='30'>"
                 break;
+            case "c++":
+                image = "<img src='' alt='C++ Logo' class='cpp_logo' width='30' height='30'>" 
+                break;
+            case "c#":
             case "csharp":
                 image = "<img src='' alt='C# Logo' class='csharp_logo' width='30' height='30'>"
                 break;
@@ -131,6 +135,13 @@ const renderBuildsList = async () => {
     const c_logos = document.getElementsByClassName("c_logo");
     for (let i = 0; i < c_logos.length; i++) {
         c_logos[i].src = "data:image/png;base64," + c_logo_img;
+    }
+
+    // C++
+    let cpp_logo_img = await getCPPLogoImage();
+    const cpp_logos = document.getElementsByClassName("cpp_logo");
+    for (let i = 0; i < cpp_logos.length; i++) {
+        cpp_logos[i].src = "data:image/png;base64," + cpp_logo_img;
     }
 
     // C#
