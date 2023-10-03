@@ -14,6 +14,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	cp "github.com/otiai10/copy"
 )
 
 var closeLocalLogger func()
@@ -258,15 +260,19 @@ func packageCArtifact(fullPath string) {
 	artifactDir := os.Getenv("BUILDER_ARTIFACT_DIR")
 	artifactList := os.Getenv("BUILDER_ARTIFACT_LIST")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+	var artifactArray []string
 
 	// If we were given an artifacts list, handle it
 	if artifactList != "" {
-		artifactArray := strings.Split(artifactList, ",")
+		artifactArray = strings.Split(artifactList, ",")
 		os.Setenv("BUILDER_ARTIFACT_NAMES", artifactList)
 
 		//copy artifact(s), then remove artifact(s) from workspace
 		for _, artifact := range artifactArray {
-			exec.Command("cp", fullPath+"/"+artifact, artifactDir).Run()
+			err := cp.Copy(fullPath+"/"+artifact, artifactDir+"/"+artifact)
+			if err != nil {
+				spinner.LogMessage(err.Error(), "warn")
+			}
 
 			// If outputpath provided also cp artifacts to that location
 			if outputPath != "" {
@@ -276,13 +282,20 @@ func packageCArtifact(fullPath string) {
 						spinner.LogMessage("Could not create output path", "fatal")
 					}
 				}
-
-				exec.Command("cp", fullPath+"/"+artifact, outputPath).Run()
+				// exec.Command("cp", fullPath+"/"+artifact, outputPath).Run()
+				err := cp.Copy(fullPath+"/"+artifact, outputPath+"/"+artifact)
+				if err != nil {
+					spinner.LogMessage(err.Error(), "warn")
+				}
 
 				spinner.LogMessage("Artifact(s) copied to output path provided", "info")
 			}
 
-			exec.Command("rm", fullPath+"/"+artifact).Run()
+			// exec.Command("rm", fullPath+"/"+artifact).Run()
+			errRemove := os.Remove(fullPath + "/" + artifact)
+			if errRemove != nil {
+				spinner.LogMessage(errRemove.Error(), "warn")
+			}
 		}
 
 	} else {
@@ -306,7 +319,7 @@ func packageCArtifact(fullPath string) {
 
 		//find artifact(s) by extension
 		// WalkMatch function defined in compile/c#.go
-		artifactArray, _ := WalkMatch(fullPath, artifactExt)
+		artifactArray, _ = WalkMatch(fullPath, artifactExt)
 		if len(artifactArray) == 0 {
 			spinner.LogMessage("Could not find artifact(s).  Please specify the name(s) in the artifactlist of the builder.yaml", "fatal")
 		}
@@ -316,7 +329,11 @@ func packageCArtifact(fullPath string) {
 		//copy artifact(s), then remove artifact(s) from workspace
 		for i := 0; i < len(artifactArray); i++ {
 			artifactNames = append(artifactNames, filepath.Base(artifactArray[i]))
-			exec.Command("cp", artifactArray[i], artifactDir).Run()
+
+			err := cp.Copy(artifactArray[i], artifactDir+"/"+artifactNames[i])
+			if err != nil {
+				spinner.LogMessage(err.Error(), "warn")
+			}
 
 			// If outputpath provided also cp artifacts to that location
 			if outputPath != "" {
@@ -327,12 +344,18 @@ func packageCArtifact(fullPath string) {
 					}
 				}
 
-				exec.Command("cp", artifactArray[i], outputPath).Run()
+				err := cp.Copy(artifactArray[i], outputPath+"/"+artifactNames[i])
+				if err != nil {
+					spinner.LogMessage(err.Error(), "warn")
+				}
 
 				spinner.LogMessage("Artifact(s) copied to output path provided", "info")
 			}
 
-			exec.Command("rm", artifactArray[i]).Run()
+			errRemove := os.Remove(artifactArray[i])
+			if errRemove != nil {
+				spinner.LogMessage(errRemove.Error(), "warn")
+			}
 		}
 
 		os.Setenv("BUILDER_ARTIFACT_NAMES", strings.Join([]string(artifactNames), ","))
@@ -345,23 +368,31 @@ func packageCArtifact(fullPath string) {
 		//zip artifact
 		artifact.ZipArtifactDir()
 
-		//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
-		exec.Command("cp", "-a", artifactDir+archiveExt, artifactDir).Run()
-		exec.Command("rm", artifactDir+archiveExt).Run()
-
-		// artifactName := artifact.NameArtifact(fullPath, extName)
-
-		// send artifact to user specified path or send to parent directory
-		artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
-		outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
-
-		if outputPath != "" {
-			exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, outputPath).Run()
-		} else {
-			exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, os.Getenv("BUILDER_PARENT_DIR")).Run()
+		//remove uncompressed artifacts
+		for i := 0; i < len(artifactArray); i++ {
+			err := os.Remove(artifactDir + "/" + filepath.Base(artifactArray[i]))
+			if err != nil {
+				spinner.LogMessage(err.Error(), "warn")
+			}
 		}
 
-		//remove artifact directory
-		exec.Command("rm", "-r", artifactDir).Run()
+		// send artifact to user specified path or send to artifact directory
+		outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+		if outputPath != "" {
+			err := cp.Copy(artifactDir+archiveExt, outputPath+"/"+filepath.Base(artifactDir)+archiveExt)
+			if err != nil {
+				spinner.LogMessage(err.Error(), "warn")
+			}
+		} else {
+			err := cp.Copy(artifactDir+archiveExt, artifactDir+"/"+filepath.Base(artifactDir)+archiveExt)
+			if err != nil {
+				spinner.LogMessage(err.Error(), "warn")
+			}
+		}
+
+		errRemove := os.Remove(artifactDir + archiveExt)
+		if errRemove != nil {
+			spinner.LogMessage(errRemove.Error(), "warn")
+		}
 	}
 }

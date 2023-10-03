@@ -13,10 +13,12 @@ import (
 	"bufio"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 
+	cp "github.com/otiai10/copy"
 	"go.uber.org/zap"
 )
 
@@ -168,8 +170,12 @@ func packageGoArtifact(fullPath string) {
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(fullPath, artifactExt)
 	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
+
 	//copy artifact, then remove artifact in workspace
-	exec.Command("cp", "-a", fullPath+"/"+extName, artifactDir).Run()
+	err := cp.Copy(fullPath+"/"+extName, artifactDir+"/"+extName)
+	if err != nil {
+		spinner.LogMessage(err.Error(), "warn")
+	}
 
 	// If outputpath provided also cp artifacts to that location
 	if outputPath != "" {
@@ -180,12 +186,18 @@ func packageGoArtifact(fullPath string) {
 			}
 		}
 
-		exec.Command("cp", "-a", fullPath+"/"+extName, outputPath).Run()
+		err := cp.Copy(fullPath+"/"+extName, outputPath+"/"+extName)
+		if err != nil {
+			spinner.LogMessage(err.Error(), "warn")
+		}
 
 		spinner.LogMessage("Artifact(s) copied to output path provided", "info")
 	}
 
-	exec.Command("rm", fullPath+"/"+extName).Run()
+	errRemove := os.Remove(fullPath + "/" + extName)
+	if errRemove != nil {
+		spinner.LogMessage(errRemove.Error(), "warn")
+	}
 
 	//create metadata
 	utils.Metadata(artifactDir)
@@ -194,22 +206,29 @@ func packageGoArtifact(fullPath string) {
 		//zip artifact
 		artifact.ZipArtifactDir()
 
-		//copy zip into open artifactDir, delete zip in workspace (keeps entire artifact contained)
-		exec.Command("cp", "-a", artifactDir+archiveExt, artifactDir).Run()
-		exec.Command("rm", artifactDir+archiveExt).Run()
-
-		// artifactName := artifact.NameArtifact(fullPath, extName)
-
-		// send artifact to user specified path or send to parent directory
-		artifactStamp := os.Getenv("BUILDER_ARTIFACT_STAMP")
-		outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
-		if outputPath != "" {
-			exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, outputPath).Run()
-		} else {
-			exec.Command("cp", "-a", artifactDir+"/"+artifactStamp+archiveExt, os.Getenv("BUILDER_PARENT_DIR")).Run()
+		//remove uncompressed artifact
+		err := os.Remove(artifactDir + "/" + extName)
+		if err != nil {
+			spinner.LogMessage(err.Error(), "warn")
 		}
 
-		//remove artifact directory
-		exec.Command("rm", "-r", artifactDir).Run()
+		// send artifact to user specified path or send to artifact directory
+		outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
+		if outputPath != "" {
+			err := cp.Copy(artifactDir+archiveExt, outputPath+"/"+filepath.Base(artifactDir)+archiveExt)
+			if err != nil {
+				spinner.LogMessage(err.Error(), "warn")
+			}
+		} else {
+			err := cp.Copy(artifactDir+archiveExt, artifactDir+"/"+filepath.Base(artifactDir)+archiveExt)
+			if err != nil {
+				spinner.LogMessage(err.Error(), "warn")
+			}
+		}
+
+		errRemove := os.Remove(artifactDir + archiveExt)
+		if errRemove != nil {
+			spinner.LogMessage(errRemove.Error(), "warn")
+		}
 	}
 }
