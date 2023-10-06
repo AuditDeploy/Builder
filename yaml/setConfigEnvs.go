@@ -177,4 +177,30 @@ func ConfigEnvs(byi interface{}) {
 			os.Setenv("REPO_BRANCH", valStr)
 		}
 	}
+
+	//check for options to push resulting build data
+	if val, ok := bldyml["docker"]; ok {
+		switch v := val.(type) {
+		case []interface{}:
+			dockerfile := v[0].(map[string]interface{})["dockerfile"]
+			registry := v[0].(map[string]interface{})["registry"]
+
+			if dockerfile != nil && dockerfile != "" {
+				os.Setenv("BUILDER_DOCKERFILE", dockerfile.(string))
+			}
+			if registry != nil && registry != "" {
+				os.Setenv("BUILDER_DOCKERFILE", registry.(string))
+			}
+		default: // type map[string]interface{}
+			dockerfile := val.(map[string]interface{})["dockerfile"]
+			registry := val.(map[string]interface{})["registry"]
+
+			if dockerfile != nil && dockerfile != "" {
+				os.Setenv("BUILDER_DOCKERFILE", dockerfile.(string))
+			}
+			if registry != nil && registry != "" {
+				os.Setenv("BUILDER_DOCKERFILE", registry.(string))
+			}
+		}
+	}
 }

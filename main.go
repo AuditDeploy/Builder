@@ -23,6 +23,9 @@ func main() {
 		} else if builderCommand == "config" {
 			cmd.Config()
 			fmt.Println("Build Complete 🔨")
+		} else if builderCommand == "docker" {
+			cmd.Docker()
+			fmt.Println("Build Complete 🔨")
 		} else if builderCommand == "gui" {
 			gui.Gui()
 		} else {
