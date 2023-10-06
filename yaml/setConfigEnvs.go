@@ -1,9 +1,11 @@
 package yaml
 
 import (
+	"Builder/spinner"
 	"Builder/utils"
 	"fmt"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 )
@@ -127,6 +129,20 @@ func ConfigEnvs(byi interface{}) {
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
+
+			if !filepath.IsAbs(valStr) {
+				if strings.HasPrefix(valStr, "./") {
+					valStr = strings.Replace(valStr, "./", "./"+utils.GetName()+"/", 1)
+				} else if strings.HasPrefix(valStr, "../") {
+					valStr = strings.Replace(valStr, "../", "./", 1)
+				}
+			}
+
+			// make sure path is absolute
+			valStr, err := filepath.Abs(valStr)
+			if err != nil {
+				spinner.LogMessage("Could not resolve outputpath from builder.yaml", "fatal")
+			}
 
 			// If on windows and they specify a path that begins with '/' append to home dir
 			if runtime.GOOS == "windows" && strings.HasPrefix(valStr, "/") == true {
