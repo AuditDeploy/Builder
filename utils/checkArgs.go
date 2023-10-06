@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 // CheckArgs is...
@@ -36,7 +38,27 @@ func CheckArgs() {
 				artifactPath = cArgs[i+1]
 				val, present := os.LookupEnv("BUILDER_OUTPUT_PATH")
 				if !present {
-					os.Setenv("BUILDER_OUTPUT_PATH", artifactPath)
+					// If init or config command used and relative path provided,
+					// make sure path is relative to project folder
+					for _, a := range cArgs {
+						if a == "config" || a == "init" {
+							if !filepath.IsAbs(artifactPath) {
+								if strings.HasPrefix(artifactPath, "./") {
+									artifactPath = strings.Replace(artifactPath, "./", "./"+GetName(), 1)
+								} else if strings.HasPrefix(artifactPath, "../") {
+									artifactPath = strings.Replace(artifactPath, "../", "./", 1)
+								}
+							}
+						}
+					}
+
+					// Make sure output path is absolute
+					outputPath, err := filepath.Abs(artifactPath)
+					if err != nil {
+						spinner.LogMessage("Could not resolve outputpath", "fatal")
+					}
+
+					os.Setenv("BUILDER_OUTPUT_PATH", outputPath)
 				} else {
 					fmt.Println("BUILDER_OUTPUT_PATH", val)
 					fmt.Println("Output Path already present")
