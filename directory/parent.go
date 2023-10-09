@@ -48,13 +48,20 @@ func MakeDirs() {
 		}
 	}
 
-	MakeParentDir(path)
+	if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		MakeParentDir(path)
 
-	MakeHiddenDir(path)
-	MakeWorkspaceDir(path)
+		MakeLogsDir(path)
+		MakeBuilderDir()
+	} else {
+		MakeParentDir(path)
 
-	MakeLogsDir(path)
-	MakeBuilderDir()
+		MakeHiddenDir(path)
+		MakeWorkspaceDir(path)
+
+		MakeLogsDir(path)
+		MakeBuilderDir()
+	}
 }
 
 func MakeParentDir(path string) (bool, error) {

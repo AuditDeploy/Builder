@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"Builder/directory"
 	"Builder/spinner"
 	"Builder/utils"
 	"Builder/utils/log"
@@ -53,6 +54,10 @@ func Docker() {
 	if _, err := os.Stat(path + "/" + "builder.yaml"); err == nil {
 		//parse builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
+
+		// make dirs
+		directory.MakeDirs()
+		spinner.LogMessage("Directories successfully created.", "info")
 
 		releaseTagProvided := false
 		args := os.Args
