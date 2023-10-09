@@ -189,7 +189,7 @@ func ConfigEnvs(byi interface{}) {
 				os.Setenv("BUILDER_DOCKERFILE", dockerfile.(string))
 			}
 			if registry != nil && registry != "" {
-				os.Setenv("BUILDER_DOCKERFILE", registry.(string))
+				os.Setenv("BUILDER_DOCKER_REGISTRY", registry.(string))
 			}
 		default: // type map[string]interface{}
 			dockerfile := val.(map[string]interface{})["dockerfile"]
@@ -199,7 +199,7 @@ func ConfigEnvs(byi interface{}) {
 				os.Setenv("BUILDER_DOCKERFILE", dockerfile.(string))
 			}
 			if registry != nil && registry != "" {
-				os.Setenv("BUILDER_DOCKERFILE", registry.(string))
+				os.Setenv("BUILDER_DOCKER_REGISTRY", registry.(string))
 			}
 		}
 	}

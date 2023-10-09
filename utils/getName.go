@@ -30,7 +30,7 @@ func GetName() string {
 					}
 				}
 			}
-		} else if os.Getenv("BUILDER_COMMAND") == "true" {
+		} else if os.Getenv("BUILDER_COMMAND") == "true" || os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
 			//use current dir name if no --name flag and using builder cmd
 			path, err := os.Getwd()
 			if err != nil {
