@@ -386,6 +386,13 @@ func Docker() {
 		utils.Metadata(artifactDir)
 		spinner.LogMessage("Metadata saved successfully.", "info")
 
+		// Remove unneeded docker_logs.json file
+		logsDir = os.Getenv("BUILDER_LOGS_DIR")
+		e := os.Remove(logsDir + "/docker_logs.json")
+		if e != nil {
+			spinner.LogMessage("Couldn't delete old docker_logs.json file: "+e.Error(), "error")
+		}
+
 		// Stop loading spinner
 		spinner.Spinner.Stop()
 	} else {
