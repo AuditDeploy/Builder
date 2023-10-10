@@ -176,8 +176,6 @@ func OutputMetadata(path string, allData *AllMetaData) {
 			spinner.LogMessage("Cannot open metadata.json file for editting: "+err.Error(), "fatal")
 		}
 
-		defer f.Close()
-
 		if _, err = f.WriteString("\n========== Build End =========="); err != nil {
 			spinner.LogMessage("Cannot append to metadata.json file: "+err.Error(), "fatal")
 		}
@@ -188,13 +186,13 @@ func OutputMetadata(path string, allData *AllMetaData) {
 			spinner.LogMessage("Cannot append to metadata.json file: "+err.Error(), "fatal")
 		}
 
+		f.Close()
+
 		// Append to metadata.yaml
 		y, err := os.OpenFile(path+"/metadata.yaml", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 		if err != nil {
 			spinner.LogMessage("Cannot open metadata.yaml file for editting: "+err.Error(), "fatal")
 		}
-
-		defer y.Close()
 
 		if _, err = y.WriteString("========== Build End =========="); err != nil {
 			spinner.LogMessage("Cannot append to metadata.yaml file: "+err.Error(), "fatal")
@@ -205,6 +203,8 @@ func OutputMetadata(path string, allData *AllMetaData) {
 		if _, err = y.WriteString(string(yamlData)); err != nil {
 			spinner.LogMessage("Cannot append to metadata.yaml file: "+err.Error(), "fatal")
 		}
+
+		y.Close()
 	}
 }
 

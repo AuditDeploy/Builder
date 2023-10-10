@@ -269,9 +269,6 @@ func Docker() {
 			spinner.LogMessage(err.Error(), "fatal")
 		}
 
-		// Close log file
-		closeLocalLogger()
-
 		// Retrieve build logs from file copied from container
 		logsJSON, err := os.ReadFile(copyPath + "/builder_logs.json")
 		if err != nil {
@@ -283,11 +280,8 @@ func Docker() {
 		// Save build logs with docker logs to file
 		SaveBuildLogs(logsJSON, logsDir)
 
-		// Update parent directory name
-		copyPath = directory.UpdateParentDirName(copyPath)
-
-		// Set start time back to docker start time for when we get docker metadata later
-		os.Setenv("BUILD_START_TIME", fmt.Sprint(startTime))
+		// Close log file
+		closeLocalLogger()
 
 		// Rename docker container to same name as build completed in container
 		if runtime.GOOS == "windows" {
@@ -321,6 +315,12 @@ func Docker() {
 				spinner.LogMessage(err.Error(), "fatal")
 			}
 		}
+
+		// Update parent directory name
+		copyPath = directory.UpdateParentDirName(copyPath)
+
+		// Set start time back to docker start time for when we get docker metadata later
+		os.Setenv("BUILD_START_TIME", fmt.Sprint(startTime))
 
 		// If release tag provided push image to user provided remote registry
 		args := os.Args
@@ -358,16 +358,18 @@ func Docker() {
 					// Push re-tagged docker image to user provided docker registry
 					if runtime.GOOS == "windows" {
 						if err := exec.Command("docker", "push", dockerRegistry+"/"+gatheredProjectName+"_"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-							spinner.LogMessage("Could not complete docker push: "+err.Error(), "fatal")
+							spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
 						}
 					} else {
 						if err := exec.Command("/bin/sh", "-c", "sudo docker push "+dockerRegistry+"/"+gatheredProjectName+"_"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-							spinner.LogMessage("Could not complete docker push: "+err.Error(), "fatal")
+							spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
 						}
 					}
 				}
 			}
 		}
+
+		spinner.LogMessage("Docker image successfully tagged and pushed to provided registry.", "info")
 
 		os.Setenv("BUILD_END_TIME", time.Now().String())
 
@@ -396,6 +398,13 @@ func SaveBuildMetadata(metadata Metadata, path string) {
 	if err2 != nil {
 		spinner.LogMessage("YAML Metadata creation unsuccessful.", "fatal")
 	}
+
+	// Delete metadata file grabbed from container to workspace dir
+	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
+	e := os.Remove(workspaceDir + "/builder_builds.json")
+	if e != nil {
+		spinner.LogMessage("Couldn't delete temporary log file in workspace: "+e.Error(), "error")
+	}
 }
 
 func SaveBuildLogs(logsJSON []byte, path string) {
@@ -405,8 +414,6 @@ func SaveBuildLogs(logsJSON []byte, path string) {
 	if err != nil {
 		spinner.LogMessage("Cannot create logs.json file: "+err.Error(), "fatal")
 	}
-
-	defer f.Close()
 
 	if _, err = f.WriteString(string(logsJSON)); err != nil {
 		spinner.LogMessage("unsuccessful write to logs.json file.", "fatal")
@@ -419,5 +426,14 @@ func SaveBuildLogs(logsJSON []byte, path string) {
 	}
 	if _, err = f.WriteString(string(dockerLogs)); err != nil {
 		spinner.LogMessage("unsuccessful write to logs.json file.", "fatal")
+	}
+
+	f.Close()
+
+	// Delete build logs file grabbed from container to workspace dir
+	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
+	e := os.Remove(workspaceDir + "/builder_logs.json")
+	if e != nil {
+		spinner.LogMessage("Couldn't delete temporary log file in workspace: "+e.Error(), "error")
 	}
 }
