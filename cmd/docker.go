@@ -47,6 +47,14 @@ func Docker() {
 	// Start loading spinner
 	spinner.Spinner.Start()
 
+	// If builder_data folder already exists, remove it
+	if _, err := os.Stat(path + "/" + "builder_data"); err == nil {
+		e := os.RemoveAll(path + "/" + "builder_data")
+		if e != nil {
+			spinner.LogMessage("Couldn't remove builder data from previous build: "+e.Error(), "error")
+		}
+	}
+
 	// make dirs
 	directory.MakeDirs()
 	spinner.LogMessage("Directories successfully created.", "info")
@@ -365,17 +373,18 @@ func Docker() {
 							spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
 						}
 					}
+
+					spinner.LogMessage("Docker image successfully tagged and pushed to provided registry.", "info")
 				}
 			}
 		}
-
-		spinner.LogMessage("Docker image successfully tagged and pushed to provided registry.", "info")
 
 		os.Setenv("BUILD_END_TIME", time.Now().String())
 
 		// Create metadata for docker build
 		artifactDir = os.Getenv("BUILDER_ARTIFACT_DIR")
 		utils.Metadata(artifactDir)
+		spinner.LogMessage("Metadata saved successfully.", "info")
 
 		// Stop loading spinner
 		spinner.Spinner.Stop()
