@@ -7,7 +7,6 @@ import (
 	"runtime"
 
 	"encoding/json"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -159,15 +158,53 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	yamlData, _ := yaml.Marshal(allData)
 	jsonData, _ := json.Marshal(allData)
 
-	err := ioutil.WriteFile(path+"/metadata.json", jsonData, 0666)
-	err2 := ioutil.WriteFile(path+"/metadata.yaml", yamlData, 0666)
+	if os.Getenv("BUILDER_DOCKER_COMMAND") != "true" {
+		err := os.WriteFile(path+"/metadata.json", jsonData, 0666)
+		err2 := os.WriteFile(path+"/metadata.yaml", yamlData, 0666)
 
-	if err != nil {
-		spinner.LogMessage("JSON Metadata creation unsuccessful.", "fatal")
-	}
+		if err != nil {
+			spinner.LogMessage("JSON Metadata creation unsuccessful.", "fatal")
+		}
 
-	if err2 != nil {
-		spinner.LogMessage("YAML Metadata creation unsuccessful.", "fatal")
+		if err2 != nil {
+			spinner.LogMessage("YAML Metadata creation unsuccessful.", "fatal")
+		}
+	} else {
+		// Append to metadata.json
+		f, err := os.OpenFile(path+"/metadata.json", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			spinner.LogMessage("Cannot open metadata.json file for editting: "+err.Error(), "fatal")
+		}
+
+		defer f.Close()
+
+		if _, err = f.WriteString("\n========== Build End =========="); err != nil {
+			spinner.LogMessage("Cannot append to metadata.json file: "+err.Error(), "fatal")
+		}
+		if _, err = f.WriteString("\n========== Docker Start ==========\n"); err != nil {
+			spinner.LogMessage("Cannot append to metadata.json file: "+err.Error(), "fatal")
+		}
+		if _, err = f.WriteString(string(jsonData)); err != nil {
+			spinner.LogMessage("Cannot append to metadata.json file: "+err.Error(), "fatal")
+		}
+
+		// Append to metadata.yaml
+		y, err := os.OpenFile(path+"/metadata.yaml", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+		if err != nil {
+			spinner.LogMessage("Cannot open metadata.yaml file for editting: "+err.Error(), "fatal")
+		}
+
+		defer y.Close()
+
+		if _, err = y.WriteString("========== Build End =========="); err != nil {
+			spinner.LogMessage("Cannot append to metadata.yaml file: "+err.Error(), "fatal")
+		}
+		if _, err = y.WriteString("========== Docker Start =========="); err != nil {
+			spinner.LogMessage("Cannot append to metadata.yaml file: "+err.Error(), "fatal")
+		}
+		if _, err = y.WriteString(string(yamlData)); err != nil {
+			spinner.LogMessage("Cannot append to metadata.yaml file: "+err.Error(), "fatal")
+		}
 	}
 }
 
