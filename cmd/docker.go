@@ -71,8 +71,8 @@ type AllDockerMetadata struct {
 	GitURL              string
 	MasterGitHash       string
 	BuildID             string
-	dockerRepositoryTag string
-	dockerRepository    string
+	DockerRepositoryTag string
+	DockerRepository    string
 	DockerTags          []string
 }
 
@@ -91,14 +91,14 @@ func Docker() {
 		}
 	}
 
-	// make dirs
-	directory.MakeDirs()
-	spinner.LogMessage("Directories successfully created.", "info")
-
 	//checks if yaml file exists in path, if it does, continue
 	if _, err := os.Stat(path + "/" + "builder.yaml"); err == nil {
 		//parse builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
+
+		// make dirs
+		directory.MakeDirs()
+		spinner.LogMessage("Directories successfully created.", "info")
 
 		name := os.Getenv("BUILDER_DIR_NAME")
 		startTime := time.Now()
@@ -447,14 +447,16 @@ func Docker() {
 		}
 
 		// If not using builder docker release, add the extra tags to local docker image:
-		for _, tag := range tags {
-			if runtime.GOOS == "windows" {
-				if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), metadata.ProjectName+":"+tag).Run(); err != nil {
-					spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-				}
-			} else {
-				if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+metadata.ProjectName+":"+tag).Run(); err != nil {
-					spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
+		if !releaseTag {
+			for _, tag := range tags {
+				if runtime.GOOS == "windows" {
+					if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), metadata.ProjectName+":"+tag).Run(); err != nil {
+						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
+					}
+				} else {
+					if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+metadata.ProjectName+":"+tag).Run(); err != nil {
+						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
+					}
 				}
 			}
 		}
@@ -532,8 +534,8 @@ func OutputDockerMetadata(buildMetadata BuildMetadata, imageTags []string, path 
 		GitURL:              utils.GetRepoURL(),
 		MasterGitHash:       masterGitHash,
 		BuildID:             buildMetadata.BuildID,
-		dockerRepositoryTag: os.Getenv("BUILDER_DOCKER_REPO_TAG"),
-		dockerRepository:    os.Getenv("BUILDER_DOCKER_REPO"),
+		DockerRepositoryTag: os.Getenv("BUILDER_DOCKER_REPO_TAG"),
+		DockerRepository:    os.Getenv("BUILDER_DOCKER_REPO"),
 		DockerTags:          imageTags,
 	}
 
