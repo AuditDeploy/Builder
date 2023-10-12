@@ -184,22 +184,30 @@ func ConfigEnvs(byi interface{}) {
 		case []interface{}:
 			dockerfile := v[0].(map[string]interface{})["dockerfile"]
 			registry := v[0].(map[string]interface{})["registry"]
+			version := v[0].(map[string]interface{})["version"]
 
 			if dockerfile != nil && dockerfile != "" {
 				os.Setenv("BUILDER_DOCKERFILE", dockerfile.(string))
 			}
 			if registry != nil && registry != "" {
 				os.Setenv("BUILDER_DOCKER_REGISTRY", registry.(string))
+			}
+			if version != nil && version != "" {
+				os.Setenv("BUILDER_DOCKER_VERSION", version.(string))
 			}
 		default: // type map[string]interface{}
 			dockerfile := val.(map[string]interface{})["dockerfile"]
 			registry := val.(map[string]interface{})["registry"]
+			version := val.(map[string]interface{})["version"]
 
 			if dockerfile != nil && dockerfile != "" {
 				os.Setenv("BUILDER_DOCKERFILE", dockerfile.(string))
 			}
 			if registry != nil && registry != "" {
 				os.Setenv("BUILDER_DOCKER_REGISTRY", registry.(string))
+			}
+			if version != nil && version != "" {
+				os.Setenv("BUILDER_DOCKER_VERSION", version.(string))
 			}
 		}
 	}
