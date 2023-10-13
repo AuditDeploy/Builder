@@ -184,7 +184,13 @@ func OutputMetadata(path string, allData *AllMetaData) {
 // Gets the name of the repo's master branch and its hash
 func GitMasterNameAndHash() (string, string) {
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
-	dirToRunIn, _ := filepath.Abs(hiddenDir)
+	currentDir, _ := os.Getwd()
+	var dirToRunIn string
+	if os.Getenv("BUILDER_COMMAND") == "true" || os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		dirToRunIn = currentDir
+	} else {
+		dirToRunIn, _ = filepath.Abs(hiddenDir)
+	}
 
 	//outputs the name of the master branch
 	cmd := exec.Command("git", "symbolic-ref", "refs/remotes/origin/HEAD", "--short")
