@@ -380,74 +380,63 @@ func Docker() {
 		// Update parent directory name
 		copyPath = directory.UpdateParentDirName(copyPath)
 
-		// If release tag provided push image to user provided remote registry
-		args := os.Args
-		releaseTag := false
+		// If Docker registry provided in the builder.yaml tag and push the image to it
+		dockerRegistryProvided := false
 		var remoteDockerRepo string
-		for _, v := range args {
-			if v == "--release" || v == "-r" {
-				releaseTag = true
-				// Check for remote registry and tag and push to it
-				if os.Getenv("BUILDER_DOCKER_REGISTRY") == "" {
-					spinner.LogMessage("Cannot complete docker push: No Docker registry provided, please provide in the builder.yaml", "fatal")
-				} else {
-					spinner.LogMessage("Tagging and pushing docker image...", "info")
+		if os.Getenv("BUILDER_DOCKER_REGISTRY") != "" {
+			dockerRegistryProvided = true
+			spinner.LogMessage("Tagging and pushing docker image...", "info")
 
-					dockerRegistry := os.Getenv("BUILDER_DOCKER_REGISTRY")
-					remoteDockerRepo = dockerRegistry + "/" + metadata.ProjectName
-					// Re-tag docker image to include remote registry
-					if runtime.GOOS == "windows" {
-						if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-							spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-						}
-					} else {
-						if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-							spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-						}
-					}
-
-					// Remove previously tagged image
-					if runtime.GOOS == "windows" {
-						if err := exec.Command("docker", "rmi", "-f", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-							spinner.LogMessage(err.Error(), "fatal")
-						}
-					} else {
-						if err := exec.Command("/bin/sh", "-c", "sudo docker rmi -f "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-							spinner.LogMessage(err.Error(), "fatal")
-						}
-					}
-
-					// Add more tags to new remote image
-					for _, tag := range tags {
-						if runtime.GOOS == "windows" {
-							if err := exec.Command("docker", "tag", remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+tag).Run(); err != nil {
-								spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-							}
-						} else {
-							if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+remoteDockerRepo+":"+tag).Run(); err != nil {
-								spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-							}
-						}
-					}
-
-					// Push re-tagged docker image (and all of its tags) to user provided docker registry
-					if runtime.GOOS == "windows" {
-						if err := exec.Command("docker", "push", remoteDockerRepo, "--all-tags").Run(); err != nil {
-							spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
-						}
-					} else {
-						if err := exec.Command("/bin/sh", "-c", "sudo docker push "+remoteDockerRepo+" --all-tags").Run(); err != nil {
-							spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
-						}
-					}
-
-					spinner.LogMessage("Docker image successfully tagged and pushed to provided registry.", "info")
+			dockerRegistry := os.Getenv("BUILDER_DOCKER_REGISTRY")
+			remoteDockerRepo = dockerRegistry + "/" + metadata.ProjectName
+			// Re-tag docker image to include remote registry
+			if runtime.GOOS == "windows" {
+				if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
+					spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
+				}
+			} else {
+				if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
+					spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
 				}
 			}
-		}
 
-		// If not using builder docker release, add the extra tags to local docker image:
-		if !releaseTag {
+			// Remove previously tagged image
+			if runtime.GOOS == "windows" {
+				if err := exec.Command("docker", "rmi", "-f", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
+					spinner.LogMessage(err.Error(), "fatal")
+				}
+			} else {
+				if err := exec.Command("/bin/sh", "-c", "sudo docker rmi -f "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
+					spinner.LogMessage(err.Error(), "fatal")
+				}
+			}
+
+			// Add more tags to new remote image
+			for _, tag := range tags {
+				if runtime.GOOS == "windows" {
+					if err := exec.Command("docker", "tag", remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+tag).Run(); err != nil {
+						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
+					}
+				} else {
+					if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+remoteDockerRepo+":"+tag).Run(); err != nil {
+						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
+					}
+				}
+			}
+
+			// Push re-tagged docker image (and all of its tags) to user provided docker registry
+			if runtime.GOOS == "windows" {
+				if err := exec.Command("docker", "push", remoteDockerRepo, "--all-tags").Run(); err != nil {
+					spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
+				}
+			} else {
+				if err := exec.Command("/bin/sh", "-c", "sudo docker push "+remoteDockerRepo+" --all-tags").Run(); err != nil {
+					spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
+				}
+			}
+
+			spinner.LogMessage("Docker image successfully tagged and pushed to provided registry.", "info")
+		} else { // If not using builder docker release, add the extra tags to local docker image:
 			for _, tag := range tags {
 				if runtime.GOOS == "windows" {
 					if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), metadata.ProjectName+":"+tag).Run(); err != nil {
@@ -462,7 +451,7 @@ func Docker() {
 		}
 
 		// Save docker image with running tag and list of tags to env vars for metadata
-		if releaseTag {
+		if dockerRegistryProvided {
 			os.Setenv("BUILDER_DOCKER_REPO", remoteDockerRepo)
 			os.Setenv("BUILDER_DOCKER_REPO_TAG", remoteDockerRepo+":"+runningTag)
 		} else {
@@ -482,6 +471,9 @@ func Docker() {
 		if e != nil {
 			spinner.LogMessage("Couldn't delete old docker_logs.json file: "+e.Error(), "error")
 		}
+
+		// Re-create builder.yaml to include any new vars
+		yaml.UpdateBuilderYaml(path)
 
 		// Stop loading spinner
 		spinner.Spinner.Stop()
