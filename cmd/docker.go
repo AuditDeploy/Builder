@@ -415,6 +415,7 @@ func Docker() {
 			for _, tag := range tags {
 				if runtime.GOOS == "windows" {
 					if err := exec.Command("docker", "tag", remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+tag).Run(); err != nil {
+						spinner.LogMessage(remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())+"->"+remoteDockerRepo+":"+tag, "info")
 						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
 					}
 				} else {
@@ -440,11 +441,11 @@ func Docker() {
 			for _, tag := range tags {
 				if runtime.GOOS == "windows" {
 					if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), metadata.ProjectName+":"+tag).Run(); err != nil {
-						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
+						spinner.LogMessage("Could not re-tag docker image to include additional tag: "+err.Error(), "fatal")
 					}
 				} else {
 					if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+metadata.ProjectName+":"+tag).Run(); err != nil {
-						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
+						spinner.LogMessage("Could not re-tag docker image to include additional tag: "+err.Error(), "fatal")
 					}
 				}
 			}
@@ -484,11 +485,20 @@ func Docker() {
 
 func GetHumanReadableStartTimeTag(startTime time.Time) string {
 	hours := fmt.Sprint(startTime.Hour())
-	minutes := fmt.Sprint(startTime.Minute())
+	minutesAsInt := startTime.Minute()
 	formattedTime := startTime.Format(time.RFC822)
 
+	// Reformat minutes if 0-9 change to 00-09
+	var minutes string
+	if minutesAsInt <= 9 {
+		stringMinutes := fmt.Sprint(minutesAsInt)
+		minutes = fmt.Sprint(0) + stringMinutes
+	} else {
+		minutes = fmt.Sprint(minutesAsInt)
+	}
+
 	// Replace __:__ time in formattedTime with __H__M
-	updatedTime := strings.Replace(formattedTime, hours+":"+minutes, hours+"H"+minutes+"M", 1)
+	updatedTime := strings.ReplaceAll(formattedTime, hours+":"+minutes, hours+"H"+minutes+"M")
 
 	finalTag := strings.ReplaceAll(updatedTime, " ", "_")
 
