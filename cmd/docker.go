@@ -415,7 +415,6 @@ func Docker() {
 			for _, tag := range tags {
 				if runtime.GOOS == "windows" {
 					if err := exec.Command("docker", "tag", remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+tag).Run(); err != nil {
-						spinner.LogMessage(remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())+"->"+remoteDockerRepo+":"+tag, "info")
 						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
 					}
 				} else {
