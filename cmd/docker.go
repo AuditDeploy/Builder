@@ -96,10 +96,23 @@ func Docker() {
 		//parse builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
 
+		// If --release or -r tag and registry provided, update env var for docker registry
+		args := os.Args
+		for i, v := range args {
+			if v == "--release" || v == "-r" {
+				if len(args) <= i+1 {
+					spinner.LogMessage("No Docker registry provided.  Please provide to command or in builder.yaml", "fatal")
+				} else {
+					os.Setenv("BUILDER_DOCKER_REGISTRY", args[i+1])
+				}
+			}
+		}
+
 		// make dirs
 		directory.MakeDirs()
 		spinner.LogMessage("Directories successfully created.", "info")
 
+		// Start building docker image
 		name := os.Getenv("BUILDER_DIR_NAME")
 		startTime := time.Now()
 		dockerfile := os.Getenv("BUILDER_DOCKERFILE")

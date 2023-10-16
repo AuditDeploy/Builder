@@ -183,6 +183,8 @@ func packageNpmArtifact(fullPath string) {
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 
+	fmt.Println("artifactDir: " + artifactDir)
+
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(workspaceDir, ".zip")
 	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)

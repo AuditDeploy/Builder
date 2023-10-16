@@ -232,8 +232,8 @@ func GetArtifactChecksum() string {
 		spinner.LogMessage(err.Error(), "fatal")
 	}
 
-	var checksumsArray []Artifacts
 	var checksum string
+	var checksumsArray []Artifacts
 	for _, file := range files {
 		if file.Name() != "metadata.json" && file.Name() != "metadata.yaml" {
 			// Get checksum of artifact
