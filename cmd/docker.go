@@ -24,39 +24,39 @@ var closeLocalLogger func()
 
 // BuildMetadata holds the data gathered from the build done in the docker container
 type BuildMetadata struct {
-	ProjectName       string                 `json:"ProjectName"`
-	ProjectType       string                 `json:"ProjectType"`
-	ArtifactName      string                 `json:"ArtifactName"`
-	ArtifactChecksums map[string]interface{} `json:"ArtifactChecksums"`
-	ArtifactLocation  string                 `json:"ArtifactLocation"`
-	LogsLocation      string                 `json:"LogsLocation"`
-	UserName          string                 `json:"UserName"`
-	HomeDir           string                 `json:"HomeDir"`
-	IP                string                 `json:"IP"`
-	StartTime         string                 `json:"StartTime"`
-	EndTime           string                 `json:"EndTime"`
-	GitURL            string                 `json:"GitURL"`
-	MasterGitHash     string                 `json:"MasterGitHash"`
-	BranchName        string                 `json:"BranchName"`
-	BuildID           string                 `json:"BuildID"`
+	ProjectName       string `json:"ProjectName"`
+	ProjectType       string `json:"ProjectType"`
+	ArtifactName      string `json:"ArtifactName"`
+	ArtifactChecksums string `json:"ArtifactChecksums"`
+	ArtifactLocation  string `json:"ArtifactLocation"`
+	LogsLocation      string `json:"LogsLocation"`
+	UserName          string `json:"UserName"`
+	HomeDir           string `json:"HomeDir"`
+	IP                string `json:"IP"`
+	StartTime         string `json:"StartTime"`
+	EndTime           string `json:"EndTime"`
+	GitURL            string `json:"GitURL"`
+	MasterGitHash     string `json:"MasterGitHash"`
+	BranchName        string `json:"BranchName"`
+	BuildID           string `json:"BuildID"`
 }
 
 // DockerMetadata holds the data gathered during the docker image build
 type DockerMetadata struct {
-	ProjectName       string                 `json:"ProjectName"`
-	ProjectType       string                 `json:"ProjectType"`
-	ArtifactName      string                 `json:"ArtifactName"`
-	ArtifactChecksums map[string]interface{} `json:"ArtifactChecksums"`
-	ArtifactLocation  string                 `json:"ArtifactLocation"`
-	LogsLocation      string                 `json:"LogsLocation"`
-	UserName          string                 `json:"UserName"`
-	HomeDir           string                 `json:"HomeDir"`
-	IP                string                 `json:"IP"`
-	StartTime         string                 `json:"StartTime"`
-	EndTime           string                 `json:"EndTime"`
-	GitURL            string                 `json:"GitURL"`
-	MasterGitHash     string                 `json:"MasterGitHash"`
-	BranchName        string                 `json:"BranchName"`
+	ProjectName       string `json:"ProjectName"`
+	ProjectType       string `json:"ProjectType"`
+	ArtifactName      string `json:"ArtifactName"`
+	ArtifactChecksums string `json:"ArtifactChecksums"`
+	ArtifactLocation  string `json:"ArtifactLocation"`
+	LogsLocation      string `json:"LogsLocation"`
+	UserName          string `json:"UserName"`
+	HomeDir           string `json:"HomeDir"`
+	IP                string `json:"IP"`
+	StartTime         string `json:"StartTime"`
+	EndTime           string `json:"EndTime"`
+	GitURL            string `json:"GitURL"`
+	MasterGitHash     string `json:"MasterGitHash"`
+	BranchName        string `json:"BranchName"`
 }
 
 // AllDockerMetaData holds the data for docker metadata.json file

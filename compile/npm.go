@@ -183,8 +183,6 @@ func packageNpmArtifact(fullPath string) {
 	workspaceDir := os.Getenv("BUILDER_WORKSPACE_DIR")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
 
-	fmt.Println("artifactDir: " + artifactDir)
-
 	//find artifact by extension
 	_, extName := artifact.ExtExistsFunction(workspaceDir, ".zip")
 	os.Setenv("BUILDER_ARTIFACT_NAMES", extName)
@@ -237,14 +235,14 @@ func packageNpmArtifact(fullPath string) {
 // recursively add files
 func addNpmFiles(w *zip.Writer, basePath, baseInZip string) {
 	// If basePath includes old parent folder name, fix it before we start (necessary for symlinks)
-	projectName := utils.GetName()
-	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
-	timeBuildStarted := parsedStartTime.Unix()
-	oldParentName := projectName + "_" + projectName
-	newParentName := projectName + "_" + strconv.FormatInt(timeBuildStarted, 10)
-	if strings.Contains(basePath, oldParentName) {
-		basePath = strings.Replace(basePath, oldParentName, newParentName, 1)
-	}
+	// projectName := utils.GetName()
+	// parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
+	// timeBuildStarted := parsedStartTime.Unix()
+	// oldParentName := projectName + "_" + projectName
+	// newParentName := projectName + "_" + strconv.FormatInt(timeBuildStarted, 10)
+	// if strings.Contains(basePath, oldParentName) {
+	// 	basePath = strings.Replace(basePath, oldParentName, newParentName, 1)
+	// }
 
 	// Open the Directory
 	files, err := os.ReadDir(basePath)

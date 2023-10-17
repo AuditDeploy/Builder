@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"runtime"
+	"sync"
 
 	"encoding/json"
 	"net"
@@ -232,27 +233,34 @@ func GetArtifactChecksum() string {
 		spinner.LogMessage(err.Error(), "fatal")
 	}
 
-	var checksum string
+	var checksum, checksums string
 	var checksumsArray []Artifacts
-	for _, file := range files {
-		if file.Name() != "metadata.json" && file.Name() != "metadata.yaml" {
-			// Get checksum of artifact
-			artifact, err := os.ReadFile(artifactDir + "/" + file.Name())
-			if err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		for _, file := range files {
+			if file.Name() != "metadata.json" && file.Name() != "metadata.yaml" {
+				// Get checksum of artifact
+				artifact, err := os.ReadFile(artifactDir + "/" + file.Name())
+				if err != nil {
+					spinner.LogMessage(err.Error(), "fatal")
+				}
+
+				sum := sha256.Sum256(artifact)
+				checksum = fmt.Sprintf("%x", sum)
+
+				var artifactObj Artifacts
+				artifactObj.name = file.Name()
+				artifactObj.checksum = checksum
+
+				checksumsArray = append(checksumsArray, artifactObj)
+				checksums = fmt.Sprintf("%+v", checksumsArray)
 			}
-
-			sum := sha256.Sum256(artifact)
-			checksum = fmt.Sprintf("%x", sum)
-
-			var artifactObj Artifacts
-			artifactObj.name = file.Name()
-			artifactObj.checksum = checksum
-
-			checksumsArray = append(checksumsArray, artifactObj)
 		}
-	}
-	checksums := fmt.Sprintf("%+v", checksumsArray)
+	}()
+	wg.Wait()
 
 	return checksums
 }
@@ -314,7 +322,7 @@ func StoreBuildMetadataLocally() {
 	if err != nil {
 		spinner.LogMessage("Could not create builds.json file: "+err.Error(), "fatal")
 	}
-	if _, err := buildsFile.Write([]byte(textToAppend)); err != nil {
+	if _, err := buildsFile.WriteString(textToAppend); err != nil {
 		spinner.LogMessage("Could not write to builds.json file: "+err.Error(), "fatal")
 	}
 	if err := buildsFile.Close(); err != nil {
