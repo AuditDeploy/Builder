@@ -21,7 +21,11 @@ func MakeDirs() {
 	var path string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
 		if configPath != "" {
-			path = configPath + "/" + name + "_" + name
+			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
+				path = configPath + "/" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
+			} else {
+				path = configPath + "/" + name + "/builder/" + name + "_" + name
+			}
 		} else { // Place builds in builder folder in repo
 			// Check if user wants to name builder folder a different name
 			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
