@@ -17,10 +17,8 @@ func Builder() {
 	// Start loading spinner
 	spinner.Spinner.Start()
 
-	spinner.LogMessage("got here", "info")
-
 	// Check if push command provided and save properties
-	args := os.Args
+	args := os.Args[1:]
 	for i, v := range args {
 		if v == "push" {
 			if len(args) <= i+1 {
@@ -45,7 +43,7 @@ func Builder() {
 					}
 				} else {
 					pushURL := args[i+1]
-					_, err := url.Parse(pushURL)
+					_, err := url.ParseRequestURI(pushURL)
 					if err != nil {
 						spinner.LogMessage("Push URL provided is not a valid url: "+err.Error(), "fatal")
 					}
