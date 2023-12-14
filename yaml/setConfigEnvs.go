@@ -177,4 +177,30 @@ func ConfigEnvs(byi interface{}) {
 			os.Setenv("REPO_BRANCH", valStr)
 		}
 	}
+
+	//check for options to push resulting build data
+	if val, ok := bldyml["push"]; ok {
+		switch v := val.(type) {
+		case []interface{}:
+			url := v[0].(map[string]interface{})["url"]
+			auto := v[0].(map[string]interface{})["auto"]
+
+			if url != nil && url != "" {
+				os.Setenv("BUILDER_PUSH_URL", url.(string))
+			}
+			if auto != nil {
+				os.Setenv("BUILDER_PUSH_AUTO", auto.(string))
+			}
+		default: // type map[string]interface{}
+			url := val.(map[string]interface{})["url"]
+			auto := val.(map[string]interface{})["auto"]
+
+			if url != nil && url != "" {
+				os.Setenv("BUILDER_PUSH_URL", url.(string))
+			}
+			if auto != nil {
+				os.Setenv("BUILDER_PUSH_AUTO", auto.(string))
+			}
+		}
+	}
 }
