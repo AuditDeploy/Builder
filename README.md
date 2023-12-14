@@ -39,9 +39,9 @@ Builder is great at guessing what to do with most repos it's given, for the othe
   - only necessary argument is a github repo url
 - `builder config`: user defined (user created builder.yaml) project build that creates artifact with metadata and logs
   - only necessary argument is a github repo url
-- `builder push <url>`: pushes build metadata and logs JSON to provided url on build completion
- - can ommit url at end of command if push url is provided in builder.yaml
- - can add `--save` flag to have Builder automatically push build metadata and logs JSON to provided url without needing to run `builder push` command on future builds
+- `builder push <url>`: Pushes build metadata and logs JSON to the specified URL upon build completion
+ - Optionally, you can omit the URL at the end of the command if the push URL is provided in `builder.yaml`.
+ - To automate the process for future builds, add the `--save` flag. This ensures Builder automatically pushes build metadata and logs JSON to the specified URL without the need to run the `builder push` command manually.
 - `builder`: user cds into a project path with a builder.yaml, it then pulls changes, creates new artifact and new metadata
   - no arguments accepted at this time
   - if you would like the new artifact sent to a specified dir, make sure your output path is specified in the builder.yaml
