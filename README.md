@@ -117,6 +117,8 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - ("docker build -t my-project:1.3 .")
 - `repobranch`: specify repo branch name
   - (“feature/“new-branch”)
+- `appicon`: specify url to app icon image
+  - ("http://domain.co/path/to/app_icon.png")
 
 ## Builder ENV Vars
 
