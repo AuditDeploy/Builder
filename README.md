@@ -117,6 +117,9 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - ("docker build -t my-project:1.3 .")
 - `repobranch`: specify repo branch name
   - (“feature/“new-branch”)
+- `push`: options for exporting build metadata and logs JSON on build completion
+  - `url`: specify url to send build metadata and logs JSON
+  - `auto`: specify whether to automatically push build metadata and logs on build completion.  Eliminates need of running `builder push` command
 
 ## Builder ENV Vars
 
