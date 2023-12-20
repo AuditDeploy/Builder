@@ -11,6 +11,7 @@ type BuilderYaml struct {
 	ProjectName  string
 	ProjectPath  string
 	ProjectType  string
+	BuildsDir    string
 	BuildTool    string
 	BuildFile    string
 	PreBuildCmd  string
@@ -27,6 +28,7 @@ func CreateBuilderYaml(fullPath string) {
 	projectName := os.Getenv("BUILDER_DIR_NAME")
 	projectPath := os.Getenv("BUILDER_DIR_PATH")
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	buildsDir := os.Getenv("BUILDER_BUILDS_DIR")
 	buildTool := os.Getenv("BUILDER_BUILD_TOOL")
 	buildFile := os.Getenv("BUILDER_BUILD_FILE")
 	preBuildCmd := os.Getenv("BUILDER_PREBUILD_COMMAND")
@@ -52,6 +54,7 @@ func CreateBuilderYaml(fullPath string) {
 		ProjectName:  projectName,
 		ProjectPath:  projectPath,
 		ProjectType:  projectType,
+		BuildsDir:    buildsDir,
 		BuildTool:    buildTool,
 		BuildFile:    buildFile,
 		PreBuildCmd:  preBuildCmd,
