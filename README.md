@@ -77,6 +77,8 @@ You must have the language or package manager previously installed in order to b
   - As of now, a requirements.txt is necessary to build default python projects.
 - Ruby
   - Uses `bundle install --path vendor/bundle` as default command.
+- Rust
+  - Uses `cargo build -r` as default command.
 - C/C++
   - Looks for `Makefile` and runs `make` as default command.
   - To run autotools or a `./configure` command please specify these in the builder.yaml
