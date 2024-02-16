@@ -20,20 +20,49 @@ func MakeDirs() {
 	//check for projectPath env from builder.yaml
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 
+	// If file or folder already named 'builder' in path, change builder folder name to builder_data
+	builderFolderName := "builder"
+	if configPath != "" && os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		if _, err := os.Stat(configPath + "/" + "builder"); err != nil {
+			builderFolderName = "builder"
+		} else {
+			builderFolderName = "builder_data"
+		}
+	} else if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		builderFolderName = "builder_data"
+	}
+
 	var path string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
 		if configPath != "" {
+			// Check if user wants to name builder folder a different name
 			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
 				path = configPath + "/" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
 			} else {
-				path = configPath + "/" + name + "/builder/" + name + "_" + name
+				path = configPath + "/" + name + "/" + builderFolderName + "/" + name + "_" + name
 			}
 		} else { // Place builds in builder folder in repo
 			// Check if user wants to name builder folder a different name
 			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
 				path = "./" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
 			} else {
-				path = "./builder/" + name + "_" + name
+				path = "./" + builderFolderName + "/" + name + "_" + name
+			}
+		}
+	} else if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		if configPath != "" {
+			// Check if user wants to name builder folder a different name
+			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
+				path = configPath + "/" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
+			} else {
+				path = configPath + "/" + name + "/" + builderFolderName + "/" + name + "_" + name
+			}
+		} else { // Place builds in builder_data folder in repo
+			// Check if user wants to name builder folder a different name
+			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
+				path = "./" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
+			} else {
+				path = "./builder_data/" + name + "_" + name
 			}
 		}
 	} else { // builder init so create an initial repo dir
@@ -42,30 +71,39 @@ func MakeDirs() {
 			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
 				path = configPath + "/" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
 			} else {
-				path = configPath + "/" + name + "/builder/" + name + "_" + name
+				path = configPath + "/" + name + "/" + builderFolderName + "/" + name + "_" + name
 			}
 		} else {
 			// Check if user wants to name builder folder a different name
 			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
 				path = "./" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
 			} else {
-				path = "./" + name + "/builder/" + name + "_" + name
+				path = "./" + name + "/" + builderFolderName + "/" + name + "_" + name
 			}
 		}
 	}
 
-	MakeParentDir(path)
+	if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		MakeParentDir(path)
 
-	MakeHiddenDir(path)
-	MakeWorkspaceDir(path)
+		MakeWorkspaceDir(path)
 
-	MakeLogsDir(path)
-	MakeBuilderDir()
+		MakeLogsDir(path)
+		MakeBuilderDir()
+	} else {
+		MakeParentDir(path)
+
+		MakeHiddenDir(path)
+		MakeWorkspaceDir(path)
+
+		MakeLogsDir(path)
+		MakeBuilderDir()
+	}
 }
 
 func MakeParentDir(path string) (bool, error) {
 	//check if file path exists, returns err = nil if file exists
-	_, err := os.Stat(path)
+	info, err := os.Stat(path)
 
 	if err == nil {
 		fmt.Println("Path already exists")
@@ -73,7 +111,7 @@ func MakeParentDir(path string) (bool, error) {
 	}
 
 	// should return true if file doesn't exist
-	if os.IsNotExist(err) {
+	if os.IsNotExist(err) || !info.IsDir() {
 		errDir := os.MkdirAll(path, 0755)
 		//should return nil once directory is made, if not, throw err
 		if errDir != nil {
@@ -103,6 +141,16 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 
 	// user using builder command and did not provide a path to build in
 	if os.Getenv("BUILDER_COMMAND") == "true" && path == "" {
+		wdPath, err := os.Getwd()
+		if err != nil {
+			spinner.LogMessage("error getting builder working directory", "error")
+		}
+
+		path = wdPath
+	}
+
+	// user using builder docker command and did not provide a path to build in
+	if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" && path == "" {
 		wdPath, err := os.Getwd()
 		if err != nil {
 			spinner.LogMessage("error getting builder working directory", "error")
@@ -153,6 +201,13 @@ func UpdateParentDirName(pathWithWrongParentName string) string {
 	os.Setenv("BUILDER_HIDDEN_DIR", newName+"/"+name)
 	os.Setenv("BUILDER_WORKSPACE_DIR", newName+"/workspace")
 	os.Setenv("BUILDER_LOGS_DIR", newName+"/logs")
+
+	if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		oldArtifactPath := os.Getenv("BUILDER_ARTIFACT_DIR")
+		newArtifactPath := strings.Replace(oldArtifactPath, name+"_"+name, name+"_"+fmt.Sprint(unixTimestamp), 1)
+
+		os.Setenv("BUILDER_ARTIFACT_DIR", newArtifactPath)
+	}
 
 	// Return new path with new parent directory name
 	newPath := strings.Replace(pathWithWrongParentName, oldName[2:], newName[2:], 1)

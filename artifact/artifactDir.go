@@ -2,7 +2,6 @@ package artifact
 
 import (
 	"Builder/spinner"
-	"fmt"
 	"os"
 	"strconv"
 	"time"
@@ -37,10 +36,8 @@ func ArtifactDir() {
 	}
 
 	//check workspace env exists, if not, create it
-	val, present := os.LookupEnv("BUILDER_ARTIFACT_DIR")
+	_, present := os.LookupEnv("BUILDER_ARTIFACT_DIR")
 	if !present {
 		os.Setenv("BUILDER_ARTIFACT_DIR", artifactDir)
-	} else {
-		fmt.Println("BUILDER_ARTIFACT_DIR", val)
 	}
 }

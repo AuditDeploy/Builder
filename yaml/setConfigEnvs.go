@@ -178,6 +178,40 @@ func ConfigEnvs(byi interface{}) {
 		}
 	}
 
+	//check for options to build docker image
+	if val, ok := bldyml["docker"]; ok {
+		switch v := val.(type) {
+		case []interface{}:
+			dockerfile := v[0].(map[string]interface{})["dockerfile"]
+			registry := v[0].(map[string]interface{})["registry"]
+			version := v[0].(map[string]interface{})["version"]
+
+			if dockerfile != nil && dockerfile != "" {
+				os.Setenv("BUILDER_DOCKERFILE", dockerfile.(string))
+			}
+			if registry != nil && registry != "" {
+				os.Setenv("BUILDER_DOCKER_REGISTRY", registry.(string))
+			}
+			if version != nil && version != "" {
+				os.Setenv("BUILDER_DOCKER_VERSION", version.(string))
+			}
+		default: // type map[string]interface{}
+			dockerfile := val.(map[string]interface{})["dockerfile"]
+			registry := val.(map[string]interface{})["registry"]
+			version := val.(map[string]interface{})["version"]
+
+			if dockerfile != nil && dockerfile != "" {
+				os.Setenv("BUILDER_DOCKERFILE", dockerfile.(string))
+			}
+			if registry != nil && registry != "" {
+				os.Setenv("BUILDER_DOCKER_REGISTRY", registry.(string))
+			}
+			if version != nil && version != "" {
+				os.Setenv("BUILDER_DOCKER_VERSION", version.(string))
+			}
+		}
+	}
+
 	//check for options to push resulting build data
 	if val, ok := bldyml["push"]; ok {
 		switch v := val.(type) {

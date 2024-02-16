@@ -5,9 +5,9 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"runtime"
+	"sync"
 
 	"encoding/json"
-	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -27,8 +27,17 @@ func Metadata(path string) {
 	caser := cases.Title(language.English)
 	projectType := caser.String(os.Getenv("BUILDER_PROJECT_TYPE"))
 
-	artifactName := os.Getenv("BUILDER_ARTIFACT_NAMES")
-	artifactChecksums := GetArtifactChecksum()
+	// If we are running the builder docker command we will not have
+	// artifact to display in docker metadata so leave as empty
+	var artifactName, artifactChecksums string
+	if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		artifactName = ""
+		artifactChecksums = ""
+	} else {
+		artifactName = os.Getenv("BUILDER_ARTIFACT_NAMES")
+		artifactChecksums = GetArtifactChecksum()
+	}
+
 	builderPath, _ := os.Getwd()
 	artifactPath := os.Getenv("BUILDER_ARTIFACT_DIR")
 	var artifactLocation string
@@ -113,6 +122,7 @@ func Metadata(path string) {
 	}
 
 	OutputMetadata(path, &userMetaData)
+
 }
 
 // AllMetaData holds the stuct of all the arguments
@@ -164,8 +174,8 @@ func OutputMetadata(path string, allData *AllMetaData) {
 	yamlData, _ := yaml.Marshal(allData)
 	jsonData, _ := json.Marshal(allData)
 
-	err := ioutil.WriteFile(path+"/metadata.json", jsonData, 0666)
-	err2 := ioutil.WriteFile(path+"/metadata.yaml", yamlData, 0666)
+	err := os.WriteFile(path+"/metadata.json", jsonData, 0666)
+	err2 := os.WriteFile(path+"/metadata.yaml", yamlData, 0666)
 
 	if err != nil {
 		spinner.LogMessage("JSON Metadata creation unsuccessful.", "fatal")
@@ -179,7 +189,13 @@ func OutputMetadata(path string, allData *AllMetaData) {
 // Gets the name of the repo's master branch and its hash
 func GitMasterNameAndHash() (string, string) {
 	hiddenDir := os.Getenv("BUILDER_HIDDEN_DIR")
-	dirToRunIn, _ := filepath.Abs(hiddenDir)
+	currentDir, _ := os.Getwd()
+	var dirToRunIn string
+	if os.Getenv("BUILDER_COMMAND") == "true" || os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		dirToRunIn = currentDir
+	} else {
+		dirToRunIn, _ = filepath.Abs(hiddenDir)
+	}
 
 	//outputs the name of the master branch
 	cmd := exec.Command("git", "symbolic-ref", "refs/remotes/origin/HEAD", "--short")
@@ -221,27 +237,34 @@ func GetArtifactChecksum() string {
 		spinner.LogMessage(err.Error(), "fatal")
 	}
 
+	var checksum, checksums string
 	var checksumsArray []Artifacts
-	var checksum string
-	for _, file := range files {
-		if file.Name() != "metadata.json" && file.Name() != "metadata.yaml" {
-			// Get checksum of artifact
-			artifact, err := os.ReadFile(artifactDir + "/" + file.Name())
-			if err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+
+		for _, file := range files {
+			if file.Name() != "metadata.json" && file.Name() != "metadata.yaml" {
+				// Get checksum of artifact
+				artifact, err := os.ReadFile(artifactDir + "/" + file.Name())
+				if err != nil {
+					spinner.LogMessage(err.Error(), "fatal")
+				}
+
+				sum := sha256.Sum256(artifact)
+				checksum = fmt.Sprintf("%x", sum)
+
+				var artifactObj Artifacts
+				artifactObj.name = file.Name()
+				artifactObj.checksum = checksum
+
+				checksumsArray = append(checksumsArray, artifactObj)
+				checksums = fmt.Sprintf("%+v", checksumsArray)
 			}
-
-			sum := sha256.Sum256(artifact)
-			checksum = fmt.Sprintf("%x", sum)
-
-			var artifactObj Artifacts
-			artifactObj.name = file.Name()
-			artifactObj.checksum = checksum
-
-			checksumsArray = append(checksumsArray, artifactObj)
 		}
-	}
-	checksums := fmt.Sprintf("%+v", checksumsArray)
+	}()
+	wg.Wait()
 
 	return checksums
 }
@@ -303,7 +326,7 @@ func StoreBuildMetadataLocally() {
 	if err != nil {
 		spinner.LogMessage("Could not create builds.json file: "+err.Error(), "fatal")
 	}
-	if _, err := buildsFile.Write([]byte(textToAppend)); err != nil {
+	if _, err := buildsFile.WriteString(textToAppend); err != nil {
 		spinner.LogMessage("Could not write to builds.json file: "+err.Error(), "fatal")
 	}
 	if err := buildsFile.Close(); err != nil {
