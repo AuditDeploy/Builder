@@ -127,7 +127,17 @@ func CSharp(filePath string) {
 	// Update parent dir name to include start time and send back new full path
 	fullPath = directory.UpdateParentDirName(fullPath)
 
-	yaml.CreateBuilderYaml(fullPath)
+	if os.Args[1] == "init" || os.Args[1] == "config" {
+		repoPath := "./" + strings.TrimSuffix(utils.GetName(), ".git")
+
+		if configPath != "" {
+			repoPath = configPath + "/" + strings.TrimSuffix(utils.GetName(), ".git")
+		}
+
+		yaml.CreateBuilderYaml(repoPath)
+	} else {
+		yaml.CreateBuilderYaml(fullPath)
+	}
 
 	packageCSharpArtifact(fullPath)
 

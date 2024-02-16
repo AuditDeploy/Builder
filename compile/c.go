@@ -172,7 +172,7 @@ func C(filePath string) {
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else if strings.Contains(buildTool, "Make") && buildFile != "" {
-		cmd = exec.Command("make -f", buildFile)
+		cmd = exec.Command("make", "-f", buildFile)
 		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_COMMAND", "make -f "+buildFile)
 	} else {
@@ -240,7 +240,17 @@ func C(filePath string) {
 	fullPath = directory.UpdateParentDirName(fullPath)
 
 	//creates default builder.yaml if it doesn't exist
-	yaml.CreateBuilderYaml(fullPath)
+	if os.Args[1] == "init" || os.Args[1] == "config" {
+		repoPath := "./" + strings.TrimSuffix(utils.GetName(), ".git")
+
+		if configPath != "" {
+			repoPath = configPath + "/" + strings.TrimSuffix(utils.GetName(), ".git")
+		}
+
+		yaml.CreateBuilderYaml(repoPath)
+	} else {
+		yaml.CreateBuilderYaml(fullPath)
+	}
 
 	packageCArtifact(fullPath)
 

@@ -143,7 +143,17 @@ func Python() {
 	workspaceDir = os.Getenv("BUILDER_WORKSPACE_DIR")
 	tempWorkspace = workspaceDir + "/temp/"
 
-	yaml.CreateBuilderYaml(fullPath)
+	if os.Args[1] == "init" || os.Args[1] == "config" {
+		repoPath := "./" + strings.TrimSuffix(utils.GetName(), ".git")
+
+		if configPath != "" {
+			repoPath = configPath + "/" + strings.TrimSuffix(utils.GetName(), ".git")
+		}
+
+		yaml.CreateBuilderYaml(repoPath)
+	} else {
+		yaml.CreateBuilderYaml(fullPath)
+	}
 
 	// CreateZip artifact dir with timestamp
 	parsedStartTime, _ := time.Parse(time.RFC850, os.Getenv("BUILD_START_TIME"))
