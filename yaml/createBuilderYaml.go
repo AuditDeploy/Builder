@@ -8,28 +8,28 @@ import (
 )
 
 type BuilderYaml struct {
-	ProjectName   string
-	ProjectPath   string
-	ProjectType   string
-	BuildTool     string
-	BuildFile     string
-	PreBuildCmd   string
-	ConfigCmd     string
-	BuildCmd      string
-	ArtifactList  string
-	OutputPath    string
-	GlobalLogs    string
-	DockerCmd     string
-	RepoBranch    string
-	BypassPrompts string
-	AppIcon       string
+	ProjectName  string
+	ProjectPath  string
+	ProjectType  string
+	BuildsDir    string
+	BuildTool    string
+	BuildFile    string
+	PreBuildCmd  string
+	ConfigCmd    string
+	BuildCmd     string
+	ArtifactList string
+	OutputPath   string
+	DockerCmd    string
+	RepoBranch   string
+	Push         map[string]interface{}
+	AppIcon      string
 }
 
 func CreateBuilderYaml(fullPath string) {
-
 	projectName := os.Getenv("BUILDER_DIR_NAME")
 	projectPath := os.Getenv("BUILDER_DIR_PATH")
 	projectType := os.Getenv("BUILDER_PROJECT_TYPE")
+	buildsDir := os.Getenv("BUILDER_BUILDS_DIR")
 	buildTool := os.Getenv("BUILDER_BUILD_TOOL")
 	buildFile := os.Getenv("BUILDER_BUILD_FILE")
 	preBuildCmd := os.Getenv("BUILDER_PREBUILD_COMMAND")
@@ -37,42 +37,49 @@ func CreateBuilderYaml(fullPath string) {
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
 	artifactList := os.Getenv("BUILDER_ARTIFACT_LIST")
 	outputPath := os.Getenv("BUILDER_OUTPUT_PATH")
-	globalLogs := os.Getenv("GLOBAL_LOGS_PATH")
 	dockerCmd := os.Getenv("BUILDER_DOCKER_CMD")
 	repoBranch := os.Getenv("REPO_BRANCH")
-	bypassPrompts := os.Getenv("BYPASS_PROMPTS")
+	var push map[string]interface{}
+	if os.Getenv("BUILDER_PUSH_AUTO") != "" {
+		push = map[string]interface{}{
+			"url":  os.Getenv("BUILDER_PUSH_URL"),
+			"auto": os.Getenv("BUILDER_PUSH_AUTO"),
+		}
+	} else {
+		push = map[string]interface{}{
+			"url": os.Getenv("BUILDER_PUSH_URL"),
+		}
+	}
 	appIcon := os.Getenv("BUILD_APP_ICON")
 
 	builderData := BuilderYaml{
-		ProjectName:   projectName,
-		ProjectPath:   projectPath,
-		ProjectType:   projectType,
-		BuildTool:     buildTool,
-		BuildFile:     buildFile,
-		PreBuildCmd:   preBuildCmd,
-		ConfigCmd:     configCmd,
-		BuildCmd:      buildCmd,
-		ArtifactList:  artifactList,
-		OutputPath:    outputPath,
-		GlobalLogs:    globalLogs,
-		DockerCmd:     dockerCmd,
-		RepoBranch:    repoBranch,
-		BypassPrompts: bypassPrompts,
-		AppIcon:       appIcon,
+		ProjectName:  projectName,
+		ProjectPath:  projectPath,
+		ProjectType:  projectType,
+		BuildsDir:    buildsDir,
+		BuildTool:    buildTool,
+		BuildFile:    buildFile,
+		PreBuildCmd:  preBuildCmd,
+		ConfigCmd:    configCmd,
+		BuildCmd:     buildCmd,
+		ArtifactList: artifactList,
+		OutputPath:   outputPath,
+		DockerCmd:    dockerCmd,
+		RepoBranch:   repoBranch,
+		Push:         push,
+		AppIcon:      appIcon,
 	}
 
-	_, err := os.Stat(fullPath + "/builder.yaml")
-	if err != nil {
-		OutputData(fullPath, &builderData)
-		spinner.LogMessage("builder.yaml created ✅", "info")
-	}
+	OutputData(fullPath, &builderData)
 }
 
 func OutputData(fullPath string, allData *BuilderYaml) {
 	yamlData, _ := yaml.Marshal(allData)
-	err := os.WriteFile(fullPath+"/builder.yaml", yamlData, 0644)
 
+	err := os.WriteFile(fullPath+"/builder.yaml", yamlData, 0755)
 	if err != nil {
-		spinner.LogMessage("builder.yaml creation failed ⛔️", "fatal")
+		spinner.LogMessage("builder.yaml creation failed ⛔️: "+err.Error(), "fatal")
 	}
+
+	spinner.LogMessage("builder.yaml created ✅", "info")
 }

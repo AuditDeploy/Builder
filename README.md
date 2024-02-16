@@ -39,6 +39,9 @@ Builder is great at guessing what to do with most repos it's given, for the othe
   - only necessary argument is a github repo url
 - `builder config`: user defined (user created builder.yaml) project build that creates artifact with metadata and logs
   - only necessary argument is a github repo url
+- `builder push <url>`: Pushes build metadata and logs JSON to the specified URL upon build completion
+ - Optionally, you can omit the URL at the end of the command if the push URL is provided in `builder.yaml`.
+ - To automate the process for future builds, add the `--save` flag. This ensures Builder automatically pushes build metadata and logs JSON to the specified URL without the need to run the `builder push` command manually.
 - `builder`: user cds into a project path with a builder.yaml, it then pulls changes, creates new artifact and new metadata
   - no arguments accepted at this time
   - if you would like the new artifact sent to a specified dir, make sure your output path is specified in the builder.yaml
@@ -119,6 +122,9 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - ("docker build -t my-project:1.3 .")
 - `repobranch`: specify repo branch name
   - (“feature/“new-branch”)
+- `push`: options for exporting build metadata and logs JSON on build completion
+  - `url`: specify url to send build metadata and logs JSON
+  - `auto`: specify whether to automatically push build metadata and logs on build completion.  Eliminates need of running `builder push` command
 - `appicon`: specify url to app icon image
   - ("http://domain.co/path/to/app_icon.png")
 
