@@ -22,6 +22,7 @@ type BuilderYaml struct {
 	DockerCmd    string
 	RepoBranch   string
 	Push         map[string]interface{}
+	AppIcon      string
 }
 
 func CreateBuilderYaml(fullPath string) {
@@ -49,6 +50,7 @@ func CreateBuilderYaml(fullPath string) {
 			"url": os.Getenv("BUILDER_PUSH_URL"),
 		}
 	}
+	appIcon := os.Getenv("BUILD_APP_ICON")
 
 	builderData := BuilderYaml{
 		ProjectName:  projectName,
@@ -65,6 +67,7 @@ func CreateBuilderYaml(fullPath string) {
 		DockerCmd:    dockerCmd,
 		RepoBranch:   repoBranch,
 		Push:         push,
+		AppIcon:      appIcon,
 	}
 
 	OutputData(fullPath, &builderData)

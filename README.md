@@ -80,6 +80,8 @@ You must have the language or package manager previously installed in order to b
   - As of now, a requirements.txt is necessary to build default python projects.
 - Ruby
   - Uses `bundle install --path vendor/bundle` as default command.
+- Rust
+  - Uses `cargo build -r` as default command.
 - C/C++
   - Looks for `Makefile` and runs `make` as default command.
   - To run autotools or a `./configure` command please specify these in the builder.yaml
@@ -123,6 +125,8 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 - `push`: options for exporting build metadata and logs JSON on build completion
   - `url`: specify url to send build metadata and logs JSON
   - `auto`: specify whether to automatically push build metadata and logs on build completion.  Eliminates need of running `builder push` command
+- `appicon`: specify url to app icon image
+  - ("http://domain.co/path/to/app_icon.png")
 
 ## Builder ENV Vars
 

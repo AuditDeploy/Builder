@@ -34,7 +34,7 @@ func ConfigEnvs(byi interface{}) {
 			valStr := fmt.Sprintf("%v", val)
 
 			// If on windows and they specify a path that begins with '/' append to home dir
-			if runtime.GOOS == "windows" && strings.HasPrefix(valStr, "/") == true {
+			if runtime.GOOS == "windows" && strings.HasPrefix(valStr, "/") {
 				homeDir := utils.GetUserData().HomeDir
 				os.Setenv("BUILDER_DIR_PATH", homeDir+valStr)
 			} else {
@@ -129,7 +129,7 @@ func ConfigEnvs(byi interface{}) {
 			valStr := fmt.Sprintf("%v", val)
 
 			// If on windows and they specify a path that begins with '/' append to home dir
-			if runtime.GOOS == "windows" && strings.HasPrefix(valStr, "/") == true {
+			if runtime.GOOS == "windows" && strings.HasPrefix(valStr, "/") {
 				homeDir := utils.GetUserData().HomeDir
 				os.Setenv("BUILDER_OUTPUT_PATH", homeDir+valStr)
 			} else {
@@ -201,6 +201,16 @@ func ConfigEnvs(byi interface{}) {
 			if auto != nil {
 				os.Setenv("BUILDER_PUSH_AUTO", auto.(string))
 			}
+		}
+	}
+
+	//check for app icon for build
+	if val, ok := bldyml["appicon"]; ok {
+		_, present := os.LookupEnv("BUILD_APP_ICON")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("BUILD_APP_ICON", valStr)
 		}
 	}
 }
