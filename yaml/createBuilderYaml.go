@@ -22,6 +22,7 @@ type BuilderYaml struct {
 	DockerCmd     string
 	RepoBranch    string
 	BypassPrompts string
+	AppIcon       string
 }
 
 func CreateBuilderYaml(fullPath string) {
@@ -40,6 +41,7 @@ func CreateBuilderYaml(fullPath string) {
 	dockerCmd := os.Getenv("BUILDER_DOCKER_CMD")
 	repoBranch := os.Getenv("REPO_BRANCH")
 	bypassPrompts := os.Getenv("BYPASS_PROMPTS")
+	appIcon := os.Getenv("BUILD_APP_ICON")
 
 	builderData := BuilderYaml{
 		ProjectName:   projectName,
@@ -56,6 +58,7 @@ func CreateBuilderYaml(fullPath string) {
 		DockerCmd:     dockerCmd,
 		RepoBranch:    repoBranch,
 		BypassPrompts: bypassPrompts,
+		AppIcon:       appIcon,
 	}
 
 	_, err := os.Stat(fullPath + "/builder.yaml")

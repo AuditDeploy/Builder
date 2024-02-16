@@ -177,4 +177,14 @@ func ConfigEnvs(byi interface{}) {
 			os.Setenv("REPO_BRANCH", valStr)
 		}
 	}
+
+	//check for app icon for build
+	if val, ok := bldyml["appicon"]; ok {
+		_, present := os.LookupEnv("BUILD_APP_ICON")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("BUILD_APP_ICON", valStr)
+		}
+	}
 }
