@@ -162,7 +162,7 @@ func packageRustArtifact(fullPath string) {
 		scanner := bufio.NewScanner(tomlfile)
 		for scanner.Scan() {
 			line := scanner.Text()
-			if strings.HasPrefix(line, "name = ") == true {
+			if strings.HasPrefix(line, "name = ") {
 				extName = strings.ReplaceAll(line[7:]+artifactExt, "\"", "")
 			}
 		}

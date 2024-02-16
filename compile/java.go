@@ -130,7 +130,17 @@ func Java(filePath string) {
 	fullPath = directory.UpdateParentDirName(fullPath)
 
 	//creates default builder.yaml if it doesn't exist
-	yaml.CreateBuilderYaml(fullPath)
+	if os.Args[1] == "init" || os.Args[1] == "config" {
+		repoPath := "./" + strings.TrimSuffix(utils.GetName(), ".git")
+
+		if configPath != "" {
+			repoPath = configPath + "/" + strings.TrimSuffix(utils.GetName(), ".git")
+		}
+
+		yaml.CreateBuilderYaml(repoPath)
+	} else {
+		yaml.CreateBuilderYaml(fullPath)
+	}
 
 	packageJavaArtifact(fullPath + "/target")
 

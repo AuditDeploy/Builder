@@ -144,7 +144,17 @@ func Go(filePath string) {
 	// Update parent dir name to include start time
 	fullPath = directory.UpdateParentDirName(fullPath)
 
-	yaml.CreateBuilderYaml(fullPath)
+	if os.Args[1] == "init" || os.Args[1] == "config" {
+		repoPath := "./" + strings.TrimSuffix(utils.GetName(), ".git")
+
+		if configPath != "" {
+			repoPath = configPath + "/" + strings.TrimSuffix(utils.GetName(), ".git")
+		}
+
+		yaml.CreateBuilderYaml(repoPath)
+	} else {
+		yaml.CreateBuilderYaml(fullPath)
+	}
 
 	packageGoArtifact(fullPath)
 
