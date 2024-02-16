@@ -11,6 +11,7 @@ require (
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
+	github.com/otiai10/copy v1.12.0 // indirect
 	github.com/theckman/yacspin v0.13.12
 	github.com/zserge/lorca v0.1.10
 	go.uber.org/zap v1.24.0

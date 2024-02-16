@@ -39,6 +39,11 @@ Builder is great at guessing what to do with most repos it's given, for the othe
   - only necessary argument is a github repo url
 - `builder config`: user defined (user created builder.yaml) project build that creates artifact with metadata and logs
   - only necessary argument is a github repo url
+- `builder docker`: generates a docker image from dockerfile which utilizes the Builder binary
+  - Use the `--release` or `-r` flag to push to a remote registry and save it for future builds
+- `builder push <url>`: Pushes build metadata and logs JSON to the specified URL upon build completion
+  - Optionally, you can omit the URL at the end of the command if the push URL is provided in `builder.yaml`.
+  - To automate the process for future builds, add the `--save` flag. This ensures Builder automatically pushes build metadata and logs JSON to the specified URL without the need to run the `builder push` command manually.
 - `builder`: user cds into a project path with a builder.yaml, it then pulls changes, creates new artifact and new metadata
   - no arguments accepted at this time
   - if you would like the new artifact sent to a specified dir, make sure your output path is specified in the builder.yaml
@@ -52,7 +57,6 @@ Builder is great at guessing what to do with most repos it's given, for the othe
 - '--branch' or '-b': specify repo branch
 - '--debug' or '-d': show Builder log output
 - '--verbose' or '-v': show log output for project being built
-- '--docker' or '-D': build Docker image
 
 ## Builder Compatibility
 
@@ -77,17 +81,19 @@ You must have the language or package manager previously installed in order to b
   - As of now, a requirements.txt is necessary to build default python projects.
 - Ruby
   - Uses `bundle install --path vendor/bundle` as default command.
+- Rust
+  - Uses `cargo build -r` as default command.
 - C/C++
   - Looks for `Makefile` and runs `make` as default command.
   - To run autotools or a `./configure` command please specify these in the builder.yaml
 
-To use other buildtools, buildcommands, or custome buildfiles you must create builder.yaml and run `config`.
+To use other buildtools, buildcommands, or custom buildfiles you must create builder.yaml and run `config`.
 
 ## Builder.yaml Parameters
 
 If you are specifying a buildfile, buildtool, or buildcmd within the builder.yaml, you MUST include the projectType.
 
-At this point in time, please include ALL builder.yaml parameters (all keys must be lowercase), even if they are empty. (This will be addressed in the next update)
+Please note that all keys must be lowercase
 
 - `projectname`: provide name for project
   - ("helloworld", etc)
@@ -117,6 +123,15 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
   - ("docker build -t my-project:1.3 .")
 - `repobranch`: specify repo branch name
   - (“feature/“new-branch”)
+- `docker`: generate docker image
+  - `dockerfile`: name of dockerfile (if different from the standard name of 'Dockerfile')
+  - `registry`: registry to push docker image to
+  - `version`: tag to give docker image
+- `push`: options for exporting build metadata and logs JSON on build completion
+  - `url`: specify url to send build metadata and logs JSON
+  - `auto`: specify whether to automatically push build metadata and logs on build completion.  Eliminates need of running `builder push` command
+- `appicon`: specify url to app icon image
+  - ("http://domain.co/path/to/app_icon.png")
 
 ## Builder ENV Vars
 
@@ -142,7 +157,7 @@ At this point in time, please include ALL builder.yaml parameters (all keys must
 
 ### main.go:
 
-- check for either 'init' or 'config' command
+- checks for 'init', 'config', 'docker', or 'gui' command
 
 ### init:
 

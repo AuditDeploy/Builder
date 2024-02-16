@@ -100,6 +100,8 @@ func Metadata(path string) {
 		branchName = os.Getenv("REPO_BRANCH_NAME")
 	}
 
+	appIcon := os.Getenv("BUILD_APP_ICON")
+
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
 		ProjectName:       projectName,
@@ -116,6 +118,7 @@ func Metadata(path string) {
 		GitURL:            gitURL,
 		MasterGitHash:     masterGitHash,
 		BranchName:        branchName,
+		AppIcon:           appIcon,
 	}
 
 	OutputMetadata(path, &userMetaData)
@@ -138,6 +141,7 @@ type AllMetaData struct {
 	GitURL            string
 	MasterGitHash     string
 	BranchName        string
+	AppIcon           string
 }
 
 // GetUserData return username and userdir

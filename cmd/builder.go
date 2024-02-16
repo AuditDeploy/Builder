@@ -6,6 +6,7 @@ import (
 	"Builder/spinner"
 	"Builder/utils"
 	"Builder/yaml"
+	"net/url"
 	"os"
 )
 
@@ -13,13 +14,58 @@ func Builder() {
 	os.Setenv("BUILDER_COMMAND", "true")
 	path, _ := os.Getwd()
 
+	// Start loading spinner
+	spinner.Spinner.Start()
+
 	//checks if yaml file exists in path
 	if _, err := os.Stat(path + "/" + "builder.yaml"); err == nil {
-		// Start loading spinner
-		spinner.Spinner.Start()
-
 		//parse builder.yaml
 		yaml.YamlParser(path + "/" + "builder.yaml")
+
+		// Check if push command provided and save properties
+		args := os.Args[1:]
+		for i, v := range args {
+			if v == "push" {
+				if len(args) <= i+1 {
+					if os.Getenv("BUILDER_PUSH_URL") == "" {
+						spinner.LogMessage("No Push Url Provided", "fatal")
+					}
+				} else {
+					if args[i+1] == "--save" {
+						os.Setenv("BUILDER_PUSH_AUTO", "true")
+
+						if len(args) <= i+2 {
+							if os.Getenv("BUILDER_PUSH_URL") == "" {
+								spinner.LogMessage("No Push Url Provided", "fatal")
+							}
+						} else {
+							pushURL := args[i+2]
+							_, err := url.Parse(pushURL)
+							if err != nil {
+								spinner.LogMessage("Push URL provided is not a valid url: "+err.Error(), "fatal")
+							}
+							os.Setenv("BUILDER_PUSH_URL", pushURL)
+						}
+					} else {
+						pushURL := args[i+1]
+						_, err := url.ParseRequestURI(pushURL)
+						if err != nil {
+							spinner.LogMessage("Push URL provided is not a valid url: "+err.Error(), "fatal")
+						}
+						os.Setenv("BUILDER_PUSH_URL", pushURL)
+
+						if len(args) > i+2 {
+							if args[i+2] == "--save" {
+								os.Setenv("BUILDER_PUSH_AUTO", "true")
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// Set repo path
+		os.Setenv("BUILDER_REPO_DIR", path)
 
 		// Create directories
 		directory.MakeDirs()
@@ -39,6 +85,26 @@ func Builder() {
 
 		// Store build metadata to hidden builder dir
 		utils.StoreBuildMetadataLocally()
+
+		// If provided, push build data to provided url
+		if os.Getenv("BUILDER_PUSH_AUTO") == "true" {
+			if os.Getenv("BUILDER_PUSH_URL") != "" {
+				utils.PushBuildData()
+			} else {
+				spinner.LogMessage("Build is set to auto-push but was not provided a url.", "fatal")
+			}
+		} else { // if push property was provided to command, push build data to provided url
+			args := os.Args
+			for _, v := range args {
+				if v == "push" {
+					if os.Getenv("BUILDER_PUSH_URL") != "" {
+						utils.PushBuildData()
+					} else {
+						spinner.LogMessage("Push Url Not Provided.", "fatal")
+					}
+				}
+			}
+		}
 
 		//Check for Dockerfile, then build image
 		utils.Docker()

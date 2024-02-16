@@ -40,6 +40,9 @@ func Help() {
 	- ex: builder init <repo> <flags> 
 * builder config: build project w/ a builder.yaml (repo needed)
 	- ex: builder config <repo> <flags>
+* builder push [optional flags]: pushes build metadata and logs JSON to provided url (url needed in line or in builder.yaml)
+    - optional flag: '--save' to automate "push" process for future builds
+	- ex: builder push <optional_flags> <url>
 * builder: build project w/ builder.yaml while in the projects directory (no repo needed) 
 	- ex: builder <flags> 
 * builder gui: display the Builder GUI (requires Chrome for use)
@@ -81,6 +84,9 @@ func Help() {
   - ("docker build -t my-project:1.3 .")
 * repobranch: specify repo branch name
   - (“feature/“new-branch”)
+* push:
+  - url: url to push build metadata and logs JSON to
+  - auto: (true/false) whether to automate pushing process for future builds
 			`)
 		os.Exit(0)
 	}
