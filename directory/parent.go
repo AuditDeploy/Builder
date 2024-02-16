@@ -21,28 +21,25 @@ func MakeDirs() {
 	configPath := os.Getenv("BUILDER_DIR_PATH")
 
 	// If file or folder already named 'builder' in path, change builder folder name to builder_data
-	var builderFolderName string
-	if configPath != "" {
+	builderFolderName := "builder"
+	if configPath != "" && os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
 		if _, err := os.Stat(configPath + "/" + "builder"); err != nil {
 			builderFolderName = "builder"
 		} else {
 			builderFolderName = "builder_data"
 		}
-	} else {
-		if _, err := os.Stat("./" + "builder"); err != nil {
-			builderFolderName = "builder"
-		} else {
-			builderFolderName = "builder_data"
-		}
+	} else if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
+		builderFolderName = "builder_data"
 	}
 
 	var path string
 	if os.Getenv("BUILDER_COMMAND") == "true" {
 		if configPath != "" {
+			// Check if user wants to name builder folder a different name
 			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
 				path = configPath + "/" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
 			} else {
-				path = configPath + "/" + name + "/builder/" + name + "_" + name
+				path = configPath + "/" + name + "/" + builderFolderName + "/" + name + "_" + name
 			}
 		} else { // Place builds in builder folder in repo
 			// Check if user wants to name builder folder a different name
@@ -54,7 +51,12 @@ func MakeDirs() {
 		}
 	} else if os.Getenv("BUILDER_DOCKER_COMMAND") == "true" {
 		if configPath != "" {
-			path = configPath + "/" + name + "_" + name
+			// Check if user wants to name builder folder a different name
+			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
+				path = configPath + "/" + name + "/" + os.Getenv("BUILDER_BUILDS_DIR") + "/" + name + "_" + name
+			} else {
+				path = configPath + "/" + name + "/" + builderFolderName + "/" + name + "_" + name
+			}
 		} else { // Place builds in builder_data folder in repo
 			// Check if user wants to name builder folder a different name
 			if os.Getenv("BUILDER_BUILDS_DIR") != "" {
