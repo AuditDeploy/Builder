@@ -72,8 +72,7 @@ func Ruby() {
 		buildCmdArray := strings.Fields(buildCmd)
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 		cmd.Dir = fullPath // or whatever directory it's in
-	} else if buildTool == "Bundler" {
-		fmt.Println(buildTool)
+	} else if buildTool == "bundler" {
 		cmd = exec.Command("bundle", "install", "--path", "vendor/bundle")
 		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_COMMAND", "bundle install --path vendor/bundle")
@@ -139,7 +138,7 @@ func Ruby() {
 	fullPath = directory.UpdateParentDirName(fullPath)
 
 	// Update vars because of parent dir name change
-	hiddenDir = os.Getenv("BUILDER_HIDDEN_DIR")
+	// hiddenDir = os.Getenv("BUILDER_HIDDEN_DIR")
 	workspaceDir = os.Getenv("BUILDER_WORKSPACE_DIR")
 	tempWorkspace = workspaceDir + "/temp/"
 

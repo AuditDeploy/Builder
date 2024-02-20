@@ -87,7 +87,9 @@ func Help() {
 * push:
   - url: url to push build metadata and logs JSON to
   - auto: (true/false) whether to automate pushing process for future builds
-			`)
+* appicon: specify url to app icon image
+  - ("http://domain.co/path/to/app_icon.png")
+		`)
 		os.Exit(0)
 	}
 }
