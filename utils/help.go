@@ -80,10 +80,12 @@ func Help() {
   - ("artifact", "artifact.exe", "artifact.rpm,artifact2.rpm,artifact3.rpm", etc)
 * outputpath: provide path for artifact to be sent
   - ("/Users/Name/Artifacts", etc)
-* dockercmd: specify docker command, if building a container
-  - ("docker build -t my-project:1.3 .")
 * repobranch: specify repo branch name
   - (“feature/“new-branch”)
+* docker: generate docker image
+  - dockerfile: name of dockerfile
+  - registry: registry to push docker image to
+  - version: tag to give docker image
 * push:
   - url: url to push build metadata and logs JSON to
   - auto: (true/false) whether to automate pushing process for future builds
