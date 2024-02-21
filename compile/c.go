@@ -171,11 +171,12 @@ func C(filePath string) {
 		buildCmdArray := strings.Fields(buildCmd)
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 		cmd.Dir = fullPath // or whatever directory it's in
-	} else if strings.Contains(buildTool, "Make") && buildFile != "" {
+	} else if buildFile != "" { // using buildTool that includes 'make' by default
+		//default with build file provided
 		cmd = exec.Command("make", "-f", buildFile)
 		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_COMMAND", "make -f "+buildFile)
-	} else {
+	} else { // using buildTool that includes 'make' by default
 		//default
 		cmd = exec.Command("make")
 		cmd.Dir = fullPath   // or whatever directory it's in

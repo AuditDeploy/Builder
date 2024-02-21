@@ -56,16 +56,13 @@ func Go(filePath string) {
 		os.Setenv("BUILDER_DIR_PATH", path)
 	}
 
-	//install dependencies/build, if yaml build type exists install accordingly
-	buildTool := strings.ToLower(os.Getenv("BUILDER_BUILD_TOOL"))
+	////////////////////////////////
+	// install dependencies/build //
+	////////////////////////////////
+
 	//find 'go file' to be built
 	buildFile := strings.ToLower(os.Getenv("BUILDER_BUILD_FILE"))
 	buildCmd := os.Getenv("BUILDER_BUILD_COMMAND")
-	//if no file defined by user, use default main.go
-	if buildFile == "" {
-		buildFile = "main.go"
-		os.Setenv("BUILDER_BUILD_FILE", buildFile)
-	}
 
 	//buildName = buildfile (get rid of ".go") + Unix timestamp
 	var cmd *exec.Cmd
@@ -74,7 +71,7 @@ func Go(filePath string) {
 		buildCmdArray := strings.Fields(buildCmd)
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 		cmd.Dir = fullPath // or whatever directory it's in
-	} else if buildTool == "go" {
+	} else if buildFile != "" {
 		cmd = exec.Command("go", "build", "-v", "-x", buildFile)
 		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_COMMAND", "go build -v -x "+buildFile)

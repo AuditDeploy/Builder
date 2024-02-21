@@ -8,7 +8,6 @@ import (
 	"Builder/utils/log"
 	"Builder/yaml"
 	"bufio"
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -62,12 +61,14 @@ func Java(filePath string) {
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else if buildTool == "maven" || buildTool == "mvn" {
-		fmt.Println(buildTool)
 		cmd = exec.Command("mvn", "clean", "install")
 		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_COMMAND", "mvn clean install")
 	} else if buildTool == "gradle" {
-		// gradle, etc.
+		// default for gradle
+		cmd = exec.Command("gradle", "build")
+		cmd.Dir = fullPath // or whatever directory it's in
+		os.Setenv("BUILDER_BUILD_COMMAND", "gradle build")
 	} else {
 		//default
 		cmd = exec.Command("mvn", "clean", "install")

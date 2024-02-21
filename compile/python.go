@@ -74,7 +74,6 @@ func Python() {
 		cmd = exec.Command(buildCmdArray[0], buildCmdArray[1:]...)
 		cmd.Dir = fullPath // or whatever directory it's in
 	} else if buildTool == "pip" {
-		fmt.Println(buildTool)
 		cmd = exec.Command("pip3", "install", "-r", "requirements.txt", "-t", "requirements")
 		cmd.Dir = fullPath // or whatever directory it's in
 		os.Setenv("BUILDER_BUILD_COMMAND", "pip3 install -r requirements.txt -t requirements")

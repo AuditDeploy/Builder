@@ -301,6 +301,9 @@ func StoreBuildMetadataLocally() {
 	metadataFormat["BuildID"] = GetBuildID()
 
 	updatedMetadataJSON, err := json.Marshal(metadataFormat)
+	if err != nil {
+		spinner.LogMessage("Cannot marshal metadata: "+err.Error(), "fatal")
+	}
 
 	// Check if builds.json exists and append to it, if not, create it
 	textToAppend := string(updatedMetadataJSON) + ",\n"
