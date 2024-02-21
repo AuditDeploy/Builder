@@ -122,9 +122,9 @@ func Docker() {
 		if dockerfile != "" {
 			// user specified Dockerfile
 			if runtime.GOOS == "windows" {
-				cmd = exec.Command("docker", "-f", dockerfile, "-t", name+"_"+fmt.Sprint(startTime.Unix()), ".")
+				cmd = exec.Command("docker", "build", "-f", dockerfile, "-t", name+"_"+fmt.Sprint(startTime.Unix()), ".")
 			} else {
-				cmd = exec.Command("/bin/sh", "-c", "sudo docker -f "+dockerfile+" -t "+name+"_"+fmt.Sprint(startTime.Unix())+" .")
+				cmd = exec.Command("/bin/sh", "-c", "sudo docker build -f "+dockerfile+" -t "+name+"_"+fmt.Sprint(startTime.Unix())+" .")
 			}
 			cmd.Dir = path
 		} else {
