@@ -3,26 +3,32 @@ package yaml
 import (
 	"Builder/spinner"
 	"os"
+	"strconv"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
 
 type BuilderYaml struct {
-	ProjectName  string
-	ProjectPath  string
-	ProjectType  string
-	BuildsDir    string
-	BuildTool    string
-	BuildFile    string
-	PreBuildCmd  string
-	ConfigCmd    string
-	BuildCmd     string
-	ArtifactList string
-	OutputPath   string
-	RepoBranch   string
-	Docker       map[string]interface{}
-	Push         map[string]interface{}
-	AppIcon      string
+	ProjectName           string
+	ProjectPath           string
+	ProjectType           string
+	BuildsDir             string
+	BuildTool             string
+	BuildFile             string
+	PreBuildCmd           string
+	ConfigCmd             string
+	BuildCmd              string
+	ArtifactList          string
+	OutputPath            string
+	RepoBranch            string
+	Docker                map[string]interface{}
+	Push                  map[string]interface{}
+	AppIcon               string
+	ContainerPort         int
+	ServicePort           int
+	CandidateDependencies []string
+	ReleaseEnvs           []EnvData
 }
 
 func CreateBuilderYaml(fullPath string) {
@@ -89,22 +95,51 @@ func CreateBuilderYaml(fullPath string) {
 	}
 	appIcon := os.Getenv("BUILD_APP_ICON")
 
+	containerPort, _ := strconv.Atoi(os.Getenv("RELEASE_CONTAINER_PORT"))
+	servicePort, _ := strconv.Atoi(os.Getenv("RELEASE_SERVICE_PORT"))
+
+	var dependsOnCandidates []string
+	if os.Getenv("RELEASE_DEPENDENCIES") == "" {
+		dependsOnCandidates = nil
+	} else {
+		dependsOnCandidates = strings.Split(os.Getenv("RELEASE_DEPENDENCIES"), ",")
+	}
+
+	var releaseEnvs []EnvData
+	if os.Getenv("RELEASE_ENVS") != "" {
+		envPairs := strings.Split(os.Getenv("RELEASE_ENVS"), ";")
+		for _, pair := range envPairs {
+			pairArray := strings.Split(pair, ",")
+			pairData := EnvData{
+				Key:   pairArray[0],
+				Value: pairArray[1],
+			}
+			releaseEnvs = append(releaseEnvs, pairData)
+		}
+	} else {
+		releaseEnvs = nil
+	}
+
 	builderData := BuilderYaml{
-		ProjectName:  projectName,
-		ProjectPath:  projectPath,
-		ProjectType:  projectType,
-		BuildsDir:    buildsDir,
-		BuildTool:    buildTool,
-		BuildFile:    buildFile,
-		PreBuildCmd:  preBuildCmd,
-		ConfigCmd:    configCmd,
-		BuildCmd:     buildCmd,
-		ArtifactList: artifactList,
-		OutputPath:   outputPath,
-		RepoBranch:   repoBranch,
-		Docker:       docker,
-		Push:         push,
-		AppIcon:      appIcon,
+		ProjectName:           projectName,
+		ProjectPath:           projectPath,
+		ProjectType:           projectType,
+		BuildsDir:             buildsDir,
+		BuildTool:             buildTool,
+		BuildFile:             buildFile,
+		PreBuildCmd:           preBuildCmd,
+		ConfigCmd:             configCmd,
+		BuildCmd:              buildCmd,
+		ArtifactList:          artifactList,
+		OutputPath:            outputPath,
+		RepoBranch:            repoBranch,
+		Docker:                docker,
+		Push:                  push,
+		AppIcon:               appIcon,
+		ContainerPort:         containerPort,
+		ServicePort:           servicePort,
+		CandidateDependencies: dependsOnCandidates,
+		ReleaseEnvs:           releaseEnvs,
 	}
 
 	OutputData(fullPath, &builderData)
@@ -144,22 +179,51 @@ func UpdateBuilderYaml(fullPath string) {
 	}
 	appIcon := os.Getenv("BUILD_APP_ICON")
 
+	containerPort, _ := strconv.Atoi(os.Getenv("RELEASE_CONTAINER_PORT"))
+	servicePort, _ := strconv.Atoi(os.Getenv("RELEASE_SERVICE_PORT"))
+
+	var dependsOnCandidates []string
+	if os.Getenv("RELEASE_DEPENDENCIES") == "" {
+		dependsOnCandidates = nil
+	} else {
+		dependsOnCandidates = strings.Split(os.Getenv("RELEASE_DEPENDENCIES"), ",")
+	}
+
+	var releaseEnvs []EnvData
+	if os.Getenv("RELEASE_ENVS") != "" {
+		envPairs := strings.Split(os.Getenv("RELEASE_ENVS"), ";")
+		for _, pair := range envPairs {
+			pairArray := strings.Split(pair, ",")
+			pairData := EnvData{
+				Key:   pairArray[0],
+				Value: pairArray[1],
+			}
+			releaseEnvs = append(releaseEnvs, pairData)
+		}
+	} else {
+		releaseEnvs = nil
+	}
+
 	builderData := BuilderYaml{
-		ProjectName:  projectName,
-		ProjectPath:  projectPath,
-		ProjectType:  projectType,
-		BuildsDir:    buildsDir,
-		BuildTool:    buildTool,
-		BuildFile:    buildFile,
-		PreBuildCmd:  preBuildCmd,
-		ConfigCmd:    configCmd,
-		BuildCmd:     buildCmd,
-		ArtifactList: artifactList,
-		OutputPath:   outputPath,
-		RepoBranch:   repoBranch,
-		Docker:       docker,
-		Push:         push,
-		AppIcon:      appIcon,
+		ProjectName:           projectName,
+		ProjectPath:           projectPath,
+		ProjectType:           projectType,
+		BuildsDir:             buildsDir,
+		BuildTool:             buildTool,
+		BuildFile:             buildFile,
+		PreBuildCmd:           preBuildCmd,
+		ConfigCmd:             configCmd,
+		BuildCmd:              buildCmd,
+		ArtifactList:          artifactList,
+		OutputPath:            outputPath,
+		RepoBranch:            repoBranch,
+		Docker:                docker,
+		Push:                  push,
+		AppIcon:               appIcon,
+		ContainerPort:         containerPort,
+		ServicePort:           servicePort,
+		CandidateDependencies: dependsOnCandidates,
+		ReleaseEnvs:           releaseEnvs,
 	}
 
 	_, err := os.Stat(fullPath + "/builder.yaml")
