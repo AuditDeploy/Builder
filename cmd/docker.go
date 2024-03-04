@@ -7,7 +7,6 @@ import (
 	"Builder/utils"
 	"Builder/utils/log"
 	"Builder/yaml"
-	"runtime"
 
 	"bufio"
 	"encoding/json"
@@ -121,19 +120,11 @@ func Docker() {
 		// Docker build cmd
 		if dockerfile != "" {
 			// user specified Dockerfile
-			if runtime.GOOS == "windows" {
-				cmd = exec.Command("docker", "-f", dockerfile, "-t", name+"_"+fmt.Sprint(startTime.Unix()), ".")
-			} else {
-				cmd = exec.Command("/bin/sh", "-c", "sudo docker -f "+dockerfile+" -t "+name+"_"+fmt.Sprint(startTime.Unix())+" .")
-			}
+			cmd = exec.Command("docker", "build", "-f", dockerfile, "-t", name+"_"+fmt.Sprint(startTime.Unix()), ".")
 			cmd.Dir = path
 		} else {
 			//default
-			if runtime.GOOS == "windows" {
-				cmd = exec.Command("docker", "build", "-t", name+"_"+fmt.Sprint(startTime.Unix()), ".")
-			} else {
-				cmd = exec.Command("/bin/sh", "-c", "sudo docker build -t "+name+"_"+fmt.Sprint(startTime.Unix())+" .")
-			}
+			cmd = exec.Command("docker", "build", "-t", name+"_"+fmt.Sprint(startTime.Unix()), ".")
 			cmd.Dir = path
 		}
 
@@ -165,6 +156,13 @@ func Docker() {
 				// Have to stop spinner or it will get printed with log to console
 				spinner.Spinner.Stop()
 				locallogger.Info(line)
+
+				if strings.Contains(line, "docker"){
+					if strings.Contains(line, "permission denied") {
+						spinner.LogMessage("Docker might not have the right permissions to run this command.  For Mac users, try running `sudo chown -R $(whoami) ~/.docker` and for Linux users, try adding your user to the docker group with `sudo usermod -aG docker $(whoami)`", "fatal")
+					}
+				}
+
 				spinner.Spinner.Start()
 			}
 
@@ -188,22 +186,12 @@ func Docker() {
 		copyPath := os.Getenv("BUILDER_WORKSPACE_DIR")
 
 		// Create a container from the image to grab build info
-		if runtime.GOOS == "windows" {
-			if err := exec.Command("docker", "create", "--name", name+"_"+fmt.Sprint(startTime.Unix()), name+"_"+fmt.Sprint(startTime.Unix())+":latest").Run(); err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
-			}
-		} else {
-			if err := exec.Command("/bin/sh", "-c", "sudo docker create --name "+name+"_"+fmt.Sprint(startTime.Unix())+" "+name+"_"+fmt.Sprint(startTime.Unix())+":latest").Run(); err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
-			}
+		if err := exec.Command("docker", "create", "--name", name+"_"+fmt.Sprint(startTime.Unix()), name+"_"+fmt.Sprint(startTime.Unix())+":latest").Run(); err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
 		}
 
 		// Copy build info from created container
-		if runtime.GOOS == "windows" {
-			cmd = exec.Command("docker", "cp", name+"_"+fmt.Sprint(startTime.Unix())+":/root/.builder/builds.json", "./builder_builds.json")
-		} else {
-			cmd = exec.Command("/bin/sh", "-c", "sudo docker cp "+name+"_"+fmt.Sprint(startTime.Unix())+":/root/.builder/builds.json ./builder_builds.json")
-		}
+		cmd = exec.Command("docker", "cp", name+"_"+fmt.Sprint(startTime.Unix())+":/root/.builder/builds.json", "./builder_builds.json")
 		cmd.Dir = copyPath
 
 		//run cmd, check for err, log cmd
@@ -268,11 +256,7 @@ func Docker() {
 		os.Setenv("BUILD_END_TIME", metadata.EndTime)
 
 		// Retrieve logs file from container
-		if runtime.GOOS == "windows" {
-			cmd = exec.Command("docker", "cp", name+"_"+fmt.Sprint(startTime.Unix())+":"+metadata.LogsLocation, "./builder_logs.json")
-		} else {
-			cmd = exec.Command("/bin/sh", "-c", "sudo docker cp "+name+"_"+fmt.Sprint(startTime.Unix())+":"+metadata.LogsLocation+" ./builder_logs.json")
-		}
+		cmd = exec.Command("docker", "cp", name+"_"+fmt.Sprint(startTime.Unix())+":"+metadata.LogsLocation, "./builder_logs.json")
 		cmd.Dir = copyPath
 
 		//run cmd, check for err, log cmd
@@ -337,36 +321,18 @@ func Docker() {
 		closeLocalLogger()
 
 		// Rename docker container to same name as build completed in container
-		if runtime.GOOS == "windows" {
-			if err := exec.Command("docker", "tag", name+"_"+fmt.Sprint(startTime.Unix())+":latest", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
-			}
-		} else {
-			if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+name+"_"+fmt.Sprint(startTime.Unix())+":latest "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
-			}
+		if err := exec.Command("docker", "tag", name+"_"+fmt.Sprint(startTime.Unix())+":latest", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
 		}
 
 		// Remove previously tagged image
-		if runtime.GOOS == "windows" {
-			if err := exec.Command("docker", "rmi", "-f", name+"_"+fmt.Sprint(startTime.Unix())+":latest").Run(); err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
-			}
-		} else {
-			if err := exec.Command("/bin/sh", "-c", "sudo docker rmi -f "+name+"_"+fmt.Sprint(startTime.Unix())+":latest").Run(); err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
-			}
+		if err := exec.Command("docker", "rmi", "-f", name+"_"+fmt.Sprint(startTime.Unix())+":latest").Run(); err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
 		}
 
 		// Remove temp container
-		if runtime.GOOS == "windows" {
-			if err := exec.Command("docker", "rm", name+"_"+fmt.Sprint(startTime.Unix())).Run(); err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
-			}
-		} else {
-			if err := exec.Command("/bin/sh", "-c", "sudo docker rm "+name+"_"+fmt.Sprint(startTime.Unix())).Run(); err != nil {
-				spinner.LogMessage(err.Error(), "fatal")
-			}
+		if err := exec.Command("docker", "rm", name+"_"+fmt.Sprint(startTime.Unix())).Run(); err != nil {
+			spinner.LogMessage(err.Error(), "fatal")
 		}
 
 		// Get additional tags for docker image
@@ -403,62 +369,32 @@ func Docker() {
 			dockerRegistry := os.Getenv("BUILDER_DOCKER_REGISTRY")
 			remoteDockerRepo = dockerRegistry + "/" + metadata.ProjectName
 			// Re-tag docker image to include remote registry
-			if runtime.GOOS == "windows" {
-				if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-					spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-				}
-			} else {
-				if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-					spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-				}
+			if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
+				spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
 			}
 
 			// Remove previously tagged image
-			if runtime.GOOS == "windows" {
-				if err := exec.Command("docker", "rmi", "-f", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-					spinner.LogMessage(err.Error(), "fatal")
-				}
-			} else {
-				if err := exec.Command("/bin/sh", "-c", "sudo docker rmi -f "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
-					spinner.LogMessage(err.Error(), "fatal")
-				}
+			if err := exec.Command("docker", "rmi", "-f", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())).Run(); err != nil {
+				spinner.LogMessage(err.Error(), "fatal")
 			}
 
 			// Add more tags to new remote image
 			for _, tag := range tags {
-				if runtime.GOOS == "windows" {
-					if err := exec.Command("docker", "tag", remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+tag).Run(); err != nil {
-						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-					}
-				} else {
-					if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+remoteDockerRepo+":"+tag).Run(); err != nil {
-						spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
-					}
+				if err := exec.Command("docker", "tag", remoteDockerRepo+":"+fmt.Sprint(gatheredStartTime.Unix()), remoteDockerRepo+":"+tag).Run(); err != nil {
+					spinner.LogMessage("Could not re-tag docker image to include registry: "+err.Error(), "fatal")
 				}
 			}
 
 			// Push re-tagged docker image (and all of its tags) to user provided docker registry
-			if runtime.GOOS == "windows" {
-				if err := exec.Command("docker", "push", remoteDockerRepo, "--all-tags").Run(); err != nil {
-					spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
-				}
-			} else {
-				if err := exec.Command("/bin/sh", "-c", "sudo docker push "+remoteDockerRepo+" --all-tags").Run(); err != nil {
-					spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
-				}
+			if err := exec.Command("docker", "push", remoteDockerRepo, "--all-tags").Run(); err != nil {
+				spinner.LogMessage("Could not complete docker push: "+err.Error()+".  You may need to docker login.", "fatal")
 			}
 
 			spinner.LogMessage("Docker image successfully tagged and pushed to provided registry.", "info")
 		} else { // If not using builder docker release, add the extra tags to local docker image:
 			for _, tag := range tags {
-				if runtime.GOOS == "windows" {
-					if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), metadata.ProjectName+":"+tag).Run(); err != nil {
-						spinner.LogMessage("Could not re-tag docker image to include additional tag: "+err.Error(), "fatal")
-					}
-				} else {
-					if err := exec.Command("/bin/sh", "-c", "sudo docker tag "+metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix())+" "+metadata.ProjectName+":"+tag).Run(); err != nil {
-						spinner.LogMessage("Could not re-tag docker image to include additional tag: "+err.Error(), "fatal")
-					}
+				if err := exec.Command("docker", "tag", metadata.ProjectName+":"+fmt.Sprint(gatheredStartTime.Unix()), metadata.ProjectName+":"+tag).Run(); err != nil {
+					spinner.LogMessage("Could not re-tag docker image to include additional tag: "+err.Error(), "fatal")
 				}
 			}
 		}
