@@ -52,7 +52,7 @@ type AllMetaData struct {
 	ContainerPort           int
 	ServicePort             int
 	ApplicationDependencies []string
-	Application_Envs        []EnvData
+	ApplicationEnvs         []EnvData
 }
 
 func Metadata(path string) {
@@ -181,7 +181,7 @@ func Metadata(path string) {
 		ContainerPort:           containerPort,
 		ServicePort:             servicePort,
 		ApplicationDependencies: appDependencies,
-		Application_Envs:        appEnvs,
+		ApplicationEnvs:         appEnvs,
 	}
 
 	OutputMetadata(path, &userMetaData)
