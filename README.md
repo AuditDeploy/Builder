@@ -132,6 +132,14 @@ Please note that all keys must be lowercase
   - `auto`: specify whether to automatically push build metadata and logs on build completion.  Eliminates need of running `builder push` command
 - `appicon`: specify url to app icon image
   - ("http://domain.co/path/to/app_icon.png")
+- `containerport`: specify container port
+  - (8080, 1234)
+- `serviceport`: specify service port
+ - (1234, 2233)
+- `application_dependencies`: specify list of application dependencies
+ - (Specify as yaml array)
+- `application_envs`: specify list of environment variable key value pairs
+ - (specify as yaml array of objects with `key` for key and `value` for value)
 
 ## Builder ENV Vars
 

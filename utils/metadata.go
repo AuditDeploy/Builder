@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"runtime"
+	"strconv"
 	"sync"
 
 	"encoding/json"
@@ -19,6 +20,40 @@ import (
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v2"
 )
+
+type Artifacts struct {
+	name     string
+	checksum string
+}
+
+// EnvData holds the struct of envs argument
+type EnvData struct {
+	Key   string
+	Value string
+}
+
+// AllMetaData holds the stuct of all the arguments
+type AllMetaData struct {
+	ProjectName             string
+	ProjectType             string
+	ArtifactName            string
+	ArtifactChecksums       string
+	ArtifactLocation        string
+	LogsLocation            string
+	UserName                string
+	HomeDir                 string
+	IP                      string
+	StartTime               string
+	EndTime                 string
+	GitURL                  string
+	MasterGitHash           string
+	BranchName              string
+	AppIcon                 string
+	ContainerPort           int
+	ServicePort             int
+	ApplicationDependencies []string
+	ApplicationEnvs         []EnvData
+}
 
 func Metadata(path string) {
 	//Metedata
@@ -102,46 +137,55 @@ func Metadata(path string) {
 
 	appIcon := os.Getenv("BUILD_APP_ICON")
 
+	containerPort, _ := strconv.Atoi(os.Getenv("APP_CONTAINER_PORT"))
+	servicePort, _ := strconv.Atoi(os.Getenv("APP_SERVICE_PORT"))
+
+	var appDependencies []string
+	if os.Getenv("APP_DEPENDENCIES") == "" {
+		appDependencies = nil
+	} else {
+		appDependencies = strings.Split(os.Getenv("APP_DEPENDENCIES"), ",")
+	}
+
+	var appEnvs []EnvData
+	var pairData EnvData
+	if os.Getenv("APP_ENVS") != "" {
+		envPairs := strings.Split(os.Getenv("APP_ENVS"), ";")
+		for _, pair := range envPairs {
+			pairArray := strings.Split(pair, ",")
+			pairData.Key = pairArray[0]
+			pairData.Value = pairArray[1]
+			appEnvs = append(appEnvs, pairData)
+		}
+	} else {
+		appEnvs = nil
+	}
+
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
-		ProjectName:       projectName,
-		ProjectType:       projectType,
-		ArtifactName:      artifactName,
-		ArtifactChecksums: artifactChecksums,
-		ArtifactLocation:  artifactLocation,
-		LogsLocation:      logsLocation,
-		UserName:          userName,
-		HomeDir:           homeDir,
-		IP:                ip,
-		StartTime:         startTime,
-		EndTime:           endTime,
-		GitURL:            gitURL,
-		MasterGitHash:     masterGitHash,
-		BranchName:        branchName,
-		AppIcon:           appIcon,
+		ProjectName:             projectName,
+		ProjectType:             projectType,
+		ArtifactName:            artifactName,
+		ArtifactChecksums:       artifactChecksums,
+		ArtifactLocation:        artifactLocation,
+		LogsLocation:            logsLocation,
+		UserName:                userName,
+		HomeDir:                 homeDir,
+		IP:                      ip,
+		StartTime:               startTime,
+		EndTime:                 endTime,
+		GitURL:                  gitURL,
+		MasterGitHash:           masterGitHash,
+		BranchName:              branchName,
+		AppIcon:                 appIcon,
+		ContainerPort:           containerPort,
+		ServicePort:             servicePort,
+		ApplicationDependencies: appDependencies,
+		ApplicationEnvs:         appEnvs,
 	}
 
 	OutputMetadata(path, &userMetaData)
 
-}
-
-// AllMetaData holds the stuct of all the arguments
-type AllMetaData struct {
-	ProjectName       string
-	ProjectType       string
-	ArtifactName      string
-	ArtifactChecksums string
-	ArtifactLocation  string
-	LogsLocation      string
-	UserName          string
-	HomeDir           string
-	IP                string
-	StartTime         string
-	EndTime           string
-	GitURL            string
-	MasterGitHash     string
-	BranchName        string
-	AppIcon           string
 }
 
 // GetUserData return username and userdir
@@ -222,11 +266,6 @@ func GitMasterNameAndHash() (string, string) {
 	masterBranchHash := strings.TrimSuffix(string(hashOutput), "\n")
 
 	return masterBranchName, masterBranchHash
-}
-
-type Artifacts struct {
-	name     string
-	checksum string
 }
 
 func GetArtifactChecksum() string {

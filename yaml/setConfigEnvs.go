@@ -4,9 +4,15 @@ import (
 	"Builder/utils"
 	"fmt"
 	"os"
+	"reflect"
 	"runtime"
 	"strings"
 )
+
+type EnvData struct {
+	Key   string
+	Value string
+}
 
 func ConfigEnvs(byi interface{}) {
 	//change interface{} into map interface{}
@@ -245,6 +251,66 @@ func ConfigEnvs(byi interface{}) {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
 			os.Setenv("BUILD_APP_ICON", valStr)
+		}
+	}
+
+	// check for container port for application
+	if val, ok := bldyml["containerport"]; ok {
+		_, present := os.LookupEnv("APP_CONTAINER_PORT")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("APP_CONTAINER_PORT", valStr)
+		}
+	}
+
+	// check for service port for application
+	if val, ok := bldyml["serviceport"]; ok {
+		_, present := os.LookupEnv("APP_SERVICE_PORT")
+		if !present {
+			//convert val interface{} to string to be set as env var
+			valStr := fmt.Sprintf("%v", val)
+			os.Setenv("APP_SERVICE_PORT", valStr)
+		}
+	}
+
+	// check for application dependencies
+	if val, ok := bldyml["application_dependencies"]; ok {
+		_, present := os.LookupEnv("APP_DEPENDENCIES")
+		if !present {
+			//convert list to string
+			var dependenciesStr string
+
+			for i, dependency := range val.([]interface{}) {
+				if i == len(val.([]interface{}))-1 {
+					dependenciesStr += dependency.(string)
+				} else {
+					dependenciesStr += dependency.(string) + ","
+				}
+			}
+
+			os.Setenv("APP_DEPENDENCIES", dependenciesStr)
+		}
+	}
+
+	// check for env vars
+	if val, ok := bldyml["application_envs"]; ok {
+		_, present := os.LookupEnv("APP_ENVS")
+		if !present {
+			//convert list of objects to string
+			var envsStr string
+
+			for i, envpair := range val.([]interface{}) {
+				pair, _ := envpair.(map[string]interface{})
+				envsStr += pair["key"].(string) + ","
+				envsStr += pair["value"].(string)
+
+				if i != reflect.ValueOf(val).Len()-1 {
+					envsStr += ";"
+				}
+			}
+
+			os.Setenv("APP_ENVS", envsStr)
 		}
 	}
 }
