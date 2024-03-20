@@ -91,6 +91,14 @@ func Help() {
   - auto: (true/false) whether to automate pushing process for future builds
 * appicon: specify url to app icon image
   - ("http://domain.co/path/to/app_icon.png")
+* containerport: specify container port
+  - (8080, 3000, etc)
+* serviceport: specify service port
+  - (1233, 4433, etc)
+* application_dependencies: specify list of application dependencies
+  - (specify as yaml array)
+* application_envs: specify list of environment variable key value pairs
+  - (specify as yaml array of objects with 'key' for key and 'value' for value)
 		`)
 		os.Exit(0)
 	}
