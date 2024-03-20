@@ -254,29 +254,29 @@ func ConfigEnvs(byi interface{}) {
 		}
 	}
 
-	// check for container port for build (used in Release)
+	// check for container port for application
 	if val, ok := bldyml["containerport"]; ok {
-		_, present := os.LookupEnv("RELEASE_CONTAINER_PORT")
+		_, present := os.LookupEnv("APP_CONTAINER_PORT")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("RELEASE_CONTAINER_PORT", valStr)
+			os.Setenv("APP_CONTAINER_PORT", valStr)
 		}
 	}
 
-	// check for service port for build (used in Release)
+	// check for service port for application
 	if val, ok := bldyml["serviceport"]; ok {
-		_, present := os.LookupEnv("RELEASE_SERVICE_PORT")
+		_, present := os.LookupEnv("APP_SERVICE_PORT")
 		if !present {
 			//convert val interface{} to string to be set as env var
 			valStr := fmt.Sprintf("%v", val)
-			os.Setenv("RELEASE_SERVICE_PORT", valStr)
+			os.Setenv("APP_SERVICE_PORT", valStr)
 		}
 	}
 
-	// check for candidate dependencies (used in Release)
+	// check for application dependencies
 	if val, ok := bldyml["candidatedependencies"]; ok {
-		_, present := os.LookupEnv("RELEASE_DEPENDENCIES")
+		_, present := os.LookupEnv("APP_DEPENDENCIES")
 		if !present {
 			//convert list to string
 			var dependenciesStr string
@@ -289,13 +289,13 @@ func ConfigEnvs(byi interface{}) {
 				}
 			}
 
-			os.Setenv("RELEASE_DEPENDENCIES", dependenciesStr)
+			os.Setenv("APP_DEPENDENCIES", dependenciesStr)
 		}
 	}
 
-	// check for env vars (used in Release)
-	if val, ok := bldyml["releaseenvs"]; ok {
-		_, present := os.LookupEnv("RELEASE_ENVS")
+	// check for env vars
+	if val, ok := bldyml["envs"]; ok {
+		_, present := os.LookupEnv("APP_ENVS")
 		if !present {
 			//convert list of objects to string
 			var envsStr string
@@ -310,7 +310,7 @@ func ConfigEnvs(byi interface{}) {
 				}
 			}
 
-			os.Setenv("RELEASE_ENVS", envsStr)
+			os.Setenv("APP_ENVS", envsStr)
 		}
 	}
 }

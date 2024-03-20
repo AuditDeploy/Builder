@@ -34,25 +34,25 @@ type EnvData struct {
 
 // AllMetaData holds the stuct of all the arguments
 type AllMetaData struct {
-	ProjectName         string
-	ProjectType         string
-	ArtifactName        string
-	ArtifactChecksums   string
-	ArtifactLocation    string
-	LogsLocation        string
-	UserName            string
-	HomeDir             string
-	IP                  string
-	StartTime           string
-	EndTime             string
-	GitURL              string
-	MasterGitHash       string
-	BranchName          string
-	AppIcon             string
-	ContainerPort       int
-	ServicePort         int
-	DependsOnCandidates []string
-	Envs                []EnvData
+	ProjectName             string
+	ProjectType             string
+	ArtifactName            string
+	ArtifactChecksums       string
+	ArtifactLocation        string
+	LogsLocation            string
+	UserName                string
+	HomeDir                 string
+	IP                      string
+	StartTime               string
+	EndTime                 string
+	GitURL                  string
+	MasterGitHash           string
+	BranchName              string
+	AppIcon                 string
+	ContainerPort           int
+	ServicePort             int
+	ApplicationDependencies []string
+	Application_Envs        []EnvData
 }
 
 func Metadata(path string) {
@@ -137,51 +137,51 @@ func Metadata(path string) {
 
 	appIcon := os.Getenv("BUILD_APP_ICON")
 
-	containerPort, _ := strconv.Atoi(os.Getenv("RELEASE_CONTAINER_PORT"))
-	servicePort, _ := strconv.Atoi(os.Getenv("RELEASE_SERVICE_PORT"))
+	containerPort, _ := strconv.Atoi(os.Getenv("APP_CONTAINER_PORT"))
+	servicePort, _ := strconv.Atoi(os.Getenv("APP_SERVICE_PORT"))
 
-	var dependsOnCandidates []string
-	if os.Getenv("RELEASE_DEPENDENCIES") == "" {
-		dependsOnCandidates = nil
+	var appDependencies []string
+	if os.Getenv("APP_DEPENDENCIES") == "" {
+		appDependencies = nil
 	} else {
-		dependsOnCandidates = strings.Split(os.Getenv("RELEASE_DEPENDENCIES"), ",")
+		appDependencies = strings.Split(os.Getenv("APP_DEPENDENCIES"), ",")
 	}
 
-	var releaseEnvs []EnvData
+	var appEnvs []EnvData
 	var pairData EnvData
-	if os.Getenv("RELEASE_ENVS") != "" {
-		envPairs := strings.Split(os.Getenv("RELEASE_ENVS"), ";")
+	if os.Getenv("APP_ENVS") != "" {
+		envPairs := strings.Split(os.Getenv("APP_ENVS"), ";")
 		for _, pair := range envPairs {
 			pairArray := strings.Split(pair, ",")
 			pairData.Key = pairArray[0]
 			pairData.Value = pairArray[1]
-			releaseEnvs = append(releaseEnvs, pairData)
+			appEnvs = append(appEnvs, pairData)
 		}
 	} else {
-		releaseEnvs = nil
+		appEnvs = nil
 	}
 
 	//Contains a collection of files with user's metadata
 	userMetaData := AllMetaData{
-		ProjectName:         projectName,
-		ProjectType:         projectType,
-		ArtifactName:        artifactName,
-		ArtifactChecksums:   artifactChecksums,
-		ArtifactLocation:    artifactLocation,
-		LogsLocation:        logsLocation,
-		UserName:            userName,
-		HomeDir:             homeDir,
-		IP:                  ip,
-		StartTime:           startTime,
-		EndTime:             endTime,
-		GitURL:              gitURL,
-		MasterGitHash:       masterGitHash,
-		BranchName:          branchName,
-		AppIcon:             appIcon,
-		ContainerPort:       containerPort,
-		ServicePort:         servicePort,
-		DependsOnCandidates: dependsOnCandidates,
-		Envs:                releaseEnvs,
+		ProjectName:             projectName,
+		ProjectType:             projectType,
+		ArtifactName:            artifactName,
+		ArtifactChecksums:       artifactChecksums,
+		ArtifactLocation:        artifactLocation,
+		LogsLocation:            logsLocation,
+		UserName:                userName,
+		HomeDir:                 homeDir,
+		IP:                      ip,
+		StartTime:               startTime,
+		EndTime:                 endTime,
+		GitURL:                  gitURL,
+		MasterGitHash:           masterGitHash,
+		BranchName:              branchName,
+		AppIcon:                 appIcon,
+		ContainerPort:           containerPort,
+		ServicePort:             servicePort,
+		ApplicationDependencies: appDependencies,
+		Application_Envs:        appEnvs,
 	}
 
 	OutputMetadata(path, &userMetaData)
