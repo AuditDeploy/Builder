@@ -275,7 +275,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	// check for application dependencies
-	if val, ok := bldyml["candidatedependencies"]; ok {
+	if val, ok := bldyml["application_dependencies"]; ok {
 		_, present := os.LookupEnv("APP_DEPENDENCIES")
 		if !present {
 			//convert list to string
@@ -294,7 +294,7 @@ func ConfigEnvs(byi interface{}) {
 	}
 
 	// check for env vars
-	if val, ok := bldyml["envs"]; ok {
+	if val, ok := bldyml["application_envs"]; ok {
 		_, present := os.LookupEnv("APP_ENVS")
 		if !present {
 			//convert list of objects to string
